@@ -1,8 +1,9 @@
 function Tutorials() {
   return (
-    <div>
+    <main className="page">
       <h1>Tutorials</h1>
-    </div>
+      <p>Walkthroughs and practice guides will live here.</p>
+    </main>
   );
 }
 

@@ -1,8 +1,9 @@
 function Songs() {
   return (
-    <div>
+    <main className="page">
       <h1>Songs</h1>
-    </div>
+      <p>Chord charts and song resources will live here.</p>
+    </main>
   );
 }
 
