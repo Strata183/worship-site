@@ -4,13 +4,11 @@ function Navbar() {
   return (
     <nav>
       <div className="nav-content">
-        <h2>Worship Hub</h2>
+        <Link className="site-title" to="/">
+          Worthy for Worship
+        </Link>
 
         <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-
           <li>
             <Link to="/songs">Songs</Link>
           </li>
@@ -20,6 +18,10 @@ function Navbar() {
           </li>
           <li>
             <Link to="/articles">Articles</Link>
+          </li>
+
+          <li>
+            <Link to="/about">About</Link>
           </li>
         </ul>
       </div>

@@ -26,9 +26,12 @@ nav {
   min-height: 72px;
 }
 
-nav h2 {
+.site-title {
+  color: white;
   font-size: 1.25rem;
-  margin: 0;
+  font-weight: 700;
+  padding: 0;
+  text-decoration: none;
 }
 
 nav ul {
@@ -51,6 +54,13 @@ nav a {
 nav a:hover,
 nav a:focus {
   background-color: #2b2b2b;
+}
+
+.site-title:hover,
+.site-title:focus {
+  background-color: transparent;
+  text-decoration: underline;
+  text-underline-offset: 0.25rem;
 }
 
 .page {

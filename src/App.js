@@ -6,6 +6,7 @@ import Home from "./Pages/Home";
 import Songs from "./Pages/Songs";
 import Tutorials from "./Pages/Tutorials";
 import Blog from "./Pages/Articles";
+import About from "./Pages/About";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/songs" element={<Songs />} />
         <Route path="/tutorials" element={<Tutorials />} />
         <Route path="/articles" element={<Blog />} />
+        <Route path="/about" element={<About />} />
       </Routes>
     </BrowserRouter>
 
