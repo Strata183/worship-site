@@ -39,7 +39,7 @@ TODO: Describe when to use a logo, wordmark, or plain text title.
 | Muted text | Gray | #4B5563 
 | Navbar background | Black | #161616 |  |
 | Navbar text | White | #FFFFFF |  |
-| Accent |  |  |  |
+| Accent | Deep Forest | #2D4330 |  |
 
 ## Typography
 
