@@ -90,8 +90,13 @@ nav a:focus {
   text-decoration: none;
 }
 
-nav a.active {
+nav a.active:not(.site-title) {
   background-color: var(--color-accent);
+}
+
+.site-title.active {
+  background-color: var(--color-accent);
+  color: white;
 }
 
 .page {
