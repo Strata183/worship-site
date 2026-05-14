@@ -17,6 +17,8 @@ function App() {
         <Route path="/tutorials" element={<Tutorials />} />
       </Routes>
     </BrowserRouter>
+
+
   );
 }
 
