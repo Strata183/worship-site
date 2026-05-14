@@ -7,50 +7,44 @@ Use this guide to keep the site consistent as new pages, resources, and features
 **Site name:** Worthy for Worship
 
 **Purpose:**
-TODO: Describe what this site helps people do.
+To facillitate proper worship in the church and make it easy to learn about worship, get/store music charts, and watch tutorials.
 
 **Audience:**
-TODO: Describe who the site is mainly for.
+This is for the local church and close friends only right now
 
 **Tone:**
-TODO: Example: clear, reverent, helpful, warm, practical.
+Loving, helpful, selfless
 
 **Core values:**
-- TODO
-- TODO
-- TODO
+- Glorify God 
+- This is to be a free site
+
 
 ## Logo And Naming
 
 **Primary name:** Worthy for Worship
 
-**Short name:**
-TODO
-
 **Logo usage:**
 TODO: Describe when to use a logo, wordmark, or plain text title.
 
 **Do not use:**
-- TODO
+- Anything that is overly spiritual and takes away from God
 
 ## Colors
 
 | Role | Color | Hex | Notes |
 | --- | --- | --- | --- |
-| Background | TODO | TODO | TODO |
-| Text | TODO | TODO | TODO |
-| Muted text | TODO | TODO | TODO |
-| Navbar background | TODO | TODO | TODO |
-| Link/button hover | TODO | TODO | TODO |
-| Accent | TODO | TODO | TODO |
+| Background | White cream | #f7f5f0 
+| Text | Black | #1F2933 |  |
+| Muted text | Gray | #4B5563 
+| Navbar background | Black | #161616 |  |
+| Navbar text | White | #FFFFFF |  |
+| Accent |  |  |  |
 
 ## Typography
 
 **Primary font:**
-TODO
-
-**Fallback fonts:**
-TODO
+Arial, sans-serif
 
 **Heading style:**
 TODO
@@ -59,7 +53,7 @@ TODO
 TODO
 
 **Link style:**
-TODO
+I don't like underlines! Transparent bubbles are great! 
 
 ## Layout
 
@@ -67,19 +61,19 @@ TODO
 TODO
 
 **Page alignment:**
-TODO
+Center
 
 **Spacing rules:**
-- TODO
-- TODO
-- TODO
+- I do not want a crowded page! Make everything open
+
 
 **Mobile behavior:**
-TODO
+I do not want a lot of scrolling
 
 ## Navigation
 
 **Main nav items:**
+- Home 
 - Songs
 - Tutorials
 - Articles
@@ -99,7 +93,7 @@ TODO
 ### Navbar
 
 **Purpose:**
-TODO
+Easily access every single part of the site from the top of the screen
 
 **Rules:**
 - TODO
