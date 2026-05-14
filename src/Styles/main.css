@@ -30,7 +30,7 @@ nav {
   color: white;
   font-size: 1.25rem;
   font-weight: 700;
-  padding: 0;
+  padding: 0.45rem 0.7rem;
   text-decoration: none;
 }
 
@@ -58,9 +58,8 @@ nav a:focus {
 
 .site-title:hover,
 .site-title:focus {
-  background-color: transparent;
-  text-decoration: underline;
-  text-underline-offset: 0.25rem;
+  background-color: #2b2b2b;
+  text-decoration: none;
 }
 
 .page {
