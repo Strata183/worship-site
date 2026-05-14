@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Navbar from "./Components/Navbar";
+import Footer from "./Components/Footer";
 
 import Home from "./Pages/Home";
 import Songs from "./Pages/Songs";
@@ -20,6 +21,8 @@ function App() {
         <Route path="/articles" element={<Blog />} />
         <Route path="/about" element={<About />} />
       </Routes>
+
+      <Footer />
     </BrowserRouter>
 
 

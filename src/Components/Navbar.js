@@ -1,27 +1,27 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 function Navbar() {
   return (
     <nav>
       <div className="nav-content">
-        <Link className="site-title" to="/">
+        <NavLink className="site-title" to="/" end>
           Worthy for Worship
-        </Link>
+        </NavLink>
 
         <ul>
           <li>
-            <Link to="/songs">Songs</Link>
+            <NavLink to="/songs">Songs</NavLink>
           </li>
 
           <li>
-            <Link to="/tutorials">Tutorials</Link>
+            <NavLink to="/tutorials">Tutorials</NavLink>
           </li>
           <li>
-            <Link to="/articles">Articles</Link>
+            <NavLink to="/articles">Articles</NavLink>
           </li>
 
           <li>
-            <Link to="/about">About</Link>
+            <NavLink to="/about">About</NavLink>
           </li>
         </ul>
       </div>

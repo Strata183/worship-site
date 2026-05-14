@@ -1,17 +1,44 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Merriweather:wght@700&display=swap");
+
 * {
   box-sizing: border-box;
 }
 
+:root {
+  --color-background: #f7f5f0;
+  --color-text: #1f2933;
+  --color-muted: #4b5563;
+  --color-nav: #161616;
+  --color-nav-hover: #2b2b2b;
+  --color-accent: #2d4330;
+  --color-accent-light: #e3eadf;
+  --color-border: #ddd6cb;
+  --font-heading: "Merriweather", Georgia, serif;
+  --font-body: "Inter", Arial, sans-serif;
+}
+
 body {
   margin: 0;
-  background-color: #f7f5f0;
-  color: #1f2933;
-  font-family: Arial, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-body);
   line-height: 1.6;
 }
 
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 nav {
-  background-color: #161616;
+  background-color: var(--color-nav);
   color: white;
   padding: 0 1.5rem;
 }
@@ -28,6 +55,7 @@ nav {
 
 .site-title {
   color: white;
+  font-family: var(--font-heading);
   font-size: 1.25rem;
   font-weight: 700;
   padding: 0.45rem 0.7rem;
@@ -53,33 +81,150 @@ nav a {
 
 nav a:hover,
 nav a:focus {
-  background-color: #2b2b2b;
+  background-color: var(--color-nav-hover);
 }
 
 .site-title:hover,
 .site-title:focus {
-  background-color: #2b2b2b;
+  background-color: var(--color-nav-hover);
   text-decoration: none;
+}
+
+nav a.active {
+  background-color: var(--color-accent);
 }
 
 .page {
   margin: 0 auto;
-  max-width: 760px;
+  max-width: 1040px;
   padding: 4rem 1.5rem;
   text-align: center;
+  width: 100%;
 }
 
 .page h1 {
+  font-family: var(--font-heading);
   font-size: clamp(2rem, 6vw, 3.5rem);
   line-height: 1.1;
   margin: 0 0 1rem;
 }
 
 .page p {
-  color: #4b5563;
+  color: var(--color-muted);
   font-size: 1.15rem;
   margin: 0 auto;
   max-width: 48rem;
+}
+
+.home-hero {
+  margin: 0 auto;
+  max-width: 760px;
+}
+
+.eyebrow {
+  color: var(--color-accent);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+}
+
+.resource-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 3rem;
+  text-align: left;
+}
+
+.resource-card {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+  min-height: 210px;
+  padding: 1.25rem;
+  text-decoration: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.resource-card:hover,
+.resource-card:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 12px 28px rgba(45, 67, 48, 0.14);
+  transform: translateY(-2px);
+}
+
+.resource-card h2 {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  line-height: 1.25;
+  margin: 0 0 0.75rem;
+}
+
+.resource-card p {
+  font-size: 0.98rem;
+  margin: 0;
+}
+
+.resource-card span {
+  color: var(--color-accent);
+  font-weight: 800;
+  margin-top: auto;
+  padding-top: 1.25rem;
+}
+
+.site-footer {
+  background-color: var(--color-accent);
+  color: white;
+  margin-top: auto;
+  padding: 2rem 1.5rem;
+}
+
+.footer-content {
+  align-items: center;
+  display: flex;
+  gap: 1.5rem;
+  justify-content: space-between;
+  margin: 0 auto;
+  max-width: 1040px;
+}
+
+.site-footer h2 {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  margin: 0 0 0.35rem;
+}
+
+.site-footer p {
+  color: var(--color-accent-light);
+  margin: 0;
+}
+
+.site-footer ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.site-footer a {
+  border-radius: 6px;
+  color: white;
+  font-weight: 700;
+  padding: 0.3rem 0.45rem;
+  text-decoration: none;
+}
+
+.site-footer a:hover,
+.site-footer a:focus {
+  background-color: rgba(255, 255, 255, 0.12);
+  text-decoration: none;
 }
 
 @media (max-width: 560px) {
@@ -100,5 +245,26 @@ nav a:focus {
 
   .page {
     padding-top: 3rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .resource-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .resource-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resource-card {
+    min-height: auto;
+  }
+
+  .footer-content {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

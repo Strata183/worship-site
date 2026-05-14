@@ -7,7 +7,7 @@ Use this guide to keep the site consistent as new pages, resources, and features
 **Site name:** Worthy for Worship
 
 **Purpose:**
-To facillitate proper worship in the church and make it easy to learn about worship, get/store music charts, and watch tutorials.
+To facilitate proper worship in the church and make it easy to learn about worship, get/store music charts, and watch tutorials.
 
 **Audience:**
 This is for the local church and close friends only right now
@@ -34,37 +34,48 @@ TODO: Describe when to use a logo, wordmark, or plain text title.
 
 | Role | Color | Hex | Notes |
 | --- | --- | --- | --- |
-| Background | White cream | #f7f5f0 
-| Text | Black | #1F2933 |  |
-| Muted text | Gray | #4B5563 
+| Background | White cream | #F7F5F0 | Main page background |
+| Text | Black | #1F2933 | Primary text |
+| Muted text | Gray | #4B5563 | Supporting copy |
 | Navbar background | Black | #161616 |  |
 | Navbar text | White | #FFFFFF |  |
-| Accent | Deep Forest | #2D4330 |  |
+| Accent | Deep Forest | #2D4330 | Active nav states, footer, and key actions |
+| Accent light | Soft Forest | #E3EADF | Subtle accent backgrounds and footer text |
+| Border | Warm gray | #DDD6CB | Card borders and dividers |
 
 ## Typography
 
 **Primary font:**
-Arial, sans-serif
+Inter, Arial, sans-serif
+
+**Heading font:**
+Merriweather, Georgia, serif
+
+**Fallback fonts:**
+Use Arial for body text and Georgia for headings if the imported fonts do not load.
 
 **Heading style:**
-TODO
+Use Merriweather for page titles, card titles, the site title, and footer title. Headings should feel warm, readable, and not overly decorative.
 
 **Body text style:**
-TODO
+Use Inter for body copy, navigation, cards, and interface text. Keep paragraphs open, readable, and not too wide.
 
 **Link style:**
-I don't like underlines! Transparent bubbles are great! 
+No default underlines in the main interface. Use rounded hover backgrounds for nav links, footer links, and cards.
 
 ## Layout
 
 **Page width:**
-TODO
+Main pages should use a max width around 1040px. Long text should stay narrower, around 760px.
 
 **Page alignment:**
 Center
 
 **Spacing rules:**
 - I do not want a crowded page! Make everything open
+- Use generous spacing between the hero/header and page sections.
+- Cards should have enough padding to breathe.
+- Avoid stacking too many sections without clear visual breaks.
 
 
 **Mobile behavior:**
@@ -83,10 +94,10 @@ I do not want a lot of scrolling
 The site title links back to the home page.
 
 **Active page behavior:**
-TODO
+Use the Deep Forest accent background for the active nav item.
 
 **Hover behavior:**
-TODO
+Use rounded hover backgrounds on navbar links. Cards can lift slightly and use the Deep Forest accent on hover.
 
 ## Components
 
@@ -96,8 +107,8 @@ TODO
 Easily access every single part of the site from the top of the screen
 
 **Rules:**
-- TODO
-- TODO
+- The site title links to the home page.
+- Keep nav labels short and clear.
 
 ### Page Header
 
@@ -131,11 +142,11 @@ TODO
 ### Home
 
 **Goal:**
-TODO
+Help visitors quickly choose where they want to go next.
 
 **Required content:**
-- TODO
-- TODO
+- Short welcome message
+- Four dashboard links: Songs, Tutorials, Articles, and About
 
 ### Songs
 
