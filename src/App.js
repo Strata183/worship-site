@@ -5,7 +5,7 @@ import Navbar from "./Components/Navbar";
 import Home from "./Pages/Home";
 import Songs from "./Pages/Songs";
 import Tutorials from "./Pages/Tutorials";
-import Blog from "./Pages/Blog";
+import Blog from "./Pages/Articles";
 
 function App() {
   return (
@@ -16,7 +16,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/songs" element={<Songs />} />
         <Route path="/tutorials" element={<Tutorials />} />
-        <Route path="/blog" element={<Blog />} />
+        <Route path="/articles" element={<Blog />} />
       </Routes>
     </BrowserRouter>
 

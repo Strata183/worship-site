@@ -19,7 +19,7 @@ function Navbar() {
             <Link to="/tutorials">Tutorials</Link>
           </li>
           <li>
-            <Link to="/blog">Blog</Link>
+            <Link to="/articles">Articles</Link>
           </li>
         </ul>
       </div>
