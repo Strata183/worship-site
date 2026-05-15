@@ -24,6 +24,11 @@ function Footer() {
           </li>
         </ul>
       </div>
+
+      <div className="footer-legal">
+        <small>© {new Date().getFullYear()} Worthy for Worship. All rights reserved.</small>
+      </div>
+      
     </footer>
   );
 }
