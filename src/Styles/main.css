@@ -258,6 +258,19 @@ nav a.active:not(.site-title) {
   text-decoration: none;
 }
 
+.footer-legal {
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  color: var(--color-accent-light);
+  margin: 1.5rem auto 0;
+  max-width: 1040px;
+  padding-top: 1rem;
+  text-align: right;
+}
+
+.footer-legal small {
+  font-size: 0.85rem;
+}
+
 @media (max-width: 560px) {
   nav {
     padding: 0.85rem 1rem;
@@ -301,5 +314,9 @@ nav a.active:not(.site-title) {
   .footer-content {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .footer-legal {
+    text-align: left;
   }
 }
