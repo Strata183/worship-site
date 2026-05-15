@@ -49,13 +49,13 @@ TODO: Describe when to use a logo, wordmark, or plain text title.
 Inter, Arial, sans-serif
 
 **Heading font:**
-Merriweather, Georgia, serif
+Inter, Arial, sans-serif
 
 **Fallback fonts:**
-Use Arial for body text and Georgia for headings if the imported fonts do not load.
+Use Arial if the imported font does not load.
 
 **Heading style:**
-Use Merriweather for page titles, card titles, the site title, and footer title. Headings should feel warm, readable, and not overly decorative.
+Use Inter for page titles, card titles, the site title, and footer title. Headings should feel simple, clean, and modern, with enough weight to be clear but not overly decorative.
 
 **Body text style:**
 Use Inter for body copy, navigation, cards, and interface text. Keep paragraphs open, readable, and not too wide.
