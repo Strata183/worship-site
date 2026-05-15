@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 
+// ...existing code...
 function Footer() {
   return (
     <footer className="site-footer">
@@ -10,27 +11,18 @@ function Footer() {
         </div>
 
         <ul>
-          <li>
-            <Link to="/songs">Songs</Link>
-          </li>
-          <li>
-            <Link to="/tutorials">Tutorials</Link>
-          </li>
-          <li>
-            <Link to="/articles">Articles</Link>
-          </li>
-          <li>
-            <Link to="/about">About</Link>
-          </li>
+          <li><Link to="/songs">Songs</Link></li>
+          <li><Link to="/tutorials">Tutorials</Link></li>
+          <li><Link to="/articles">Articles</Link></li>
+          <li><Link to="/about">About</Link></li>
         </ul>
       </div>
 
       <div className="footer-legal">
-        <small>© {new Date().getFullYear()} Worthy for Worship. All rights reserved.</small>
+        <small>© Copyright {new Date().getFullYear()} Worthy for Worship. All rights reserved.</small>
       </div>
-      
     </footer>
   );
 }
-
+// ...existing code...
 export default Footer;
