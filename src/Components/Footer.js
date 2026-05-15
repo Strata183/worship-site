@@ -6,7 +6,7 @@ function Footer() {
       <div className="footer-content">
         <div>
           <h2>Worthy for Worship</h2>
-          <p>Free worship resources for serving the local church with care.</p>
+          <p>Free worship resources for serving the local church.</p>
         </div>
 
         <ul>

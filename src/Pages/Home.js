@@ -27,7 +27,6 @@ function Home() {
   return (
     <main className="page page-home">
       <section className="home-hero">
-        <p className="eyebrow">Free worship resources for the local church</p>
         <h1>Welcome to Worthy for Worship</h1>
         <p>
           Find chord charts, tutorials, articles, and practical help for
