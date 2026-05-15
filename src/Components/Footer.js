@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-// ...existing code...
+
 function Footer() {
   return (
     <footer className="site-footer">
@@ -24,5 +24,5 @@ function Footer() {
     </footer>
   );
 }
-// ...existing code...
+
 export default Footer;
