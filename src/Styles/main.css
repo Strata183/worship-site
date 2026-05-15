@@ -123,8 +123,31 @@ nav a.active:not(.site-title) {
 }
 
 .home-hero {
+  isolation: isolate;
   margin: 0 auto;
   max-width: 760px;
+  overflow: hidden;
+  padding: 2.5rem 1.5rem;
+  position: relative;
+}
+
+.home-hero-image {
+  display: block;
+  height: auto;
+  max-width: 640px;
+  opacity: 0.14;
+  pointer-events: none;
+  position: absolute;
+  right: -170px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 80%;
+  z-index: -1;
+}
+
+.home-hero h1,
+.home-hero p {
+  position: relative;
 }
 
 .eyebrow {

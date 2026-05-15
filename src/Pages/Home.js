@@ -27,6 +27,11 @@ function Home() {
   return (
     <main className="page page-home">
       <section className="home-hero">
+        <img
+          className="home-hero-image"
+          src="/newguitar.png"
+          alt="Black acoustic guitar"
+        />
         <h1>Welcome to Worthy for Worship</h1>
         <p>
           Find chord charts, tutorials, articles, and practical help for
