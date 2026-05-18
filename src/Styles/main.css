@@ -94,6 +94,78 @@ nav a.active:not(.site-title) {
   background-color: var(--color-accent);
 }
 
+.account-nav {
+  margin-left: auto;
+}
+
+.login-link,
+.account-button {
+  background-color: white;
+  border: 0;
+  border-radius: 6px;
+  color: var(--color-nav);
+  cursor: pointer;
+  display: inline-block;
+  font: inherit;
+  font-weight: 800;
+  line-height: 1.4;
+  padding: 0.55rem 0.9rem;
+  text-decoration: none;
+}
+
+.login-link:hover,
+.login-link:focus,
+.account-button:hover,
+.account-button:focus {
+  background-color: var(--color-accent-light);
+}
+
+.account-menu {
+  position: relative;
+}
+
+.account-dropdown {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.18);
+  display: none;
+  min-width: 150px;
+  padding: 0.35rem;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  z-index: 10;
+}
+
+.account-menu:hover .account-dropdown,
+.account-menu:focus-within .account-dropdown {
+  display: grid;
+}
+
+.account-dropdown a,
+.account-dropdown button {
+  background-color: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--color-text);
+  cursor: pointer;
+  display: block;
+  font: inherit;
+  font-weight: 700;
+  padding: 0.6rem 0.7rem;
+  text-align: left;
+  text-decoration: none;
+  width: 100%;
+}
+
+.account-dropdown a:hover,
+.account-dropdown a:focus,
+.account-dropdown button:hover,
+.account-dropdown button:focus {
+  background-color: var(--color-accent-light);
+}
+
 .site-title.active {
   background-color: var(--color-accent);
   color: white;
@@ -258,6 +330,230 @@ nav a.active:not(.site-title) {
   text-decoration: none;
 }
 
+.auth-page,
+.app-page {
+  text-align: left;
+}
+
+.auth-panel {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  margin: 0 auto;
+  max-width: 520px;
+  padding: 2rem;
+}
+
+.auth-panel h1,
+.page-heading h1 {
+  text-align: left;
+}
+
+.auth-panel p,
+.page-heading p {
+  margin-left: 0;
+  text-align: left;
+}
+
+.auth-tabs {
+  background-color: var(--color-accent-light);
+  border-radius: 8px;
+  display: grid;
+  gap: 0.35rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 1.5rem 0;
+  padding: 0.35rem;
+}
+
+.auth-tabs button,
+.text-button {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.auth-tabs button {
+  background-color: transparent;
+  border-radius: 6px;
+  color: var(--color-text);
+  font-weight: 800;
+  padding: 0.7rem 1rem;
+}
+
+.auth-tabs button.active {
+  background-color: white;
+}
+
+.form-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.form-stack label {
+  color: var(--color-text);
+  display: grid;
+  font-weight: 800;
+  gap: 0.4rem;
+}
+
+.form-stack input {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  font: inherit;
+  padding: 0.75rem 0.85rem;
+  width: 100%;
+}
+
+.primary-button,
+.row-actions button {
+  background-color: var(--color-accent);
+  border: 0;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  padding: 0.8rem 1rem;
+}
+
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.text-button {
+  background-color: transparent;
+  color: var(--color-accent);
+  font-weight: 800;
+  padding: 0.3rem 0;
+}
+
+.form-message {
+  border-radius: 6px;
+  font-size: 0.95rem;
+  max-width: none;
+  padding: 0.75rem;
+}
+
+.form-message.error {
+  background-color: #fef2f2;
+  color: #991b1b;
+}
+
+.form-message.success {
+  background-color: #ecfdf3;
+  color: #166534;
+}
+
+.page-heading {
+  margin-bottom: 2rem;
+}
+
+.tool-layout {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+}
+
+.tool-panel {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.wide-panel {
+  grid-column: 1 / -1;
+}
+
+.tool-panel h2,
+.song-list h3,
+.friend-list h3 {
+  font-family: var(--font-heading);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.tool-panel h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.panel-header {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.panel-header h2 {
+  margin-bottom: 0;
+}
+
+.empty-state,
+.profile-name {
+  font-size: 1rem;
+  margin: 0;
+  max-width: none;
+}
+
+.song-list,
+.friend-list {
+  display: grid;
+  gap: 0.75rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.song-list li,
+.friend-list li {
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 1rem;
+}
+
+.song-list h3,
+.friend-list h3 {
+  font-size: 1rem;
+}
+
+.song-list p,
+.friend-list p {
+  font-size: 0.92rem;
+  margin: 0.2rem 0 0;
+  max-width: none;
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.row-actions button + button {
+  background-color: #374151;
+}
+
+.share-code,
+.friend-list code {
+  background-color: var(--color-accent-light);
+  border-radius: 6px;
+  color: var(--color-accent);
+  display: block;
+  font-size: 0.88rem;
+  margin-top: 0.75rem;
+  overflow-wrap: anywhere;
+  padding: 0.75rem;
+}
+
 .footer-legal {
   border-top: 1px solid rgba(255, 255, 255, 0.18);
   color: var(--color-accent-light);
@@ -300,6 +596,10 @@ nav a.active:not(.site-title) {
   .resource-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .tool-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 640px) {
@@ -318,5 +618,20 @@ nav a.active:not(.site-title) {
 
   .footer-legal {
     text-align: left;
+  }
+
+  .auth-panel,
+  .tool-panel {
+    padding: 1rem;
+  }
+
+  .song-list li,
+  .friend-list li {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .row-actions {
+    justify-content: flex-start;
   }
 }
