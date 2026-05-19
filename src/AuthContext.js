@@ -46,10 +46,12 @@ export function AuthProvider({ children }) {
         session.user.user_metadata?.display_name ||
         session.user.email?.split("@")[0] ||
         "Friend";
+      const email = session.user.email?.toLowerCase();
 
       await supabase.from("profiles").upsert({
         id: session.user.id,
         display_name: displayName,
+        email,
       });
 
       const { data } = await supabase

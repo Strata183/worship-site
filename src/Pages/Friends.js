@@ -4,7 +4,7 @@ import { supabase } from "../supabaseClient";
 
 function Friends() {
   const { profile, user } = useAuth();
-  const [friendId, setFriendId] = useState("");
+  const [friendEmail, setFriendEmail] = useState("");
   const [friendships, setFriendships] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -38,23 +38,44 @@ function Friends() {
     setError("");
     setMessage("");
 
-    const addresseeId = friendId.trim();
+    const addresseeEmail = friendEmail.trim().toLowerCase();
 
-    if (!addresseeId) {
-      setError("Paste your friend's user ID first.");
+    if (!addresseeEmail) {
+      setError("Enter your friend's email first.");
+      return;
+    }
+
+    if (addresseeEmail === user.email?.toLowerCase()) {
+      setError("You cannot send a friend request to yourself.");
+      return;
+    }
+
+    const { data: friendProfile, error: profileError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("email", addresseeEmail)
+      .maybeSingle();
+
+    if (profileError) {
+      setError(profileError.message);
+      return;
+    }
+
+    if (!friendProfile) {
+      setError("No account found with that email.");
       return;
     }
 
     const { error: insertError } = await supabase.from("friendships").insert({
       requester_id: user.id,
-      addressee_id: addresseeId,
+      addressee_id: friendProfile.id,
     });
 
     if (insertError) {
       setError(insertError.message);
     } else {
       setMessage("Friend request sent.");
-      setFriendId("");
+      setFriendEmail("");
       await loadFriendships();
     }
   }
@@ -93,27 +114,28 @@ function Friends() {
         <p className="eyebrow">Sharing access</p>
         <h1>Friends</h1>
         <p>
-          Share your user ID with a friend, then accept each other to unlock PDF
+          Add a friend by email, then accept each other to unlock PDF
           access.
         </p>
       </section>
 
       <section className="tool-layout">
         <section className="tool-panel">
-          <h2>Your share ID</h2>
+          <h2>Your account</h2>
           <p className="profile-name">{profile?.display_name || user.email}</p>
-          <code className="share-code">{user.id}</code>
+          <code className="share-code">{user.email}</code>
         </section>
 
         <form className="tool-panel form-stack" onSubmit={sendRequest}>
           <h2>Add friend</h2>
           <label>
-            Friend user ID
+            Friend email
             <input
-              onChange={(event) => setFriendId(event.target.value)}
-              placeholder="Paste their share ID"
-              type="text"
-              value={friendId}
+              autoComplete="email"
+              onChange={(event) => setFriendEmail(event.target.value)}
+              placeholder="friend@example.com"
+              type="email"
+              value={friendEmail}
             />
           </label>
           <button className="primary-button" type="submit">

@@ -3,9 +3,7 @@ import { useAuth } from "../AuthContext";
 import { supabase } from "../supabaseClient";
 
 function Navbar() {
-  const { profile, user } = useAuth();
-  const displayName =
-    profile?.display_name || user?.email?.split("@")[0] || "Account";
+  const { user } = useAuth();
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -38,8 +36,12 @@ function Navbar() {
         <div className="account-nav">
           {user ? (
             <div className="account-menu">
-              <button className="account-button" type="button">
-                {displayName}
+              <button
+                aria-label="Account menu"
+                className="account-button"
+                type="button"
+              >
+                <span aria-hidden="true" className="account-icon" />
               </button>
               <div className="account-dropdown">
                 <NavLink to="/friends">Friends</NavLink>
