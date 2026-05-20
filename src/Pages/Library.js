@@ -10,6 +10,30 @@ function cleanFileName(name) {
     .replace(/^-|-$/g, "");
 }
 
+async function getFunctionErrorMessage(error) {
+  if (error?.context instanceof Response) {
+    try {
+      const body = await error.context.json();
+
+      if (body?.error) {
+        return body.error;
+      }
+    } catch {
+      try {
+        const text = await error.context.text();
+
+        if (text) {
+          return text;
+        }
+      } catch {
+        // Fall back to the Supabase client error message below.
+      }
+    }
+  }
+
+  return error?.message || "Unexpected Edge Function error.";
+}
+
 function Library() {
   const { user } = useAuth();
   const [songs, setSongs] = useState([]);
@@ -65,15 +89,21 @@ function Library() {
     const safeName = cleanFileName(file.name) || "song";
     const filePath = `${user.id}/${songId}-${safeName}.pdf`;
     const songTitle = title.trim() || file.name.replace(/\.pdf$/i, "");
+    const formData = new FormData();
 
-    const { error: uploadError } = await supabase.storage
-      .from("song-pdfs")
-      .upload(filePath, file, {
-        contentType: "application/pdf",
-      });
+    formData.append("action", "upload");
+    formData.append("filePath", filePath);
+    formData.append("file", file);
+
+    const { error: uploadError } = await supabase.functions.invoke(
+      "r2-song-files",
+      {
+        body: formData,
+      }
+    );
 
     if (uploadError) {
-      setError(uploadError.message);
+      setError(`PDF upload failed: ${await getFunctionErrorMessage(uploadError)}`);
       setSubmitting(false);
       return;
     }
@@ -86,7 +116,7 @@ function Library() {
     });
 
     if (insertError) {
-      setError(insertError.message);
+      setError(`Song save failed: ${insertError.message}`);
     } else {
       setMessage("Song uploaded.");
       setTitle("");
@@ -101,12 +131,18 @@ function Library() {
   async function openPdf(song) {
     setError("");
 
-    const { data, error: signedUrlError } = await supabase.storage
-      .from("song-pdfs")
-      .createSignedUrl(song.file_path, 60);
+    const { data, error: signedUrlError } = await supabase.functions.invoke(
+      "r2-song-files",
+      {
+        body: {
+          action: "signed-url",
+          songId: song.id,
+        },
+      }
+    );
 
     if (signedUrlError) {
-      setError(signedUrlError.message);
+      setError(await getFunctionErrorMessage(signedUrlError));
       return;
     }
 
@@ -117,12 +153,18 @@ function Library() {
     setError("");
     setMessage("");
 
-    const { error: storageError } = await supabase.storage
-      .from("song-pdfs")
-      .remove([song.file_path]);
+    const { error: storageError } = await supabase.functions.invoke(
+      "r2-song-files",
+      {
+        body: {
+          action: "delete",
+          songId: song.id,
+        },
+      }
+    );
 
     if (storageError) {
-      setError(storageError.message);
+      setError(await getFunctionErrorMessage(storageError));
       return;
     }
 
