@@ -1,3 +1,5 @@
+// Articles is currently a placeholder page.
+// Later, this could list blog posts from Supabase or local files.
 function Articles() {
     return (
         <main className = "page page-articles">

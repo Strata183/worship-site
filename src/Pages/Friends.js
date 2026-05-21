@@ -2,15 +2,27 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../AuthContext";
 import { supabase } from "../supabaseClient";
 
+// Friends is the protected page where users manage sharing relationships.
+// Accepted friends can be allowed to see each other's PDF songs, depending on
+// the Supabase Row Level Security policies.
 function Friends() {
   const { profile, user } = useAuth();
+
+  // friendEmail is the email typed into the "Add friend" form.
   const [friendEmail, setFriendEmail] = useState("");
+
+  // friendships holds rows from the Supabase "friendships" table.
   const [friendships, setFriendships] = useState([]);
+
+  // loading controls the loading/empty/list UI.
   const [loading, setLoading] = useState(true);
+
+  // message and error show feedback after actions.
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
+    // Load existing friend requests once when the page first appears.
     loadFriendships();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -19,6 +31,7 @@ function Friends() {
     setLoading(true);
     setError("");
 
+    // RLS should limit this query to friendships involving the signed-in user.
     const { data, error: friendshipError } = await supabase
       .from("friendships")
       .select("*")
@@ -34,10 +47,12 @@ function Friends() {
   }
 
   async function sendRequest(event) {
+    // Prevent a normal browser page refresh.
     event.preventDefault();
     setError("");
     setMessage("");
 
+    // Normalize the email so matching is consistent.
     const addresseeEmail = friendEmail.trim().toLowerCase();
 
     if (!addresseeEmail) {
@@ -45,11 +60,14 @@ function Friends() {
       return;
     }
 
+    // You should not be able to friend yourself.
     if (addresseeEmail === user.email?.toLowerCase()) {
       setError("You cannot send a friend request to yourself.");
       return;
     }
 
+    // Look up the other user's profile by email.
+    // maybeSingle returns null if no matching profile exists.
     const { data: friendProfile, error: profileError } = await supabase
       .from("profiles")
       .select("id")
@@ -66,6 +84,7 @@ function Friends() {
       return;
     }
 
+    // Create a pending request from the current user to the other user.
     const { error: insertError } = await supabase.from("friendships").insert({
       requester_id: user.id,
       addressee_id: friendProfile.id,
@@ -74,6 +93,7 @@ function Friends() {
     if (insertError) {
       setError(insertError.message);
     } else {
+      // Clear the form and refresh the request list after success.
       setMessage("Friend request sent.");
       setFriendEmail("");
       await loadFriendships();
@@ -84,6 +104,8 @@ function Friends() {
     setError("");
     setMessage("");
 
+    // Change a pending request to accepted or rejected.
+    // RLS should make sure only the addressee can respond.
     const { error: updateError } = await supabase
       .from("friendships")
       .update({ status })
@@ -98,6 +120,10 @@ function Friends() {
   }
 
   function describeFriendship(friendship) {
+    // A friendship row stores two ids:
+    // requester_id = who sent it
+    // addressee_id = who received it
+    // This helper figures out which id belongs to the other person.
     const otherId =
       friendship.requester_id === user.id
         ? friendship.addressee_id
@@ -161,6 +187,8 @@ function Friends() {
             <ul className="friend-list">
               {friendships.map((friendship) => {
                 const { direction, otherId } = describeFriendship(friendship);
+
+                // Only the person who received a pending request can accept/reject.
                 const canRespond =
                   friendship.addressee_id === user.id &&
                   friendship.status === "pending";

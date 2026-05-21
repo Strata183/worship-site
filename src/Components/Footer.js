@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
-
+// Footer appears at the bottom of every page.
+// Link is like an <a> tag, but it navigates inside React without a full reload.
 function Footer() {
   return (
     <footer className="site-footer">
@@ -19,6 +20,7 @@ function Footer() {
       </div>
 
       <div className="footer-legal">
+        {/* new Date().getFullYear() keeps the copyright year current automatically. */}
         <small>© Copyright {new Date().getFullYear()} Worthy for Worship. All rights reserved.</small>
       </div>
     </footer>

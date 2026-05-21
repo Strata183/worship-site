@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 
+// This array is the data for the cards on the home page.
+// Keeping the card information here makes the JSX below shorter.
 const homeSections = [
   {
     title: "Start with Songs",
@@ -23,9 +25,11 @@ const homeSections = [
   },
 ];
 
+// Home is the landing page visitors see at "/".
 function Home() {
   return (
     <main className="page page-home">
+      {/* Hero section: the main welcome area at the top of the page. */}
       <section className="home-hero">
         <img
           className="home-hero-image"
@@ -39,8 +43,10 @@ function Home() {
         </p>
       </section>
 
+      {/* The cards are created by looping over homeSections with map(). */}
       <section className="resource-grid" aria-label="Worship resource sections">
         {homeSections.map((section) => (
+          // key helps React track each card efficiently.
           <Link className="resource-card" key={section.path} to={section.path}>
             <h2>{section.title}</h2>
             <p>{section.description}</p>

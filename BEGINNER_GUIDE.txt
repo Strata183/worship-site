@@ -1,0 +1,316 @@
+Worthy for Worship beginner guide
+=================================
+
+This project is a React website connected to Supabase. The public pages explain
+the worship resource site, and the private pages let signed-in users upload PDF
+song charts and share access with friends.
+
+
+1. The big picture
+------------------
+
+The app has three main pieces:
+
+1. React frontend
+   This is the website code in the src folder. It controls what visitors see,
+   handles forms, and calls Supabase when it needs login, database, or file
+   actions.
+
+2. Supabase
+   Supabase handles user accounts, login sessions, and database tables such as
+   profiles, songs, and friendships.
+
+3. Cloudflare R2 through a Supabase Edge Function
+   The actual PDF files are stored in Cloudflare R2. The browser does not talk
+   to R2 directly. Instead, it calls the Supabase Edge Function named
+   r2-song-files, and that function uploads, deletes, or creates temporary links
+   for PDFs.
+
+
+2. Where the app starts
+-----------------------
+
+public/index.html contains a div with id="root".
+
+src/index.js finds that root div and renders the React app inside it. The main
+component it renders is src/App.js.
+
+src/App.js sets up:
+
+- AuthProvider, so the whole app can know who is signed in
+- BrowserRouter, so URLs like /songs and /about show React pages
+- Navbar, which appears at the top of every page
+- Routes, which choose the correct page for each URL
+- Footer, which appears at the bottom of every page
+
+
+3. Routing
+----------
+
+Routes are defined in src/App.js.
+
+/ shows Home.js.
+/tutorials shows Tutorials.js.
+/articles shows Articles.js.
+/about shows About.js.
+/login shows Login.js.
+/songs shows Library.js, but only through ProtectedRoute.
+/friends shows Friends.js, but only through ProtectedRoute.
+
+ProtectedRoute is important. It checks whether there is a signed-in user. If
+there is no user, it sends the visitor to /login. It also remembers the page the
+visitor wanted so they can be sent back after login.
+
+
+4. Authentication
+-----------------
+
+src/supabaseClient.js creates the Supabase client using values from .env.local:
+
+REACT_APP_SUPABASE_URL
+REACT_APP_SUPABASE_ANON_KEY
+
+src/AuthContext.js manages login state for the whole React app. It asks
+Supabase whether a session already exists, listens for sign-in/sign-out changes,
+and creates or updates a row in the profiles table for the signed-in user.
+
+Any component can call useAuth() to get:
+
+- user: the signed-in Supabase user, or null
+- session: the full Supabase session
+- profile: the user's row in the profiles table
+- loading: whether the app is still checking auth state
+
+
+5. Login and sign-up
+--------------------
+
+src/Pages/Login.js handles both sign-in and sign-up.
+
+When the mode is sign-in, it calls:
+
+supabase.auth.signInWithPassword()
+
+When the mode is sign-up, it calls:
+
+supabase.auth.signUp()
+
+The sign-up call also sends display_name as user metadata and includes
+emailRedirectTo so Supabase knows where to send users after confirming their
+email.
+
+If email confirmations are enabled in Supabase, a new user may not receive a
+session immediately. In that case, the page shows a message telling the user to
+check their email.
+
+
+6. Navigation
+-------------
+
+src/Components/Navbar.js shows the top navigation.
+
+If no user is signed in, the right side shows a Login link.
+
+If a user is signed in, the right side shows an account icon with a dropdown.
+That dropdown has a Friends link and a Sign out button.
+
+The Sign out button calls:
+
+supabase.auth.signOut()
+
+After sign-out, AuthContext notices the session changed and updates the app.
+
+
+7. The Songs library
+--------------------
+
+src/Pages/Library.js is the real /songs page.
+
+It does several jobs:
+
+- loads available songs from the songs table
+- lets a signed-in user choose a PDF
+- uploads that PDF through the r2-song-files Edge Function
+- saves song metadata in the songs table
+- asks for a temporary signed URL when opening a PDF
+- deletes owned PDFs from R2 and then deletes their database rows
+
+The PDF file itself is not stored in Supabase's database. The database stores
+information about the file, such as title, owner_id, and file_path.
+
+
+8. Upload flow
+--------------
+
+When a user uploads a song:
+
+1. Library.js validates that a file exists and that it is a PDF.
+2. It creates a song id with crypto.randomUUID().
+3. It creates a safe file path like:
+
+   user-id/song-id-file-name.pdf
+
+4. It sends the PDF to the r2-song-files Edge Function using FormData.
+5. The Edge Function checks that the user is signed in.
+6. The Edge Function checks that the file is a PDF.
+7. The Edge Function checks that the file path starts with that user's id.
+8. The Edge Function uploads the file to Cloudflare R2.
+9. Library.js inserts a row into the songs table.
+10. Library.js reloads the song list.
+
+
+9. Opening a PDF
+----------------
+
+When a user clicks Open:
+
+1. Library.js calls the r2-song-files Edge Function with action "signed-url".
+2. The Edge Function loads the song row from Supabase.
+3. Supabase Row Level Security should decide whether the user is allowed to see
+   that row.
+4. If the row is allowed, the Edge Function creates a temporary signed R2 URL.
+5. Library.js opens that temporary URL in a new tab.
+
+This keeps the R2 bucket private. Users only get short-lived access links.
+
+
+10. Deleting a PDF
+------------------
+
+When a user clicks Delete:
+
+1. Library.js calls the r2-song-files Edge Function with action "delete".
+2. The Edge Function loads the song row.
+3. The Edge Function checks that the signed-in user owns that song.
+4. The Edge Function deletes the PDF from R2.
+5. Library.js deletes the song row from Supabase.
+6. Library.js reloads the song list.
+
+
+11. Friends and sharing
+-----------------------
+
+src/Pages/Friends.js manages friend requests.
+
+The page lets a user:
+
+- see their own account email
+- enter another user's email
+- send a friend request
+- accept or reject incoming requests
+- refresh the list of requests
+
+The friendships table stores:
+
+- requester_id: the user who sent the request
+- addressee_id: the user who received the request
+- status: pending, accepted, or rejected
+
+The React page shows ids for now. Later, the app could join profiles so it can
+show names and emails instead of raw user ids.
+
+
+12. Supabase Edge Function
+--------------------------
+
+supabase/functions/r2-song-files/index.ts is server-side code. It runs in
+Supabase, not in the browser.
+
+It exists because the frontend should not know private R2 credentials. Secret
+values like R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY belong on the server only.
+
+The function handles three actions:
+
+- upload: receive a PDF and store it in R2
+- signed-url: create a temporary link for opening a private PDF
+- delete: remove a PDF from R2
+
+
+13. CSS
+-------
+
+src/Styles/main.css controls how the app looks.
+
+It defines reusable variables in :root, such as colors and fonts. It also styles
+the navbar, footer, page layouts, forms, cards, account menu, song list, friend
+list, and responsive mobile layout.
+
+Class names in JSX, such as className="page" or className="tool-panel", connect
+React markup to CSS rules.
+
+
+14. Environment variables
+-------------------------
+
+.env.local is for local secrets/configuration. The React app reads:
+
+REACT_APP_SUPABASE_URL
+REACT_APP_SUPABASE_ANON_KEY
+
+The Supabase Edge Function has its own environment variables/secrets in Supabase,
+such as:
+
+SUPABASE_URL
+SUPABASE_ANON_KEY
+R2_ENDPOINT
+R2_BUCKET
+R2_ACCESS_KEY_ID
+R2_SECRET_ACCESS_KEY
+
+Do not put private R2 secret keys in the React frontend. Frontend code is visible
+to users in the browser.
+
+
+15. Files to know
+-----------------
+
+src/index.js
+The React entry point.
+
+src/App.js
+The top-level app layout and route list.
+
+src/AuthContext.js
+Global login/session/profile state.
+
+src/supabaseClient.js
+The shared Supabase client.
+
+src/Components/Navbar.js
+Top navigation and sign-out button.
+
+src/Components/ProtectedRoute.js
+Redirects signed-out users away from private pages.
+
+src/Components/Footer.js
+Bottom footer links.
+
+src/Pages/Login.js
+Sign-in and sign-up form.
+
+src/Pages/Library.js
+Protected PDF song library.
+
+src/Pages/Friends.js
+Protected friend request page.
+
+src/Styles/main.css
+All main styling.
+
+supabase/functions/r2-song-files/index.ts
+Server-side PDF storage helper.
+
+
+16. Helpful mental model
+------------------------
+
+Think of the project like this:
+
+React is the front desk.
+Supabase Auth checks who someone is.
+Supabase Database remembers information about users, songs, and friendships.
+Cloudflare R2 stores the heavy PDF files.
+The Supabase Edge Function is the secure helper that talks to R2.
+
+The frontend asks for things. Supabase and the Edge Function decide what is
+allowed and where the data should go.

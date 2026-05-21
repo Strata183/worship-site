@@ -13,14 +13,25 @@ import Friends from "./Pages/Friends";
 import Library from "./Pages/Library";
 import Login from "./Pages/Login";
 
+// App is the main "layout" component for the whole website.
+// It decides which page appears for each URL.
 function App() {
   return (
+    // AuthProvider makes login/session information available everywhere below it.
+    // Navbar, ProtectedRoute, Friends, Library, and Login can all use useAuth()
+    // because they live inside this provider.
     <AuthProvider>
+      {/* BrowserRouter turns normal-looking URLs into React pages. */}
       <BrowserRouter>
+        {/* Navbar appears on every route because it sits outside <Routes>. */}
         <Navbar />
 
+        {/* Routes is the list of pages this website knows how to show. */}
         <Routes>
+          {/* Public route: anyone can visit the home page. */}
           <Route path="/" element={<Home />} />
+
+          {/* Protected route: visitors must be signed in before seeing Library. */}
           <Route
             path="/songs"
             element={
@@ -29,10 +40,15 @@ function App() {
               </ProtectedRoute>
             }
           />
+          {/* Public informational pages. */}
           <Route path="/tutorials" element={<Tutorials />} />
           <Route path="/articles" element={<Blog />} />
           <Route path="/about" element={<About />} />
+
+          {/* Login handles both sign-in and sign-up. */}
           <Route path="/login" element={<Login />} />
+
+          {/* Friends is also protected because it uses the signed-in user's id. */}
           <Route
             path="/friends"
             element={
@@ -43,11 +59,10 @@ function App() {
           />
         </Routes>
 
+        {/* Footer appears on every route because it also sits outside <Routes>. */}
         <Footer />
       </BrowserRouter>
     </AuthProvider>
-
-
   );
 }
 

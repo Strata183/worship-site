@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../AuthContext";
 import { supabase } from "../supabaseClient";
 
+// Turn a file name like "Amazing Grace (Key of G).pdf" into a safer storage
+// name like "amazing-grace-key-of-g". This avoids spaces and unusual symbols.
 function cleanFileName(name) {
   return name
     .toLowerCase()
@@ -10,6 +12,8 @@ function cleanFileName(name) {
     .replace(/^-|-$/g, "");
 }
 
+// Supabase Edge Function errors can contain useful details in the HTTP response.
+// This helper tries to pull out the clearest message for the user.
 async function getFunctionErrorMessage(error) {
   if (error?.context instanceof Response) {
     try {
@@ -34,17 +38,31 @@ async function getFunctionErrorMessage(error) {
   return error?.message || "Unexpected Edge Function error.";
 }
 
+// Library is the protected Songs page.
+// Signed-in users can upload PDFs, open PDFs they are allowed to see,
+// and delete PDFs they own.
 function Library() {
   const { user } = useAuth();
+
+  // songs holds the rows loaded from the Supabase "songs" table.
   const [songs, setSongs] = useState([]);
+
+  // title and file track the upload form inputs.
   const [title, setTitle] = useState("");
   const [file, setFile] = useState(null);
+
+  // loadingSongs controls the "Loading songs..." message.
   const [loadingSongs, setLoadingSongs] = useState(true);
+
+  // submitting prevents duplicate uploads while one upload is already running.
   const [submitting, setSubmitting] = useState(false);
+
+  // message and error display feedback below the upload form.
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
+    // Load songs once when the Library page first appears.
     loadSongs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -53,6 +71,8 @@ function Library() {
     setLoadingSongs(true);
     setError("");
 
+    // Row Level Security in Supabase should decide which songs this user can see.
+    // The frontend simply asks for songs ordered newest first.
     const { data, error: songsError } = await supabase
       .from("songs")
       .select("*")
@@ -68,11 +88,13 @@ function Library() {
   }
 
   async function handleUpload(event) {
+    // Prevent the browser from refreshing the page after form submit.
     event.preventDefault();
     setSubmitting(true);
     setError("");
     setMessage("");
 
+    // Basic frontend validation gives quick feedback before calling Supabase.
     if (!file) {
       setError("Choose a PDF before uploading.");
       setSubmitting(false);
@@ -85,16 +107,27 @@ function Library() {
       return;
     }
 
+    // Create an id in the browser so the file path and database row can match.
     const songId = crypto.randomUUID();
     const safeName = cleanFileName(file.name) || "song";
+
+    // Store each user's files inside a folder named with their Supabase user id.
+    // The Edge Function checks this too, so users cannot upload into another
+    // user's folder by changing frontend code.
     const filePath = `${user.id}/${songId}-${safeName}.pdf`;
+
+    // If the user leaves the title blank, use the PDF file name without ".pdf".
     const songTitle = title.trim() || file.name.replace(/\.pdf$/i, "");
+
+    // FormData is required because a real file is being sent to the Edge Function.
     const formData = new FormData();
 
     formData.append("action", "upload");
     formData.append("filePath", filePath);
     formData.append("file", file);
 
+    // The Edge Function uploads the PDF to Cloudflare R2.
+    // The browser does not receive direct R2 credentials, which keeps them secret.
     const { error: uploadError } = await supabase.functions.invoke(
       "r2-song-files",
       {
@@ -108,6 +141,7 @@ function Library() {
       return;
     }
 
+    // After the file exists in storage, save the searchable metadata in Supabase.
     const { error: insertError } = await supabase.from("songs").insert({
       id: songId,
       owner_id: user.id,
@@ -118,6 +152,7 @@ function Library() {
     if (insertError) {
       setError(`Song save failed: ${insertError.message}`);
     } else {
+      // Reset the form and reload the list so the new song appears.
       setMessage("Song uploaded.");
       setTitle("");
       setFile(null);
@@ -131,6 +166,8 @@ function Library() {
   async function openPdf(song) {
     setError("");
 
+    // Ask the Edge Function for a temporary signed URL.
+    // This lets the user open the PDF without making the R2 bucket public.
     const { data, error: signedUrlError } = await supabase.functions.invoke(
       "r2-song-files",
       {
@@ -146,6 +183,7 @@ function Library() {
       return;
     }
 
+    // Open the signed URL in a new browser tab.
     window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   }
 
@@ -153,6 +191,7 @@ function Library() {
     setError("");
     setMessage("");
 
+    // First delete the actual PDF file from R2 through the Edge Function.
     const { error: storageError } = await supabase.functions.invoke(
       "r2-song-files",
       {
@@ -168,6 +207,8 @@ function Library() {
       return;
     }
 
+    // Then delete the database row from Supabase.
+    // Doing both keeps the database and file storage in sync.
     const { error: deleteError } = await supabase
       .from("songs")
       .delete()
@@ -232,6 +273,7 @@ function Library() {
           ) : (
             <ul className="song-list">
               {songs.map((song) => {
+                // Owners can delete their own songs. Friends can only open them.
                 const isOwner = song.owner_id === user.id;
 
                 return (

@@ -1,9 +1,13 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
+/* box-sizing: border-box makes width/height calculations easier.
+   Padding and border are included inside an element's declared size. */
 * {
   box-sizing: border-box;
 }
 
+/* :root stores reusable design values.
+   Variables make it easier to change colors/fonts in one place. */
 :root {
   --color-background: #f7f5f0;
   --color-text: #1f2933;
@@ -17,6 +21,7 @@
   --font-body: "Inter", Arial, sans-serif;
 }
 
+/* Base page styles shared by the whole app. */
 body {
   margin: 0;
   background-color: var(--color-background);
@@ -25,24 +30,30 @@ body {
   line-height: 1.6;
 }
 
+/* Make the app tall enough for the footer to sit at the bottom on short pages. */
 html,
 body,
 #root {
   min-height: 100%;
 }
 
+/* The root React container becomes a vertical layout:
+   navbar at top, page content in middle, footer at bottom. */
 #root {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
 
+/* Navigation bar at the top of the site. */
 nav {
   background-color: var(--color-nav);
   color: white;
   padding: 0 1.5rem;
 }
 
+/* The nav uses a three-column grid:
+   site title, main links, account/login area. */
 .nav-content {
   align-items: center;
   display: grid;
@@ -53,6 +64,7 @@ nav {
   min-height: 72px;
 }
 
+/* Main brand link on the left side of the navbar. */
 .site-title {
   color: white;
   font-family: var(--font-heading);
@@ -62,6 +74,7 @@ nav {
   text-decoration: none;
 }
 
+/* Horizontal list of primary nav links. */
 nav ul {
   display: flex;
   gap: 0.75rem;
@@ -72,6 +85,7 @@ nav ul {
   width: 100%;
 }
 
+/* Shared styling for links inside the nav. */
 nav a {
   border-radius: 6px;
   color: white;
@@ -81,6 +95,7 @@ nav a {
   text-decoration: none;
 }
 
+/* Give each main nav link a steady width so the navbar feels balanced. */
 nav ul a {
   min-width: 6.5rem;
   padding-left: 1.25rem;
@@ -88,6 +103,7 @@ nav ul a {
   text-align: center;
 }
 
+/* Hover/focus styles help mouse and keyboard users see what is active. */
 nav a:hover,
 nav a:focus {
   background-color: var(--color-nav-hover);
@@ -99,14 +115,17 @@ nav a:focus {
   text-decoration: none;
 }
 
+/* The active class comes from NavLink when the URL matches the link. */
 nav a.active:not(.site-title) {
   background-color: var(--color-accent);
 }
 
+/* Account area is pushed to the right column. */
 .account-nav {
   justify-self: end;
 }
 
+/* Login link and account icon share button-like styling. */
 .login-link,
 .account-button {
   background-color: white;
@@ -131,6 +150,7 @@ nav a.active:not(.site-title) {
   width: 2.5rem;
 }
 
+/* The account icon is built with CSS instead of an image file. */
 .account-icon {
   border: 2px solid currentColor;
   border-radius: 999px;
@@ -140,6 +160,7 @@ nav a.active:not(.site-title) {
   width: 1.3rem;
 }
 
+/* These pseudo-elements draw the head and shoulders inside the account icon. */
 .account-icon::before,
 .account-icon::after {
   background-color: currentColor;
@@ -170,10 +191,12 @@ nav a.active:not(.site-title) {
   background-color: var(--color-accent-light);
 }
 
+/* Dropdown is positioned relative to the account button. */
 .account-menu {
   position: relative;
 }
 
+/* Small invisible hover bridge so the menu does not close too easily. */
 .account-menu::after {
   content: "";
   height: 0.5rem;
@@ -183,6 +206,7 @@ nav a.active:not(.site-title) {
   top: 100%;
 }
 
+/* Hidden by default; shown when the account area is hovered or focused. */
 .account-dropdown {
   background-color: white;
   border: 1px solid var(--color-border);
@@ -230,6 +254,7 @@ nav a.active:not(.site-title) {
   color: white;
 }
 
+/* Main page wrapper used by most pages. */
 .page {
   margin: 0 auto;
   max-width: 1040px;
@@ -238,6 +263,7 @@ nav a.active:not(.site-title) {
   width: 100%;
 }
 
+/* Large page headline style. */
 .page h1 {
   font-family: var(--font-heading);
   font-size: 3rem;
@@ -246,6 +272,7 @@ nav a.active:not(.site-title) {
   margin: 0 0 1rem;
 }
 
+/* General paragraph style inside pages. */
 .page p {
   color: var(--color-muted);
   font-size: 1.15rem;
@@ -253,6 +280,7 @@ nav a.active:not(.site-title) {
   max-width: 48rem;
 }
 
+/* Home page hero area. */
 .home-hero {
   isolation: isolate;
   margin: 0 auto;

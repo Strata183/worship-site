@@ -1,3 +1,5 @@
+// About is a simple informational page.
+// It does not need state, effects, or database calls.
 function About() {
   return (
     <main className="page page-about">
