@@ -36,6 +36,7 @@ function Login() {
               data: {
                 display_name: displayName,
               },
+              emailRedirectTo: `${window.location.origin}/songs`,
             },
           })
         : supabase.auth.signInWithPassword({ email, password });
