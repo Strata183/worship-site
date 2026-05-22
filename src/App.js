@@ -43,6 +43,7 @@ function App() {
           {/* Public informational pages. */}
           <Route path="/tutorials" element={<Tutorials />} />
           <Route path="/articles" element={<Blog />} />
+          <Route path="/articles/:articleSlug" element={<Blog />} />
           <Route path="/about" element={<About />} />
 
           {/* Login handles both sign-in and sign-up. */}

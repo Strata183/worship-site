@@ -24,8 +24,9 @@ function About() {
           <h2>What is the purpose?</h2>
           <p>
             The title, "Worthy for Worship," describes the heart behind this
-            site. We are all created for the purpose of worship. One specific
-            way we worship is through music, and this site exists to support
+            site. We are all created for the purpose of worship. Furthermore,
+            God is worthy of our worship!
+            One specific way we worship is through music, and this site exists to support
             that work with practical tools for the church.
           </p>
         </section>
