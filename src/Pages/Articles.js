@@ -69,7 +69,7 @@ function Articles() {
     return (
         <main className="page page-articles">
             <section className="articles-hero">
-                <h1>Worship articles for the local church</h1>
+                <h1>Worship Articles</h1>
                 <p>
                     Read short studies and reflections surrounding biblical worship
                 </p>
