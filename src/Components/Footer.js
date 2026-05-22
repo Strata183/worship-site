@@ -9,6 +9,12 @@ function Footer() {
         <div>
           <h2>Worthy for Worship</h2>
           <p>Free worship resources for serving the local church.</p>
+          <p className="footer-contact">
+            Questions, suggestions, or critiques?{" "}
+            <a href="mailto:derek.smith@worthyforworship.com">
+              derek.smith@worthyforworship.com
+            </a>
+          </p>
         </div>
 
         <ul>

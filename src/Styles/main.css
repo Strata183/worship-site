@@ -394,6 +394,11 @@ nav a.active:not(.site-title) {
   margin: 0;
 }
 
+.footer-contact {
+  font-size: 0.95rem;
+  margin-top: 0.5rem;
+}
+
 .site-footer ul {
   display: flex;
   flex-wrap: wrap;
@@ -407,8 +412,11 @@ nav a.active:not(.site-title) {
   border-radius: 6px;
   color: white;
   font-weight: 700;
-  padding: 0.3rem 0.45rem;
   text-decoration: none;
+}
+
+.site-footer ul a {
+  padding: 0.3rem 0.45rem;
 }
 
 .site-footer a:hover,
