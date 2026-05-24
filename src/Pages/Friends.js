@@ -66,32 +66,14 @@ function Friends() {
       return;
     }
 
-    // Look up the other user's profile by email.
-    // maybeSingle returns null if no matching profile exists.
-    const { data: friendProfile, error: profileError } = await supabase
-      .from("profiles")
-      .select("id")
-      .ilike("email", addresseeEmail)
-      .maybeSingle();
-
-    if (profileError) {
-      setError(profileError.message);
-      return;
-    }
-
-    if (!friendProfile) {
-      setError("No profile found for that email. Ask them to sign in once, then try again.");
-      return;
-    }
-
-    // Create a pending request from the current user to the other user.
-    const { error: insertError } = await supabase.from("friendships").insert({
-      requester_id: user.id,
-      addressee_id: friendProfile.id,
+    // Let the database do the profile lookup and request insert together.
+    // This keeps the browser out of RLS-sensitive profile and friendship writes.
+    const { error: requestError } = await supabase.rpc("send_friend_request", {
+      addressee_email: addresseeEmail,
     });
 
-    if (insertError) {
-      setError(insertError.message);
+    if (requestError) {
+      setError(requestError.message);
     } else {
       // Clear the form and refresh the request list after success.
       setMessage("Friend request sent.");
