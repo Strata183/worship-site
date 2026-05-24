@@ -71,7 +71,7 @@ function Friends() {
     const { data: friendProfile, error: profileError } = await supabase
       .from("profiles")
       .select("id")
-      .eq("email", addresseeEmail)
+      .ilike("email", addresseeEmail)
       .maybeSingle();
 
     if (profileError) {
@@ -80,7 +80,7 @@ function Friends() {
     }
 
     if (!friendProfile) {
-      setError("No account found with that email.");
+      setError("No profile found for that email. Ask them to sign in once, then try again.");
       return;
     }
 
