@@ -31,11 +31,10 @@ function Friends() {
     setLoading(true);
     setError("");
 
-    // RLS should limit this query to friendships involving the signed-in user.
-    const { data, error: friendshipError } = await supabase
-      .from("friendships")
-      .select("*")
-      .order("created_at", { ascending: false });
+    // Load friendships with the other person's profile details included.
+    const { data, error: friendshipError } = await supabase.rpc(
+      "list_friendships_with_profiles"
+    );
 
     if (friendshipError) {
       setError(friendshipError.message);
@@ -113,7 +112,12 @@ function Friends() {
     const direction =
       friendship.requester_id === user.id ? "Request sent to" : "Request from";
 
-    return { direction, otherId };
+    return {
+      direction,
+      otherId,
+      otherName: friendship.other_display_name || friendship.other_email || otherId,
+      otherEmail: friendship.other_email,
+    };
   }
 
   return (
@@ -168,7 +172,7 @@ function Friends() {
           ) : (
             <ul className="friend-list">
               {friendships.map((friendship) => {
-                const { direction, otherId } = describeFriendship(friendship);
+                const { direction, otherEmail, otherName } = describeFriendship(friendship);
 
                 // Only the person who received a pending request can accept/reject.
                 const canRespond =
@@ -179,7 +183,8 @@ function Friends() {
                   <li key={friendship.id}>
                     <div>
                       <h3>{direction}</h3>
-                      <code>{otherId}</code>
+                      <p className="friend-name">{otherName}</p>
+                      {otherEmail && <code>{otherEmail}</code>}
                       <p>Status: {friendship.status}</p>
                     </div>
                     {canRespond && (

@@ -107,4 +107,41 @@ $$;
 
 grant execute on function public.send_friend_request(text) to authenticated;
 
+create or replace function public.list_friendships_with_profiles()
+returns table (
+  id uuid,
+  requester_id uuid,
+  addressee_id uuid,
+  status text,
+  created_at timestamptz,
+  other_id uuid,
+  other_display_name text,
+  other_email text
+)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select
+    friendships.id,
+    friendships.requester_id,
+    friendships.addressee_id,
+    friendships.status,
+    friendships.created_at,
+    other_profile.id as other_id,
+    other_profile.display_name as other_display_name,
+    other_profile.email as other_email
+  from public.friendships
+  join public.profiles as other_profile
+    on other_profile.id = case
+      when friendships.requester_id = auth.uid() then friendships.addressee_id
+      else friendships.requester_id
+    end
+  where auth.uid() in (friendships.requester_id, friendships.addressee_id)
+  order by friendships.created_at desc;
+$$;
+
+grant execute on function public.list_friendships_with_profiles() to authenticated;
+
 notify pgrst, 'reload schema';

@@ -1191,6 +1191,12 @@ nav a.active:not(.site-title) {
   max-width: none;
 }
 
+.friend-list .friend-name {
+  color: var(--color-text);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
 .row-actions {
   display: flex;
   flex-wrap: wrap;
