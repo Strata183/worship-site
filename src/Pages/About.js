@@ -15,9 +15,33 @@ function About() {
 
       <section className="about-content">
         <p className="verse-ref">
-          "Whether, then, you eat or drink or whatever you do, do all to the
-          glory of God."
-          <span>1 Corinthians 10:31</span>
+          "Let the word of Christ dwell in you richly, with all wisdom
+          teaching and admonishing one another with psalms and hymns
+          and spiritual songs, singing with gratefulness in your hearts
+          to God."
+          <span>Colossians 3:16 (LSB)</span>
+        </p>
+      
+      </section>
+
+      <section className="about-content">
+        <p className="verse-ref">
+          "Praise Him with trumpet blast; Praise Him with harp and lyre. 
+          Praise Him with tambourine and dancing;
+          Praise Him with stringed instruments and pipe.
+          Praise Him with resounding cymbals;
+          Praise Him with clashing cymbals.
+          Let everything that has breath praise Yah.""
+          Praise Yah!"
+          <span>Psalm 150:3-6 (LSB)</span>
+        </p>
+      
+      </section>
+      <section className="about-content">
+        <p className="verse-ref">
+        "Whether, then, you eat or drink or whatever you do, do all to the
+        glory of God."
+        <span>1 Corinthians 10:31 (LSB)</span>
         </p>
 
         <section className="about-section">
@@ -100,6 +124,15 @@ function About() {
             If you have any questions, reach out to me at derek.smith@worthyforworship.com
           </p>
         </section>
+        <section className="about-closing">
+          <h2>Permission to Quote the LSB</h2>
+          <p>
+            “Scripture quotations taken from the (LSB®) Legacy Standard Bible®, Copyright © 2021 by The Lockman Foundation. 
+            Used by permission. All rights reserved. Managed in partnership with Three Sixteen Publishing Inc.
+            LSBible.org and 316publishing.com.”
+          </p>
+        </section>
+
       </section>
     </main>
   );

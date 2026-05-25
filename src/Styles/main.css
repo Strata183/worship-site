@@ -445,6 +445,8 @@ nav a.active:not(.site-title) {
 
 .about-closing {
   background-color: var(--color-accent-light);
+  padding-bottom: 2rem;
+  margin-bottom: 4rem
 }
 
 .page-articles {
