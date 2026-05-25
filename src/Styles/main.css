@@ -1251,6 +1251,22 @@ nav a.active:not(.site-title) {
     justify-content: flex-start;
   }
 
+  .account-nav {
+    width: 100%;
+  }
+
+  .account-menu {
+    display: inline-block;
+  }
+
+  .account-dropdown {
+    left: 0;
+    max-width: calc(100vw - 2rem);
+    right: auto;
+    width: 12rem;
+    z-index: 1000;
+  }
+
   .page {
     padding-top: 3rem;
   }
