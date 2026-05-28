@@ -258,6 +258,8 @@ function Library() {
   }
 
   function startEditingSong(song) {
+    // Copy the current row values into temporary edit state.
+    // The database is not changed until saveSongEdit runs.
     setEditingSongId(song.id);
     setEditTitle(song.title || "");
     setEditSongKey(song.song_key || "");
@@ -266,12 +268,14 @@ function Library() {
   }
 
   function cancelEditingSong() {
+    // Leave edit mode and clear the temporary form values.
     setEditingSongId(null);
     setEditTitle("");
     setEditSongKey("");
   }
 
   async function saveSongEdit(song) {
+    // Trim keeps users from saving a title that only contains spaces.
     const nextTitle = editTitle.trim();
 
     if (!nextTitle) {
@@ -294,6 +298,8 @@ function Library() {
         title: nextTitle,
         song_key: editSongKey,
       })
+      // Both filters matter: id picks the row, owner_id makes the update
+      // owner-only even if a shared song is visible in this list.
       .eq("id", song.id)
       .eq("owner_id", user.id);
 
@@ -348,6 +354,7 @@ function Library() {
   }, [searchQuery, songs, sortMode]);
 
   function formatSongDate(song) {
+    // Some older rows or test data may not have created_at populated.
     if (!song.created_at) {
       return "No date";
     }
@@ -484,6 +491,8 @@ function Library() {
               {visibleSongs.map((song) => {
                 // Owners can delete their own songs. Friends can only open them.
                 const isOwner = song.owner_id === user.id;
+
+                // Only one row can be edited at a time.
                 const isEditing = editingSongId === song.id;
 
                 return (

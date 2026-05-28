@@ -635,11 +635,13 @@ nav a.active:not(.site-title) {
   text-decoration: none;
 }
 
+/* Auth and app pages use left-aligned content instead of the centered home style. */
 .auth-page,
 .app-page {
   text-align: left;
 }
 
+/* Login/sign-up card. */
 .auth-panel {
   background-color: white;
   border: 1px solid var(--color-border);
@@ -660,6 +662,7 @@ nav a.active:not(.site-title) {
   text-align: left;
 }
 
+/* Two-button tab switcher on the login page. */
 .auth-tabs {
   background-color: var(--color-accent-light);
   border-radius: 8px;
@@ -689,6 +692,7 @@ nav a.active:not(.site-title) {
   background-color: white;
 }
 
+/* Shared vertical form layout for login, upload, and friend request forms. */
 .form-stack {
   display: grid;
   gap: 1rem;
@@ -719,6 +723,7 @@ nav a.active:not(.site-title) {
   width: 100%;
 }
 
+/* Main action buttons. */
 .primary-button,
 .row-actions button {
   background-color: var(--color-accent);
@@ -743,6 +748,7 @@ nav a.active:not(.site-title) {
   padding: 0.3rem 0;
 }
 
+/* Inline success/error messages under forms. */
 .form-message {
   border-radius: 6px;
   font-size: 0.95rem;
@@ -764,10 +770,12 @@ nav a.active:not(.site-title) {
   margin-bottom: 2rem;
 }
 
+/* Protected song library layout. */
 .library-page {
   max-width: 1400px;
 }
 
+/* Sidebar plus main score browser. */
 .library-shell {
   align-items: start;
   display: grid;
@@ -775,6 +783,7 @@ nav a.active:not(.site-title) {
   grid-template-columns: minmax(230px, 280px) minmax(0, 1fr);
 }
 
+/* Sticky library navigation on wider screens. */
 .library-sidebar {
   display: grid;
   gap: 0.85rem;
@@ -798,6 +807,7 @@ nav a.active:not(.site-title) {
   text-align: left;
 }
 
+/* Shelf buttons are placeholders for future library sections. */
 .library-shelves {
   display: grid;
   gap: 0.25rem;
@@ -861,6 +871,7 @@ nav a.active:not(.site-title) {
   padding: 0;
 }
 
+/* Wide upload form that sits above the score list on desktop. */
 .upload-card-main {
   align-items: end;
   background-color: white;
@@ -905,6 +916,7 @@ nav a.active:not(.site-title) {
   font-size: 2rem;
 }
 
+/* Search, sort, and count controls above the list. */
 .library-toolbar {
   align-items: end;
   background-color: white;
@@ -955,6 +967,7 @@ nav a.active:not(.site-title) {
   width: 100%;
 }
 
+/* Empty states cover both no songs and no search results. */
 .library-empty-state {
   align-items: center;
   border: 1px dashed var(--color-border);
@@ -977,6 +990,7 @@ nav a.active:not(.site-title) {
   margin: 0;
 }
 
+/* Main song list. Each row has an open area and owner-only actions. */
 .score-list {
   background-color: white;
   border: 1px solid var(--color-border);
@@ -1009,6 +1023,7 @@ nav a.active:not(.site-title) {
   box-shadow: none;
 }
 
+/* The whole score title/key area is clickable to open the PDF. */
 .score-open-button {
   align-items: center;
   background-color: transparent;
@@ -1023,6 +1038,7 @@ nav a.active:not(.site-title) {
   text-align: left;
 }
 
+/* Inline owner edit form shown inside a score row. */
 .score-edit-form {
   align-items: end;
   display: grid;
@@ -1048,6 +1064,7 @@ nav a.active:not(.site-title) {
   width: 100%;
 }
 
+/* Title/subtitle text truncates so long song names do not break the row. */
 .score-main {
   display: grid;
   min-width: 0;
@@ -1070,6 +1087,7 @@ nav a.active:not(.site-title) {
   white-space: nowrap;
 }
 
+/* Song key badge on each score row. */
 .score-key {
   align-self: center;
   background-color: var(--color-accent-light);
@@ -1083,6 +1101,7 @@ nav a.active:not(.site-title) {
   text-align: center;
 }
 
+/* Row-level action buttons such as Open, Edit, Delete, Save, and Cancel. */
 .score-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1112,12 +1131,14 @@ nav a.active:not(.site-title) {
   background-color: #374151;
 }
 
+/* Generic two-column tool layout used by Friends and similar pages. */
 .tool-layout {
   display: grid;
   gap: 1.25rem;
   grid-template-columns: minmax(320px, 0.75fr) minmax(0, 1.35fr);
 }
 
+/* Reusable white panel for protected-page tools. */
 .tool-panel {
   background-color: white;
   border: 1px solid var(--color-border);
@@ -1125,6 +1146,7 @@ nav a.active:not(.site-title) {
   padding: 1.25rem;
 }
 
+/* Full-width panel inside tool-layout. */
 .wide-panel {
   grid-column: 1 / -1;
 }
@@ -1161,6 +1183,7 @@ nav a.active:not(.site-title) {
   max-width: none;
 }
 
+/* Lists used by older song/friend layouts. */
 .song-list,
 .friend-list {
   display: grid;
@@ -1210,6 +1233,7 @@ nav a.active:not(.site-title) {
   background-color: #374151;
 }
 
+/* Email/code pill styling for account and friend identifiers. */
 .share-code,
 .friend-list code {
   background-color: var(--color-accent-light);
@@ -1222,6 +1246,7 @@ nav a.active:not(.site-title) {
   padding: 0.75rem;
 }
 
+/* Separate legal line in the footer. */
 .footer-legal {
   border-top: 1px solid rgba(255, 255, 255, 0.18);
   color: var(--color-accent-light);
@@ -1235,6 +1260,7 @@ nav a.active:not(.site-title) {
   font-size: 0.85rem;
 }
 
+/* Compact navigation and page spacing for very small screens. */
 @media (max-width: 560px) {
   nav {
     padding: 0.85rem 1rem;
@@ -1278,6 +1304,7 @@ nav a.active:not(.site-title) {
   }
 }
 
+/* Collapse wide grids before they feel cramped. */
 @media (max-width: 900px) {
   .resource-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1300,6 +1327,7 @@ nav a.active:not(.site-title) {
   }
 }
 
+/* Phone layout: stack cards, forms, tool panels, and score rows. */
 @media (max-width: 640px) {
   .resource-grid {
     grid-template-columns: 1fr;

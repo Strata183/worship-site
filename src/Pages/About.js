@@ -1,8 +1,9 @@
 // About is a simple informational page.
-// It does not need state, effects, or database calls.
+// It does not need state, effects, or database calls because all text is static.
 function About() {
   return (
     <main className="page page-about">
+      {/* Opening mission statement for the site. */}
       <section className="about-hero">
         <h1>About Worthy for Worship</h1>
         <p>
@@ -13,6 +14,7 @@ function About() {
         </p>
       </section>
 
+      {/* Scripture quotations are grouped in the reusable verse-ref style. */}
       <section className="about-content">
         <p className="verse-ref">
           "Let the word of Christ dwell in you richly, with all wisdom
@@ -24,6 +26,7 @@ function About() {
       
       </section>
 
+      {/* Main explanatory content for visitors who want context and usage rules. */}
       <section className="about-content">
         <p className="verse-ref">
           "Praise Him with trumpet blast; Praise Him with harp and lyre. 

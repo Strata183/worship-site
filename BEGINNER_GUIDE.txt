@@ -51,7 +51,8 @@ Routes are defined in src/App.js.
 
 / shows Home.js.
 /tutorials shows Tutorials.js.
-/articles shows Articles.js.
+/articles shows the article index in Articles.js.
+/articles/:articleSlug shows one article detail page in Articles.js.
 /about shows About.js.
 /login shows Login.js.
 /songs shows Library.js, but only through ProtectedRoute.
@@ -121,7 +122,32 @@ supabase.auth.signOut()
 After sign-out, AuthContext notices the session changed and updates the app.
 
 
-7. The Songs library
+7. Articles and tutorials
+-------------------------
+
+src/Pages/Tutorials.js is currently a placeholder page.
+
+src/Pages/Articles.js has a small articles array at the top of the file. Each
+article object has:
+
+- slug: the URL-friendly id, such as what-is-worship
+- name: the article title shown on cards and detail pages
+- description: the short summary shown under the title
+- body: the article text
+
+The /articles route shows all article cards. The /articles/:articleSlug route
+uses useParams() to read the slug from the URL, finds the matching article, and
+shows the detail page.
+
+Article body text is split into paragraphs by blank lines. That means a body can
+look like this in Articles.js:
+
+"First paragraph here.\n\nSecond paragraph here."
+
+If the body is empty, the article page shows a draft placeholder.
+
+
+8. The Songs library
 --------------------
 
 src/Pages/Library.js is the real /songs page.
@@ -133,13 +159,15 @@ It does several jobs:
 - uploads that PDF through the r2-song-files Edge Function
 - saves song metadata in the songs table
 - asks for a temporary signed URL when opening a PDF
+- lets owners edit a song title and key
 - deletes owned PDFs from R2 and then deletes their database rows
+- filters and sorts the visible song list in the browser
 
 The PDF file itself is not stored in Supabase's database. The database stores
-information about the file, such as title, owner_id, and file_path.
+information about the file, such as title, song_key, owner_id, and file_path.
 
 
-8. Upload flow
+9. Upload flow
 --------------
 
 When a user uploads a song:
@@ -159,7 +187,7 @@ When a user uploads a song:
 10. Library.js reloads the song list.
 
 
-9. Opening a PDF
+10. Opening a PDF
 ----------------
 
 When a user clicks Open:
@@ -174,7 +202,41 @@ When a user clicks Open:
 This keeps the R2 bucket private. Users only get short-lived access links.
 
 
-10. Deleting a PDF
+11. Editing song metadata
+-------------------------
+
+When a user clicks Edit on a song they own:
+
+1. Library.js copies the current title and key into temporary edit state.
+2. The row changes into a small inline form.
+3. Save validates that the title and key are not blank.
+4. Library.js updates the songs row in Supabase.
+5. The update filters by both id and owner_id.
+6. Library.js reloads the list after a successful save.
+
+The PDF file does not need to be re-uploaded when only the title or key changes.
+
+
+12. Searching and sorting
+-------------------------
+
+Library.js keeps searchQuery and sortMode in React state.
+
+visibleSongs is created with useMemo(). It filters and sorts the songs already
+loaded in the browser. It does not make another Supabase request.
+
+Current sort modes are:
+
+- Alphabetical
+- Key: C to B
+- Newest Added
+- Oldest Added
+
+The key sort uses the songKeyOptions array so keys appear in a musical order
+instead of plain alphabetical order.
+
+
+13. Deleting a PDF
 ------------------
 
 When a user clicks Delete:
@@ -187,7 +249,7 @@ When a user clicks Delete:
 6. Library.js reloads the song list.
 
 
-11. Friends and sharing
+14. Friends and sharing
 -----------------------
 
 src/Pages/Friends.js manages friend requests.
@@ -196,7 +258,7 @@ The page lets a user:
 
 - see their own account email
 - enter another user's email
-- send a friend request
+- send a friend request through the send_friend_request database function
 - accept or reject incoming requests
 - refresh the list of requests
 
@@ -206,11 +268,36 @@ The friendships table stores:
 - addressee_id: the user who received the request
 - status: pending, accepted, or rejected
 
-The React page shows ids for now. Later, the app could join profiles so it can
-show names and emails instead of raw user ids.
+Friends.js calls list_friendships_with_profiles so the page can show the other
+person's display name and email instead of only raw user ids.
 
 
-12. Supabase Edge Function
+15. Supabase database helpers
+-----------------------------
+
+The migration file in supabase/migrations adds helper functions for profiles and
+friends.
+
+handle_new_user_profile()
+Creates or updates a profile row when a Supabase Auth user is created.
+
+find_profile_id_by_email(profile_email)
+Looks up a profile id from an email address.
+
+send_friend_request(addressee_email)
+Finds the other user by email and creates a friendship row. This keeps the
+sensitive lookup in the database instead of exposing profile searches directly
+to the browser.
+
+list_friendships_with_profiles()
+Returns friendships for the signed-in user with the other person's name and
+email included.
+
+These functions use security definer, so be careful when editing them. They
+should stay narrow and only return or change the exact data the app needs.
+
+
+16. Supabase Edge Function
 --------------------------
 
 supabase/functions/r2-song-files/index.ts is server-side code. It runs in
@@ -226,7 +313,7 @@ The function handles three actions:
 - delete: remove a PDF from R2
 
 
-13. CSS
+17. CSS
 -------
 
 src/Styles/main.css controls how the app looks.
@@ -238,8 +325,21 @@ list, and responsive mobile layout.
 Class names in JSX, such as className="page" or className="tool-panel", connect
 React markup to CSS rules.
 
+The CSS file is grouped by feature:
 
-14. Environment variables
+- global variables and base page styles
+- navbar and account dropdown
+- shared page and card styles
+- About and Articles pages
+- footer
+- login/auth forms
+- protected app pages
+- song library browser
+- Friends page tools
+- responsive mobile layouts
+
+
+18. Environment variables
 -------------------------
 
 .env.local is for local secrets/configuration. The React app reads:
@@ -261,7 +361,7 @@ Do not put private R2 secret keys in the React frontend. Frontend code is visibl
 to users in the browser.
 
 
-15. Files to know
+19. Files to know
 -----------------
 
 src/index.js
@@ -289,10 +389,14 @@ src/Pages/Login.js
 Sign-in and sign-up form.
 
 src/Pages/Library.js
-Protected PDF song library.
+Protected PDF song library. Handles upload, open, edit, delete, search, and
+sort.
 
 src/Pages/Friends.js
 Protected friend request page.
+
+src/Pages/Articles.js
+Article index and article detail page.
 
 src/Styles/main.css
 All main styling.
@@ -300,8 +404,11 @@ All main styling.
 supabase/functions/r2-song-files/index.ts
 Server-side PDF storage helper.
 
+supabase/migrations/20260523000000_profiles_friend_lookup.sql
+Database functions for profiles and friend requests.
 
-16. Helpful mental model
+
+20. Helpful mental model
 ------------------------
 
 Think of the project like this:

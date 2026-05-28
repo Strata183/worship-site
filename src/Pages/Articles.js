@@ -15,12 +15,19 @@ const articles = [
     }
 ];
 
-// Articles are currently written here.
-// Add each article's text to the body field above.
+// Articles are currently written in this file instead of loaded from Supabase.
+// Add each article's text to the body field above. Paragraphs are separated by
+// blank lines because the detail view splits body text on "\n\n".
 function Articles() {
+    // articleSlug comes from the dynamic route in App.js:
+    // /articles/:articleSlug
     const { articleSlug } = useParams();
+
+    // If there is a slug in the URL, try to find the matching article object.
+    // When there is no slug, this stays undefined and the page shows the index.
     const selectedArticle = articles.find((article) => article.slug === articleSlug);
 
+    // This branch catches typed or outdated article links.
     if (articleSlug && !selectedArticle) {
         return (
             <main className="page page-articles article-detail-page">
@@ -34,6 +41,7 @@ function Articles() {
         );
     }
 
+    // Detail page for one article.
     if (selectedArticle) {
         return (
             <main className="page page-articles article-detail-page">
@@ -47,6 +55,7 @@ function Articles() {
                     </header>
 
                     <section className="article-body">
+                        {/* Empty body fields show a writing placeholder until the article is drafted. */}
                         {selectedArticle.body ? (
                             selectedArticle.body.split("\n\n").map((paragraph) => (
                                 <p key={paragraph}>{paragraph}</p>
@@ -76,6 +85,7 @@ function Articles() {
             </section>
 
             <section className="article-template-grid" aria-label="Articles">
+                {/* Build the article index from the articles array above. */}
                 {articles.map((article) => (
                     <Link
                         className="article-template-card"
