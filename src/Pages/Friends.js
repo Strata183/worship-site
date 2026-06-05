@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../AuthContext";
 import { supabase } from "../supabaseClient";
 
@@ -100,6 +100,40 @@ function Friends() {
     }
   }
 
+  // Split one friendship list into page sections so Friends feels like a
+  // relationship manager instead of a notification center.
+  const friendshipGroups = useMemo(
+    () =>
+      friendships.reduce(
+        (groups, friendship) => {
+          if (friendship.status === "accepted") {
+            groups.accepted.push(friendship);
+          } else if (
+            friendship.status === "pending" &&
+            friendship.addressee_id === user.id
+          ) {
+            groups.incoming.push(friendship);
+          } else if (
+            friendship.status === "pending" &&
+            friendship.requester_id === user.id
+          ) {
+            groups.sent.push(friendship);
+          } else {
+            groups.other.push(friendship);
+          }
+
+          return groups;
+        },
+        {
+          accepted: [],
+          incoming: [],
+          other: [],
+          sent: [],
+        }
+      ),
+    [friendships, user.id]
+  );
+
   function describeFriendship(friendship) {
     // A friendship row stores two ids:
     // requester_id = who sent it
@@ -120,8 +154,25 @@ function Friends() {
     };
   }
 
+  function renderPersonMeta(friendship, label) {
+    const { otherEmail, otherName } = describeFriendship(friendship);
+
+    return (
+      <div className="friend-person">
+        <span className="friend-avatar" aria-hidden="true">
+          {otherName.charAt(0).toUpperCase()}
+        </span>
+        <div>
+          <h3>{otherName}</h3>
+          {otherEmail && <code>{otherEmail}</code>}
+          {label && <p>{label}</p>}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <main className="page app-page">
+    <main className="page app-page friends-page">
       <section className="page-heading">
         <p className="eyebrow">Sharing access</p>
         <h1>Friends</h1>
@@ -131,14 +182,21 @@ function Friends() {
         </p>
       </section>
 
-      <section className="tool-layout">
-        <section className="tool-panel">
+      <section className="friend-dashboard">
+        <section className="friend-summary-card">
           <h2>Your account</h2>
-          <p className="profile-name">{profile?.display_name || user.email}</p>
-          <code className="share-code">{user.email}</code>
+          <div className="friend-person">
+            <span className="friend-avatar" aria-hidden="true">
+              {(profile?.display_name || user.email).charAt(0).toUpperCase()}
+            </span>
+            <div>
+              <p className="profile-name">{profile?.display_name || user.email}</p>
+              <code>{user.email}</code>
+            </div>
+          </div>
         </section>
 
-        <form className="tool-panel form-stack" onSubmit={sendRequest}>
+        <form className="friend-summary-card form-stack" onSubmit={sendRequest}>
           <h2>Add friend</h2>
           <label>
             Friend email
@@ -156,56 +214,100 @@ function Friends() {
           {message && <p className="form-message success">{message}</p>}
           {error && <p className="form-message error">{error}</p>}
         </form>
+      </section>
 
-        <section className="tool-panel wide-panel">
+      <section className="friend-workspace">
+        <section className="friend-section friend-section-primary">
           <div className="panel-header">
-            <h2>Requests</h2>
+            <div>
+              <p className="eyebrow">Shared libraries</p>
+              <h2>Friends</h2>
+            </div>
+            <span className="friend-count">{friendshipGroups.accepted.length}</span>
+          </div>
+
+          {loading ? (
+            <p className="empty-state">Loading friendships...</p>
+          ) : friendshipGroups.accepted.length === 0 ? (
+            <div className="friend-empty-state">
+              <h3>No friends yet</h3>
+              <p>Accepted friends will appear here after a request is approved.</p>
+            </div>
+          ) : (
+            <ul className="friend-list">
+              {friendshipGroups.accepted.map((friendship) => {
+                return (
+                  <li key={friendship.id}>
+                    {renderPersonMeta(friendship, "Library sharing is active.")}
+                    <span className="status-pill accepted">Accepted</span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+
+        <section className="friend-section">
+          <div className="panel-header">
+            <div>
+              <p className="eyebrow">Needs response</p>
+              <h2>Incoming requests</h2>
+            </div>
             <button className="text-button" type="button" onClick={loadFriendships}>
               Refresh
             </button>
           </div>
 
           {loading ? (
-            <p className="empty-state">Loading friendships...</p>
-          ) : friendships.length === 0 ? (
-            <p className="empty-state">No friend requests yet.</p>
+            <p className="empty-state">Loading requests...</p>
+          ) : friendshipGroups.incoming.length === 0 ? (
+            <p className="empty-state">No incoming requests.</p>
           ) : (
-            <ul className="friend-list">
-              {friendships.map((friendship) => {
-                const { direction, otherEmail, otherName } = describeFriendship(friendship);
+            <ul className="friend-list compact-friend-list">
+              {friendshipGroups.incoming.map((friendship) => (
+                <li key={friendship.id}>
+                  {renderPersonMeta(friendship, "Wants to share library access.")}
+                  <div className="row-actions">
+                    <button
+                      type="button"
+                      onClick={() => updateRequest(friendship, "accepted")}
+                    >
+                      Accept
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => updateRequest(friendship, "rejected")}
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
-                // Only the person who received a pending request can accept/reject.
-                const canRespond =
-                  friendship.addressee_id === user.id &&
-                  friendship.status === "pending";
+        <section className="friend-section">
+          <div className="panel-header">
+            <div>
+              <p className="eyebrow">Waiting</p>
+              <h2>Sent requests</h2>
+            </div>
+            <span className="friend-count">{friendshipGroups.sent.length}</span>
+          </div>
 
-                return (
-                  <li key={friendship.id}>
-                    <div>
-                      <h3>{direction}</h3>
-                      <p className="friend-name">{otherName}</p>
-                      {otherEmail && <code>{otherEmail}</code>}
-                      <p>Status: {friendship.status}</p>
-                    </div>
-                    {canRespond && (
-                      <div className="row-actions">
-                        <button
-                          type="button"
-                          onClick={() => updateRequest(friendship, "accepted")}
-                        >
-                          Accept
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => updateRequest(friendship, "rejected")}
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    )}
-                  </li>
-                );
-              })}
+          {loading ? (
+            <p className="empty-state">Loading sent requests...</p>
+          ) : friendshipGroups.sent.length === 0 ? (
+            <p className="empty-state">No sent requests waiting.</p>
+          ) : (
+            <ul className="friend-list compact-friend-list">
+              {friendshipGroups.sent.map((friendship) => (
+                <li key={friendship.id}>
+                  {renderPersonMeta(friendship, "Request sent.")}
+                  <span className="status-pill pending">Pending</span>
+                </li>
+              ))}
             </ul>
           )}
         </section>
