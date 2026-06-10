@@ -50,8 +50,8 @@ function Home() {
         />
         <h1>Welcome to Worthy for Worship</h1>
         <p>
-          Find chord charts, tutorials, articles, and practical help for
-          serving worship teams with love and clarity.
+          My name is Derek Smith and I hope to provide a place to find chord charts, tutorials, articles, and practical help for
+          serving the local church in worship ministry
         </p>
       </section>
 
