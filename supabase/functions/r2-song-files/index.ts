@@ -77,6 +77,43 @@ function createR2Client() {
   });
 }
 
+function safeZipName(name: string, index: number) {
+  const cleanName =
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || "vbs-chart";
+
+  return `${String(index + 1).padStart(2, "0")}-${cleanName}.pdf`;
+}
+
+function bytesToBase64(bytes: Uint8Array) {
+  let binary = "";
+  const chunkSize = 0x8000;
+
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    const chunk = bytes.subarray(offset, offset + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+
+  return btoa(binary);
+}
+
+async function getObjectBytes(r2: S3Client, bucket: string, key: string) {
+  const object = await r2.send(
+    new GetObjectCommand({
+      Bucket: bucket,
+      Key: key,
+    }),
+  );
+
+  if (!object.Body) {
+    throw new Error(`Missing file body for ${key}.`);
+  }
+
+  return new Uint8Array(await object.Body.transformToByteArray());
+}
+
 // Deno.serve starts the Edge Function HTTP server.
 // Every request to this function runs through this callback.
 Deno.serve(async (req) => {
@@ -217,6 +254,33 @@ Deno.serve(async (req) => {
       );
 
       return jsonResponse({ signedUrl });
+    }
+
+    if (body.action === "vbs-kinder-files") {
+      // RLS only returns chart rows when the signed-in user has claimed VBS
+      // Kinder access with the team password.
+      const { data: charts, error: chartsError } = await supabase
+        .from("vbs_kinder_charts")
+        .select("title, file_path, sort_order")
+        .order("sort_order", { ascending: true })
+        .order("title", { ascending: true });
+
+      if (chartsError) {
+        return jsonResponse({ error: chartsError.message }, 403);
+      }
+
+      if (!charts?.length) {
+        return jsonResponse({ error: "No VBS charts are available." }, 404);
+      }
+
+      const files = await Promise.all(
+        charts.map(async (chart, index) => ({
+          data: bytesToBase64(await getObjectBytes(r2, bucket, chart.file_path)),
+          name: safeZipName(chart.title, index),
+        })),
+      );
+
+      return jsonResponse({ files });
     }
 
     if (body.action === "delete") {

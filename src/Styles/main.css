@@ -687,12 +687,47 @@ nav a.active:not(.site-title) {
 }
 
 .vbs-hero {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: 0 16px 36px rgba(45, 67, 48, 0.1);
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  justify-content: space-between;
   margin: 0 auto 2.5rem;
-  max-width: 760px;
+  max-width: 920px;
+  padding: 1.75rem;
+  text-align: left;
+}
+
+.vbs-hero-copy {
+  max-width: 620px;
+}
+
+.vbs-hero-copy h1 {
+  margin-bottom: 0.75rem;
 }
 
 .vbs-hero p {
   font-size: 1.12rem;
+  margin-left: 0;
+  text-align: left;
+}
+
+.vbs-hero-actions {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  justify-content: center;
+  min-width: 190px;
+}
+
+.vbs-hero-actions span {
+  color: var(--color-muted);
+  font-size: 0.95rem;
+  font-weight: 800;
 }
 
 .vbs-password-panel,
@@ -706,11 +741,34 @@ nav a.active:not(.site-title) {
   text-align: left;
 }
 
-.vbs-chart-panel h2 {
+.vbs-chart-panel {
+  max-width: 920px;
+}
+
+.vbs-panel-heading {
+  align-items: flex-end;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.vbs-panel-heading h2 {
   font-family: var(--font-heading);
   font-size: 1.35rem;
   line-height: 1.2;
-  margin: 0 0 1rem;
+  margin: 0;
+}
+
+.vbs-panel-heading .eyebrow {
+  margin-bottom: 0.4rem;
+}
+
+.vbs-panel-heading > span {
+  color: var(--color-muted);
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-align: right;
 }
 
 .vbs-chart-list {
@@ -727,10 +785,10 @@ nav a.active:not(.site-title) {
   border-radius: 8px;
   color: var(--color-text);
   cursor: pointer;
-  display: grid;
+  display: flex;
+  align-items: center;
   gap: 0.35rem;
-  text-align: left;
-  padding: 1rem;
+  padding: 1rem 1.1rem;
   text-decoration: none;
   transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
   width: 100%;
@@ -743,14 +801,40 @@ nav a.active:not(.site-title) {
   transform: translateY(-1px);
 }
 
-.vbs-chart-list strong {
+.vbs-chart-number {
+  align-items: center;
+  background-color: var(--color-accent-light);
+  border-radius: 6px;
+  color: var(--color-accent);
+  display: inline-flex;
+  flex: 0 0 2.4rem;
+  font-size: 0.82rem;
+  font-weight: 900;
+  height: 2.4rem;
+  justify-content: center;
+}
+
+.vbs-chart-copy {
+  display: grid;
+  flex: 1;
+  gap: 0.25rem;
+  text-align: left;
+}
+
+.vbs-chart-copy strong {
   font-family: var(--font-heading);
   font-size: 1.08rem;
 }
 
-.vbs-chart-list span {
+.vbs-chart-copy span {
   color: var(--color-muted);
   font-size: 0.95rem;
+}
+
+.vbs-chart-action {
+  color: var(--color-accent);
+  font-weight: 900;
+  margin-left: auto;
 }
 
 .site-footer {
@@ -1714,6 +1798,33 @@ nav a.active:not(.site-title) {
 
   .score-actions button {
     flex: 1 1 auto;
+  }
+
+  .vbs-hero {
+    grid-template-columns: 1fr;
+    padding: 1.25rem;
+  }
+
+  .vbs-hero-actions {
+    align-items: stretch;
+    min-width: 0;
+  }
+
+  .vbs-panel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .vbs-panel-heading > span {
+    text-align: left;
+  }
+
+  .vbs-chart-list button {
+    align-items: flex-start;
+  }
+
+  .vbs-chart-action {
+    display: none;
   }
 
   .song-list li,
