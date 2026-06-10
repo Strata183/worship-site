@@ -7,7 +7,7 @@ function About() {
       <section className="about-hero">
         <h1>About Worthy for Worship</h1>
         <p>
-          Worthy for Worship exists to serve the local church providing
+          Worthy for Worship exists to serve the local church by providing
           a place for worship leaders and musicians to share resources
           and to understand what Worship truly is
           so they can effectively apply their gifts to the glory of God.
@@ -54,7 +54,12 @@ function About() {
             site. We are all created for the purpose of worship. Furthermore,
             God is worthy of our worship!
             One specific way we worship is through music, and this site exists to support
-            that work with practical tools for the church.
+            that work with practical tools for the church. 
+          </p>
+          <p>
+            I desire this site to be a way for me to pour out my brain and thoughts on worship
+            to my brothers and sisters in Christ so that we can be on the same page when it comes
+            to serving the church with music. 
           </p>
         </section>
 
@@ -62,12 +67,14 @@ function About() {
           <h2>Why use this site?</h2>
           <p>
             I do not mean to discourage use of other excellent worship resources
-            that already exist. However, many are built for a broad category of
-            people who come from different churches with different needs.
-            My site is spicifically tailored for personal use in the local church. 
-            This is helpful because you can share specific arrangements that your church
-            is used to or even refer to other peoples song lists to know what songs are 
-            acceptable to play on a Sunday morning. 
+            that already exist; however, they are built on a large scale. 
+            My site is spicifically tailored for personal use in the local church 
+            because it is specific to my church and my experiences. I want to share 
+            specific arrangements for my church and refer others to songs that we know 
+            and are already comforatable singing on a Sunday morning. I also mean to develop
+            this website in a way that encourages this same idea for many different local churches
+            as the Lord wills. 
+            
             
           </p>
           <p>
@@ -80,20 +87,17 @@ function About() {
             Nevertheless I hope it can be an encouragment to others in the 
             universal church as well as I continue to develop and expand. 
           </p>
-          <p>
-            All glory to Christ, <br></br>
-            Derek Smith
-          </p>
+          
         </section>
         <section className="about-section">
           <h2>How to use?</h2>
           <p>
             Each account is free and comes with a section for a personal library of songs that
-            can only be shared through friend requests. This is intentional because this site is 
-            not meant to be free distribution copywrited charts. 
+            can only be shared through friend requests. This is intentional because it is meant 
+            to be closed distribution between brothers and sisters in the local church. 
           </p>
           <p>
-            It is up to you to create faithful, helpful charts to share with your church!
+            It is up to YOU to create faithful, helpful charts to share with your church!
           </p>
           <p>
             There will also be development on other helpful resouces sourounding worship 
@@ -115,13 +119,15 @@ function About() {
             or choral octavos is strictly prohibited.
           </p>
           <p>
-            I suggest being very careful in uploading song sheets to make sure you have proper rights to.
+            I suggest being very careful in uploading and sharing song sheets. 
             When creating a chart, there must be credit given at the bottom such as a CCLI #.
             The only instance this does not matter is if the song is in the public domain. 
             (all musical compositions published in the United States in or before 1930 are in the public domain)
           </p>
           <p>
             If these rules are not followed properly, I reserve the right to remove your charts from my website.
+            Obviously, these are private charts so it is up to you to distribute them according to the law just as 
+            you would normally be sharing charts outside of this website.
           </p>
           <p>
             If you have any questions, reach out to me at derek.smith@worthyforworship.com
