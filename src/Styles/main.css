@@ -682,6 +682,90 @@ nav a.active:not(.site-title) {
   background-color: var(--color-accent-light);
 }
 
+.page-vbs {
+  max-width: 1040px;
+}
+
+.vbs-hero {
+  margin: 0 auto 2.5rem;
+  max-width: 760px;
+}
+
+.vbs-hero p {
+  font-size: 1.12rem;
+}
+
+.vbs-password-panel,
+.vbs-upload-panel,
+.vbs-chart-panel {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  margin: 0 auto;
+  max-width: 720px;
+  padding: 1.5rem;
+  text-align: left;
+}
+
+.vbs-upload-panel {
+  margin-bottom: 1.25rem;
+}
+
+.vbs-upload-panel h2,
+.vbs-chart-panel h2 {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  line-height: 1.2;
+  margin: 0 0 1rem;
+}
+
+.vbs-upload-panel p {
+  font-size: 1rem;
+  margin: 0;
+  max-width: none;
+  text-align: left;
+}
+
+.vbs-chart-list {
+  display: grid;
+  gap: 0.85rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.vbs-chart-list button {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text);
+  cursor: pointer;
+  display: grid;
+  gap: 0.35rem;
+  text-align: left;
+  padding: 1rem;
+  text-decoration: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  width: 100%;
+}
+
+.vbs-chart-list button:hover,
+.vbs-chart-list button:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 10px 24px rgba(45, 67, 48, 0.12);
+  transform: translateY(-1px);
+}
+
+.vbs-chart-list strong {
+  font-family: var(--font-heading);
+  font-size: 1.08rem;
+}
+
+.vbs-chart-list span {
+  color: var(--color-muted);
+  font-size: 0.95rem;
+}
+
 .site-footer {
   background-color: var(--color-accent);
   color: white;

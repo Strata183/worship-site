@@ -190,6 +190,35 @@ Deno.serve(async (req) => {
       return jsonResponse({ signedUrl });
     }
 
+    if (body.action === "vbs-kinder-signed-url") {
+      const chartId = String(body.chartId || "");
+
+      // RLS on vbs_kinder_charts only exposes rows to users who have claimed
+      // VBS Kinder access with the team password.
+      const { data: chart, error: chartError } = await supabase
+        .from("vbs_kinder_charts")
+        .select("file_path")
+        .eq("id", chartId)
+        .single();
+
+      if (chartError || !chart) {
+        return jsonResponse({ error: "Chart not found or not shared with you." }, 404);
+      }
+
+      // A signed URL is temporary access to a private R2 object.
+      // The URL expires after 60 seconds.
+      const signedUrl = await getSignedUrl(
+        r2,
+        new GetObjectCommand({
+          Bucket: bucket,
+          Key: chart.file_path,
+        }),
+        { expiresIn: 60 },
+      );
+
+      return jsonResponse({ signedUrl });
+    }
+
     if (body.action === "delete") {
       const songId = String(body.songId || "");
 

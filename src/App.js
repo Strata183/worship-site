@@ -11,6 +11,7 @@ import Blog from "./Pages/Articles";
 import About from "./Pages/About";
 import Steadfast from "./Pages/Steadfast";
 import WorthyForSong from "./Pages/WorthyForSong";
+import VbsKinderMusic from "./Pages/VbsKinderMusic";
 import Friends from "./Pages/Friends";
 import Library from "./Pages/Library";
 import Login from "./Pages/Login";
@@ -46,6 +47,14 @@ function App() {
           <Route path="/tutorials" element={<Tutorials />} />
           <Route path="/steadfast" element={<Steadfast />} />
           <Route path="/worthy-for-song" element={<WorthyForSong />} />
+          <Route
+            path="/vbs-2026-kinder-music"
+            element={
+              <ProtectedRoute>
+                <VbsKinderMusic />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/articles" element={<Blog />} />
           <Route path="/articles/:articleSlug" element={<Blog />} />
           <Route path="/about" element={<About />} />

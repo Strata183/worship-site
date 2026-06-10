@@ -21,6 +21,11 @@ const homeSections = [
     path: "/worthy-for-song",
   },
   {
+    title: "VBS 2026, Kinder Music",
+    description: "Charts and practice resources for the Kinder music team.",
+    path: "/vbs-2026-kinder-music",
+  },
+  {
     title: "Learn with Tutorials",
     description: "Practice with walkthroughs made for growing worship leaders.",
     path: "/tutorials",
