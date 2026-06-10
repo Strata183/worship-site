@@ -288,6 +288,7 @@ function VbsKinderMusic() {
       return "";
     }
 
+    setError("");
     return data.signedUrl;
   }
 
@@ -324,15 +325,16 @@ function VbsKinderMusic() {
       link.click();
       link.remove();
       URL.revokeObjectURL(url);
+      setError("");
     } catch (downloadError) {
       setError(
         downloadError instanceof Error
           ? downloadError.message
           : "Unable to download the VBS chart zip."
       );
+    } finally {
+      setDownloadingAll(false);
     }
-
-    setDownloadingAll(false);
   }
 
   if (checkingAccess) {
