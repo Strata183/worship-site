@@ -5,12 +5,14 @@ function Steadfast() {
   return (
     <main className="page page-steadfast">
       <section className="steadfast-hero">
-        <p className="eyebrow">Steadfast</p>
-        <h1>Welcome, Steadfast!</h1>
-        <p>
-          Thank you for making your way to this new website as I continue
-          developing it for the local church.
-        </p>
+        <div className="steadfast-hero-copy">
+          <p className="eyebrow">Steadfast</p>
+          <h1>Welcome, Steadfast!</h1>
+          <p>
+            Thank you for making your way to this new website as I continue
+            developing it for the local church.
+          </p>
+        </div>
       </section>
 
       <section className="steadfast-content" aria-label="Steadfast resources">

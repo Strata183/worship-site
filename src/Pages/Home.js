@@ -12,6 +12,8 @@ const homeSections = [
     title: "Steadfast",
     description: "Find resources for practicing and leading Steadfast.",
     path: "/steadfast",
+    image: "/steadfast-banner.png",
+    imageAlt: "Steadfast logo",
   },
   {
     title: "Worthy for Song",
@@ -60,6 +62,13 @@ function Home() {
           <Link className="resource-card" key={section.title} to={section.path}>
             <h2>{section.title}</h2>
             <p>{section.description}</p>
+            {section.image && (
+              <img
+                className="resource-card-image"
+                src={section.image}
+                alt={section.imageAlt}
+              />
+            )}
             <span>Open section</span>
           </Link>
         ))}
