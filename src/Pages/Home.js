@@ -24,7 +24,8 @@ const homeSections = [
     title: "VBS 2026, Kinder Music",
     description: "Charts and practice resources for the Kinder music team.",
     path: "/vbs-2026-kinder-music",
-    image: "/vbs-2026-god-of-light.png"
+    image: "/vbs-2026-god-of-light.png",
+    imageAlt: "VBS 2026 God of Light artwork",
   },
   {
     title: "Learn with Tutorials",
