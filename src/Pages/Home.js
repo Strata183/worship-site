@@ -9,6 +9,16 @@ const homeSections = [
     path: "/songs",
   },
   {
+    title: "Steadfast",
+    description: "Find resources for practicing and leading Steadfast.",
+    path: "/steadfast",
+  },
+  {
+    title: "Worthy for Song",
+    description: "Worthy for Song, Lord willing, will be my first and upcoming album!",
+    path: "/worthy-for-song",
+  },
+  {
     title: "Learn with Tutorials",
     description: "Practice with walkthroughs made for growing worship leaders.",
     path: "/tutorials",
@@ -47,7 +57,7 @@ function Home() {
       <section className="resource-grid" aria-label="Worship resource sections">
         {homeSections.map((section) => (
           // key helps React track each card efficiently.
-          <Link className="resource-card" key={section.path} to={section.path}>
+          <Link className="resource-card" key={section.title} to={section.path}>
             <h2>{section.title}</h2>
             <p>{section.description}</p>
             <span>Open section</span>

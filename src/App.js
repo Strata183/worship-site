@@ -9,6 +9,8 @@ import Home from "./Pages/Home";
 import Tutorials from "./Pages/Tutorials";
 import Blog from "./Pages/Articles";
 import About from "./Pages/About";
+import Steadfast from "./Pages/Steadfast";
+import WorthyForSong from "./Pages/WorthyForSong";
 import Friends from "./Pages/Friends";
 import Library from "./Pages/Library";
 import Login from "./Pages/Login";
@@ -42,6 +44,8 @@ function App() {
           />
           {/* Public informational pages. */}
           <Route path="/tutorials" element={<Tutorials />} />
+          <Route path="/steadfast" element={<Steadfast />} />
+          <Route path="/worthy-for-song" element={<WorthyForSong />} />
           <Route path="/articles" element={<Blog />} />
           <Route path="/articles/:articleSlug" element={<Blog />} />
           <Route path="/about" element={<About />} />
