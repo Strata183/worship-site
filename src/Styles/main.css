@@ -280,6 +280,24 @@ nav a.active:not(.site-title) {
   max-width: 48rem;
 }
 
+.contact-email-link {
+  border-radius: 6px;
+  color: var(--color-accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.contact-email-link:hover,
+.contact-email-link:focus {
+  background-color: rgba(76, 108, 81, 0.12);
+  text-decoration: none;
+}
+
+.tutorials-contact-copy {
+  max-width: 42rem;
+  text-wrap: balance;
+}
+
 /* Home page hero area. */
 .home-hero {
   isolation: isolate;
