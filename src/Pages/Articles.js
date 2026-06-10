@@ -5,7 +5,7 @@ const articles = [
         slug: "what-is-worship",
         name: "What is worship?",
         description: "A biblical look at worship and why it reaches beyond music.",
-        body: ""
+        body: "Worship, in its simplist form, is honor/reverence/respect, paid to a superior being. The idea is bowing down before a superior being as the Lord of our life."
     },
     {
         slug: "are-we-required-to-sing-at-church",
