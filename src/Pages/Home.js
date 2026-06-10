@@ -10,7 +10,7 @@ const homeSections = [
   },
   {
     title: "Steadfast",
-    description: "Find resources for practicing and leading Steadfast.",
+    description: "Find resources for practicing and leading Steadfast in worship.",
     path: "/steadfast",
     image: "/steadfast-banner.png",
     imageAlt: "Steadfast logo",
