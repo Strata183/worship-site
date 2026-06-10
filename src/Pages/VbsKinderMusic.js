@@ -2,15 +2,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../AuthContext";
 import { supabase } from "../supabaseClient";
 
-// Turn a file name like "VBS Song (Key of C).pdf" into a safer storage name.
-function cleanFileName(name) {
-  return name
-    .toLowerCase()
-    .replace(/\.pdf$/i, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
 // Supabase Edge Function errors can contain useful details in the HTTP response.
 async function getFunctionErrorMessage(error) {
   if (error?.context instanceof Response) {
@@ -39,15 +30,10 @@ async function getFunctionErrorMessage(error) {
 function VbsKinderMusic() {
   const { user } = useAuth();
   const [charts, setCharts] = useState([]);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [file, setFile] = useState(null);
   const [password, setPassword] = useState("");
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
   const [loadingCharts, setLoadingCharts] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -157,82 +143,6 @@ function VbsKinderMusic() {
     window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   }
 
-  async function handleUpload(event) {
-    event.preventDefault();
-    setSubmitting(true);
-    setError("");
-    setMessage("");
-
-    if (!file) {
-      setError("Choose a PDF before uploading.");
-      setSubmitting(false);
-      return;
-    }
-
-    if (file.type !== "application/pdf") {
-      setError("Only PDF files can be uploaded.");
-      setSubmitting(false);
-      return;
-    }
-
-    const chartId = crypto.randomUUID();
-    const safeName = cleanFileName(file.name) || "vbs-chart";
-    const filePath = `${user.id}/vbs-2026-kinder/${chartId}-${safeName}.pdf`;
-    const chartTitle = title.trim() || file.name.replace(/\.pdf$/i, "");
-    const chartDescription = description.trim() || "VBS 2026 Kinder Music chart";
-
-    const formData = new FormData();
-
-    formData.append("action", "upload");
-    formData.append("filePath", filePath);
-    formData.append("file", file);
-
-    const { error: uploadError } = await supabase.functions.invoke(
-      "r2-song-files",
-      {
-        body: formData,
-      }
-    );
-
-    if (uploadError) {
-      setError(`PDF upload failed: ${await getFunctionErrorMessage(uploadError)}`);
-      setSubmitting(false);
-      return;
-    }
-
-    const nextSortOrder =
-      charts.reduce((highest, chart) => Math.max(highest, chart.sort_order || 0), 0) + 1;
-
-    const { error: insertError } = await supabase.from("vbs_kinder_charts").insert({
-      id: chartId,
-      title: chartTitle,
-      description: chartDescription,
-      file_path: filePath,
-      sort_order: nextSortOrder,
-    });
-
-    if (insertError) {
-      setError(`Chart save failed: ${insertError.message}`);
-    } else {
-      setMessage("VBS chart uploaded.");
-      setTitle("");
-      setDescription("");
-      setFile(null);
-      event.target.reset();
-      setCharts((currentCharts) => [
-        ...currentCharts,
-        {
-          id: chartId,
-          title: chartTitle,
-          description: chartDescription,
-          sort_order: nextSortOrder,
-        },
-      ]);
-    }
-
-    setSubmitting(false);
-  }
-
   if (checkingAccess) {
     return (
       <main className="page page-vbs">
@@ -279,44 +189,6 @@ function VbsKinderMusic() {
         <p>Charts and practice resources for the Kinder music team.</p>
       </section>
 
-      <form className="vbs-upload-panel form-stack" onSubmit={handleUpload}>
-        <div>
-          <h2>Add VBS Chart</h2>
-          <p>Temporary upload form for adding Kinder team PDFs.</p>
-        </div>
-        <label>
-          Chart title
-          <input
-            onChange={(event) => setTitle(event.target.value)}
-            placeholder="Jesus Loves Me"
-            type="text"
-            value={title}
-          />
-        </label>
-        <label>
-          Description
-          <input
-            onChange={(event) => setDescription(event.target.value)}
-            placeholder="Key of C - rehearsal chart"
-            type="text"
-            value={description}
-          />
-        </label>
-        <label>
-          PDF file
-          <input
-            accept="application/pdf"
-            onChange={(event) => setFile(event.target.files?.[0] || null)}
-            required
-            type="file"
-          />
-        </label>
-        <button className="primary-button" disabled={submitting} type="submit">
-          {submitting ? "Uploading..." : "Upload VBS chart"}
-        </button>
-        {message && <p className="form-message success">{message}</p>}
-      </form>
-
       <section className="vbs-chart-panel">
         <h2>Charts</h2>
 
@@ -337,8 +209,8 @@ function VbsKinderMusic() {
           </ul>
         ) : (
           <p className="empty-state">
-            This account is eligible. Add VBS chart rows in Supabase to show
-            them here.
+            This account is eligible. Charts will appear here when they are
+            added.
           </p>
         )}
       </section>

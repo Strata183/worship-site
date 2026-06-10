@@ -696,7 +696,6 @@ nav a.active:not(.site-title) {
 }
 
 .vbs-password-panel,
-.vbs-upload-panel,
 .vbs-chart-panel {
   background-color: white;
   border: 1px solid var(--color-border);
@@ -707,23 +706,11 @@ nav a.active:not(.site-title) {
   text-align: left;
 }
 
-.vbs-upload-panel {
-  margin-bottom: 1.25rem;
-}
-
-.vbs-upload-panel h2,
 .vbs-chart-panel h2 {
   font-family: var(--font-heading);
   font-size: 1.35rem;
   line-height: 1.2;
   margin: 0 0 1rem;
-}
-
-.vbs-upload-panel p {
-  font-size: 1rem;
-  margin: 0;
-  max-width: none;
-  text-align: left;
 }
 
 .vbs-chart-list {
