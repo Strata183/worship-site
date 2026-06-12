@@ -323,8 +323,30 @@ nav a.active:not(.site-title) {
 }
 
 .home-hero h1,
+.home-hero-statement,
 .home-hero p {
   position: relative;
+}
+
+.home-hero-statement {
+  color: var(--color-accent);
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.45;
+  margin: 0.5rem auto 1.15rem;
+  max-width: 52rem;
+  text-wrap: balance;
+}
+
+.home-hero-statement::before,
+.home-hero-statement::after {
+  background-color: var(--color-border);
+  content: "";
+  display: block;
+  height: 1px;
+  margin: 1rem auto;
+  width: min(8rem, 34vw);
 }
 
 .eyebrow {
@@ -1704,6 +1726,22 @@ nav a.active:not(.site-title) {
 
   .page h1 {
     font-size: 2.25rem;
+  }
+
+  .home-hero {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .home-hero-statement {
+    font-size: 1.08rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+  }
+
+  .home-hero-statement::before,
+  .home-hero-statement::after {
+    margin: 0.8rem auto;
   }
 }
 

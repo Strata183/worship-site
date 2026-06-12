@@ -56,6 +56,11 @@ function Home() {
           alt="Black acoustic guitar"
         />
         <h1>Welcome to Worthy for Worship</h1>
+        <h2 className="home-hero-statement">
+          Worship is that which is distinctly and only for God, and which,
+          while capturing the most profound of our emotions, does so by the
+          most profound divine truth
+        </h2>
         <p>
           My name is Derek Smith and I hope to provide a place to find chord charts, tutorials, articles, and practical help for
           serving the local church in worship ministry
