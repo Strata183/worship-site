@@ -2,15 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../AuthContext";
 import { supabase } from "../supabaseClient";
 
-// Turn a file name like "God of Light.pdf" into a safer storage name.
-function cleanFileName(name) {
-  return name
-    .toLowerCase()
-    .replace(/\.pdf$/i, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
 // Supabase Edge Function errors can contain useful details in the HTTP response.
 async function getFunctionErrorMessage(error) {
   if (error?.context instanceof Response) {
@@ -36,37 +27,13 @@ async function getFunctionErrorMessage(error) {
   return error?.message || "Unexpected Edge Function error.";
 }
 
-const songKeyOptions = [
-  "C",
-  "C#/Db",
-  "D",
-  "Eb",
-  "E",
-  "F",
-  "F#/Gb",
-  "G",
-  "Ab",
-  "A",
-  "Bb",
-  "B",
-];
-
 function VbsKinderMusic() {
   const { user } = useAuth();
   const [charts, setCharts] = useState([]);
-  const [title, setTitle] = useState("");
-  const [songKey, setSongKey] = useState("");
-  const [description, setDescription] = useState("");
-  const [sortOrder, setSortOrder] = useState("");
-  const [file, setFile] = useState(null);
   const [password, setPassword] = useState("");
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
   const [loadingCharts, setLoadingCharts] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [deletingChartId, setDeletingChartId] = useState("");
-  const [deletingAllCharts, setDeletingAllCharts] = useState(false);
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -127,7 +94,7 @@ function VbsKinderMusic() {
 
     const chartQuery = supabase
       .from("vbs_kinder_charts")
-      .select("id, title, description, song_key, file_path, sort_order")
+      .select("id, title, description, song_key, sort_order")
       .order("sort_order", { ascending: true })
       .order("title", { ascending: true });
 
@@ -136,7 +103,7 @@ function VbsKinderMusic() {
     if (chartsError) {
       const fallbackResult = await supabase
         .from("vbs_kinder_charts")
-        .select("id, title, description, file_path, sort_order")
+        .select("id, title, description, sort_order")
         .order("sort_order", { ascending: true })
         .order("title", { ascending: true });
 
@@ -172,88 +139,6 @@ function VbsKinderMusic() {
     };
   }, [loadCharts]);
 
-  async function handleUpload(event) {
-    event.preventDefault();
-    setError("");
-    setMessage("");
-    setSubmitting(true);
-
-    if (!user) {
-      setError("You must be signed in to upload VBS charts.");
-      setSubmitting(false);
-      return;
-    }
-
-    if (!file) {
-      setError("Choose a PDF before uploading.");
-      setSubmitting(false);
-      return;
-    }
-
-    if (file.type !== "application/pdf") {
-      setError("Only PDF files can be uploaded.");
-      setSubmitting(false);
-      return;
-    }
-
-    if (!songKey) {
-      setError("Choose a key for the song before uploading.");
-      setSubmitting(false);
-      return;
-    }
-
-    const chartId = crypto.randomUUID();
-    const safeName = cleanFileName(file.name) || "vbs-chart";
-    const filePath = `${user.id}/vbs-kinder/${chartId}-${safeName}.pdf`;
-    const chartTitle = title.trim() || file.name.replace(/\.pdf$/i, "");
-    const parsedSortOrder = Number.parseInt(sortOrder, 10);
-
-    const formData = new FormData();
-
-    formData.append("action", "upload");
-    formData.append("filePath", filePath);
-    formData.append("file", file);
-
-    const { error: uploadError } = await supabase.functions.invoke(
-      "r2-song-files",
-      {
-        body: formData,
-      }
-    );
-
-    if (uploadError) {
-      setError(`PDF upload failed: ${await getFunctionErrorMessage(uploadError)}`);
-      setSubmitting(false);
-      return;
-    }
-
-    const { error: insertError } = await supabase
-      .from("vbs_kinder_charts")
-      .insert({
-        id: chartId,
-        title: chartTitle,
-        description: description.trim(),
-        song_key: songKey,
-        file_path: filePath,
-        sort_order: Number.isNaN(parsedSortOrder) ? charts.length + 1 : parsedSortOrder,
-      });
-
-    if (insertError) {
-      setError(`Chart save failed: ${insertError.message}`);
-    } else {
-      setMessage("VBS chart uploaded.");
-      setTitle("");
-      setSongKey("");
-      setDescription("");
-      setSortOrder("");
-      setFile(null);
-      event.target.reset();
-      await loadCharts();
-    }
-
-    setSubmitting(false);
-  }
-
   async function openChart(chart) {
     setError("");
 
@@ -282,123 +167,6 @@ function VbsKinderMusic() {
 
     setError("");
     return data.signedUrl;
-  }
-
-  async function deleteChart(chart) {
-    const confirmed = window.confirm(
-      `Delete "${chart.title}" from the VBS chart list and Cloudflare storage?`
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    setError("");
-    setMessage("");
-    setDeletingChartId(chart.id);
-
-    const { data: deletedRows, error: deleteError } = await supabase
-      .from("vbs_kinder_charts")
-      .delete()
-      .eq("id", chart.id)
-      .select("id");
-
-    if (deleteError) {
-      setError(
-        `Chart row delete failed: ${deleteError.message}. Make sure the temporary delete migration has been applied.`
-      );
-      setDeletingChartId("");
-      return;
-    }
-
-    if (!deletedRows?.length) {
-      setError("No chart row was deleted. Refresh the page and try again.");
-      setDeletingChartId("");
-      return;
-    }
-
-    setCharts((currentCharts) =>
-      currentCharts.filter((currentChart) => currentChart.id !== chart.id)
-    );
-
-    const { error: storageError } = await supabase.functions.invoke(
-      "r2-song-files",
-      {
-        body: {
-          action: "vbs-kinder-delete",
-          filePath: chart.file_path,
-        },
-      }
-    );
-
-    if (storageError) {
-      setError(
-        `Chart removed from the VBS page, but PDF cleanup failed: ${await getFunctionErrorMessage(storageError)}`
-      );
-      setDeletingChartId("");
-      return;
-    }
-
-    setMessage("VBS chart deleted.");
-    setDeletingChartId("");
-  }
-
-  async function deleteAllCharts() {
-    const confirmed = window.confirm(
-      `Delete all ${charts.length} VBS charts from the page? This is meant for clearing the old set before uploading the new one.`
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    const chartIds = charts.map((chart) => chart.id);
-    const filePaths = charts.map((chart) => chart.file_path).filter(Boolean);
-
-    setError("");
-    setMessage("");
-    setDeletingAllCharts(true);
-
-    const { data: deletedRows, error: deleteError } = await supabase
-      .from("vbs_kinder_charts")
-      .delete()
-      .in("id", chartIds)
-      .select("id");
-
-    if (deleteError) {
-      setError(
-        `Old chart cleanup failed: ${deleteError.message}. Make sure the temporary delete migration has been applied.`
-      );
-      setDeletingAllCharts(false);
-      return;
-    }
-
-    setCharts([]);
-
-    const storageResults = await Promise.all(
-      filePaths.map((filePath) =>
-        supabase.functions.invoke("r2-song-files", {
-          body: {
-            action: "vbs-kinder-delete",
-            filePath,
-          },
-        })
-      )
-    );
-
-    const failedStorageDeletes = storageResults.filter(
-      (result) => result.error
-    );
-
-    if (failedStorageDeletes.length > 0) {
-      setError(
-        `${deletedRows?.length || 0} old chart rows were removed from the page, but ${failedStorageDeletes.length} Cloudflare PDF cleanup request failed.`
-      );
-    } else {
-      setMessage(`${deletedRows?.length || 0} old VBS charts deleted.`);
-    }
-
-    setDeletingAllCharts(false);
   }
 
   if (checkingAccess) {
@@ -463,86 +231,6 @@ function VbsKinderMusic() {
         </div>
 
         {error && <p className="form-message error">{error}</p>}
-        {message && <p className="form-message success">{message}</p>}
-
-        {charts.length > 0 && (
-          <div className="vbs-cleanup-tools">
-            <button
-              className="danger-button"
-              disabled={deletingAllCharts}
-              type="button"
-              onClick={deleteAllCharts}
-            >
-              {deletingAllCharts ? "Deleting old charts..." : "Delete all old charts"}
-            </button>
-          </div>
-        )}
-
-        <form className="vbs-upload-form form-stack" onSubmit={handleUpload}>
-          <div className="vbs-upload-heading">
-            <h3>Temporary chart upload</h3>
-            <p>Add VBS PDFs here while building the chart list.</p>
-          </div>
-
-          <label>
-            Song title
-            <input
-              onChange={(event) => setTitle(event.target.value)}
-              placeholder="God of Light"
-              type="text"
-              value={title}
-            />
-          </label>
-
-          <label>
-            Key
-            <select
-              onChange={(event) => setSongKey(event.target.value)}
-              value={songKey}
-            >
-              <option value="">Choose key</option>
-              {songKeyOptions.map((key) => (
-                <option key={key} value={key}>
-                  {key}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            Order
-            <input
-              min="0"
-              onChange={(event) => setSortOrder(event.target.value)}
-              placeholder={String(charts.length + 1)}
-              type="number"
-              value={sortOrder}
-            />
-          </label>
-
-          <label>
-            PDF file
-            <input
-              accept="application/pdf"
-              onChange={(event) => setFile(event.target.files?.[0] || null)}
-              type="file"
-            />
-          </label>
-
-          <label>
-            Description
-            <input
-              onChange={(event) => setDescription(event.target.value)}
-              placeholder="Kinder lead sheet"
-              type="text"
-              value={description}
-            />
-          </label>
-
-          <button className="primary-button" disabled={submitting} type="submit">
-            {submitting ? "Uploading..." : "Upload chart"}
-          </button>
-        </form>
 
         {loadingCharts ? (
           <p className="empty-state">Loading charts...</p>
@@ -565,14 +253,6 @@ function VbsKinderMusic() {
                   <span className="vbs-chart-actions">
                     <button type="button" onClick={() => openChart(chart)}>
                       Open
-                    </button>
-                    <button
-                      className="danger-button"
-                      disabled={deletingChartId === chart.id}
-                      type="button"
-                      onClick={() => deleteChart(chart)}
-                    >
-                      {deletingChartId === chart.id ? "Deleting..." : "Delete"}
                     </button>
                   </span>
                 </div>
