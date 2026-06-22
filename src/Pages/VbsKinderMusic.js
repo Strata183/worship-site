@@ -244,10 +244,13 @@ function VbsKinderMusic() {
                   </span>
                   <span className="vbs-chart-copy">
                     <strong>{chart.title}</strong>
-                    <span>
-                      {[chart.song_key && `Key of ${chart.song_key}`, chart.description]
-                        .filter(Boolean)
-                        .join(" - ")}
+                    <span className="vbs-chart-meta">
+                      {chart.song_key && (
+                        <span className="vbs-chart-key">
+                          Key: {chart.song_key}
+                        </span>
+                      )}
+                      {chart.description && <span>{chart.description}</span>}
                     </span>
                   </span>
                   <span className="vbs-chart-actions">

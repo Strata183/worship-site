@@ -847,9 +847,24 @@ nav a.active:not(.site-title) {
   font-size: 1.08rem;
 }
 
-.vbs-chart-copy span {
+.vbs-chart-meta {
+  align-items: center;
   color: var(--color-muted);
+  display: flex;
+  flex-wrap: wrap;
   font-size: 0.95rem;
+  gap: 0.5rem;
+}
+
+.vbs-chart-key {
+  background-color: var(--color-accent-light);
+  border-radius: 6px;
+  color: var(--color-accent);
+  display: inline-flex;
+  font-size: 0.86rem;
+  font-weight: 900;
+  line-height: 1.3;
+  padding: 0.2rem 0.45rem;
 }
 
 .vbs-chart-actions {
