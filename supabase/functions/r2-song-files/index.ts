@@ -283,6 +283,50 @@ Deno.serve(async (req) => {
       return jsonResponse({ files });
     }
 
+    if (body.action === "vbs-kinder-delete") {
+      const chartId = String(body.chartId || "");
+      const requestedFilePath = String(body.filePath || "");
+      let filePath = requestedFilePath;
+
+      const { data: accessRow, error: accessError } = await supabase
+        .from("vbs_kinder_access")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (accessError || !accessRow) {
+        return jsonResponse({ error: "You do not have VBS Kinder access." }, 403);
+      }
+
+      if (!filePath && chartId) {
+        // RLS only exposes chart rows to users who have claimed VBS Kinder access.
+        const { data: chart, error: chartError } = await supabase
+          .from("vbs_kinder_charts")
+          .select("file_path")
+          .eq("id", chartId)
+          .single();
+
+        if (chartError || !chart) {
+          return jsonResponse({ error: "Chart not found or not shared with you." }, 404);
+        }
+
+        filePath = chart.file_path;
+      }
+
+      if (!filePath || !filePath.endsWith(".pdf")) {
+        return jsonResponse({ error: "Missing VBS PDF file path." }, 400);
+      }
+
+      await r2.send(
+        new DeleteObjectCommand({
+          Bucket: bucket,
+          Key: filePath,
+        }),
+      );
+
+      return jsonResponse({ ok: true });
+    }
+
     if (body.action === "delete") {
       const songId = String(body.songId || "");
 
