@@ -4,6 +4,7 @@ import { AuthProvider } from "./AuthContext";
 import Navbar from "./Components/Navbar";
 import Footer from "./Components/Footer";
 import ProtectedRoute from "./Components/ProtectedRoute";
+import ScrollToTop from "./Components/ScrollToTop";
 
 import Home from "./Pages/Home";
 import Tutorials from "./Pages/Tutorials";
@@ -26,6 +27,8 @@ function App() {
     <AuthProvider>
       {/* BrowserRouter turns normal-looking URLs into React pages. */}
       <BrowserRouter>
+        <ScrollToTop />
+
         {/* Navbar appears on every route because it sits outside <Routes>. */}
         <Navbar />
 
