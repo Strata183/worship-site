@@ -1,23 +1,10 @@
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-const articles = [
-    {
-        slug: "what-is-worship",
-        name: "What is worship?",
-        description: "A biblical look at worship and why it reaches beyond music.",
-        body: ""
-    },
-    {
-        slug: "are-we-required-to-sing-at-church",
-        name: "Are we required to sing at church?",
-        description: "A study on why congregational singing matters when the church gathers.",
-        body: ""
-    }
-];
+import articles from "../Data/articles";
 
-// Articles are currently written in this file instead of loaded from Supabase.
-// Add each article's text to the body field above. Paragraphs are separated by
-// blank lines because the detail view splits body text on "\n\n".
+// Long article drafts live in public/articles as plain text files.
+// Paragraphs are separated by blank lines because the detail view splits text on "\n\n".
 function Articles() {
     // articleSlug comes from the dynamic route in App.js:
     // /articles/:articleSlug
@@ -26,6 +13,44 @@ function Articles() {
     // If there is a slug in the URL, try to find the matching article object.
     // When there is no slug, this stays undefined and the page shows the index.
     const selectedArticle = articles.find((article) => article.slug === articleSlug);
+    const [articleBody, setArticleBody] = useState("");
+    const [articleLoadError, setArticleLoadError] = useState(false);
+
+    useEffect(() => {
+        let ignoreResponse = false;
+
+        setArticleBody("");
+        setArticleLoadError(false);
+
+        if (!selectedArticle?.bodyPath) {
+            return () => {
+                ignoreResponse = true;
+            };
+        }
+
+        fetch(selectedArticle.bodyPath)
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Article file could not be loaded.");
+                }
+
+                return response.text();
+            })
+            .then((text) => {
+                if (!ignoreResponse) {
+                    setArticleBody(text.trim());
+                }
+            })
+            .catch(() => {
+                if (!ignoreResponse) {
+                    setArticleLoadError(true);
+                }
+            });
+
+        return () => {
+            ignoreResponse = true;
+        };
+    }, [selectedArticle]);
 
     // This branch catches typed or outdated article links.
     if (articleSlug && !selectedArticle) {
@@ -55,17 +80,23 @@ function Articles() {
                     </header>
 
                     <section className="article-body">
-                        {/* Empty body fields show a writing placeholder until the article is drafted. */}
-                        {selectedArticle.body ? (
-                            selectedArticle.body.split("\n\n").map((paragraph) => (
+                        {articleBody ? (
+                            articleBody.split(/\n\s*\n/).map((paragraph) => (
                                 <p key={paragraph}>{paragraph}</p>
                             ))
+                        ) : articleLoadError ? (
+                            <section className="article-writing-space">
+                                <h2>Article file not found</h2>
+                                <p>
+                                    Check the bodyPath for this article in src/Data/articles.js.
+                                </p>
+                            </section>
                         ) : (
                             <section className="article-writing-space">
                                 <h2>Article draft</h2>
                                 <p>
-                                    Write this article in the body field for this article
-                                    inside Articles.js.
+                                    Write this article in its plain text file inside
+                                    public/articles.
                                 </p>
                             </section>
                         )}
