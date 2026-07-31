@@ -100,6 +100,32 @@ function Friends() {
     }
   }
 
+  async function removeFriend(friendship) {
+    const { otherName } = describeFriendship(friendship);
+    const shouldRemove = window.confirm(
+      `Remove ${otherName} as a friend? This will stop library sharing between you.`
+    );
+
+    if (!shouldRemove) {
+      return;
+    }
+
+    setError("");
+    setMessage("");
+
+    const { error: deleteError } = await supabase
+      .from("friendships")
+      .delete()
+      .eq("id", friendship.id);
+
+    if (deleteError) {
+      setError(deleteError.message);
+    } else {
+      setMessage("Friend removed.");
+      await loadFriendships();
+    }
+  }
+
   // Split one friendship list into page sections so Friends feels like a
   // relationship manager instead of a notification center.
   const friendshipGroups = useMemo(
@@ -220,7 +246,7 @@ function Friends() {
         <section className="friend-section friend-section-primary">
           <div className="panel-header">
             <div>
-              <p className="eyebrow">Shared libraries</p>
+              <p className="eyebrow">People</p>
               <h2>Friends</h2>
             </div>
             <span className="friend-count">{friendshipGroups.accepted.length}</span>
@@ -238,8 +264,16 @@ function Friends() {
               {friendshipGroups.accepted.map((friendship) => {
                 return (
                   <li key={friendship.id}>
-                    {renderPersonMeta(friendship, "Library sharing is active.")}
-                    <span className="status-pill accepted">Accepted</span>
+                    {renderPersonMeta(friendship)}
+                    <div className="row-actions">
+                      <button
+                        className="subtle-danger-button"
+                        type="button"
+                        onClick={() => removeFriend(friendship)}
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </li>
                 );
               })}

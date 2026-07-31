@@ -1746,6 +1746,18 @@ nav a.active:not(.site-title) {
   background-color: #374151;
 }
 
+.row-actions .subtle-danger-button {
+  background-color: transparent;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 0.55rem 0.75rem;
+}
+
+.row-actions .subtle-danger-button:hover,
+.row-actions .subtle-danger-button:focus {
+  background-color: #fef2f2;
+}
+
 /* Email/code pill styling for account and friend identifiers. */
 .share-code,
 .friend-list code {
