@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { supabase } from "../supabaseClient";
 
@@ -53,14 +54,15 @@ const songKeyOptions = [
   "B",
 ];
 
-// Library is the protected Songs page.
-// Signed-in users can upload PDFs, open PDFs they are allowed to see,
-// and delete PDFs they own.
+// Library is the protected My Library page.
+// Signed-in users can upload, open, edit, and delete their own PDF songs.
 function Library() {
   const { user } = useAuth();
 
   // songs holds the rows loaded from the Supabase "songs" table.
   const [songs, setSongs] = useState([]);
+  const [friendships, setFriendships] = useState([]);
+  const [activeShelf, setActiveShelf] = useState("mine");
 
   // title and file track the upload form inputs.
   const [title, setTitle] = useState("");
@@ -70,6 +72,7 @@ function Library() {
   // These states only affect how the current song list is displayed.
   // They do not change anything in the database.
   const [searchQuery, setSearchQuery] = useState("");
+  const [friendFilter, setFriendFilter] = useState("all");
   const [sortMode, setSortMode] = useState("key");
 
   // These states control the inline edit form for a song row.
@@ -98,17 +101,23 @@ function Library() {
     setLoadingSongs(true);
     setError("");
 
-    // Row Level Security in Supabase should decide which songs this user can see.
-    // The frontend simply asks for songs ordered newest first.
-    const { data, error: songsError } = await supabase
-      .from("songs")
-      .select("*")
-      .order("created_at", { ascending: false });
+    // RLS decides which rows this user is allowed to see. The shelves below
+    // split those visible songs into mine and friends.
+    const [songsResult, friendshipsResult] = await Promise.all([
+      supabase.from("songs").select("*").order("created_at", { ascending: false }),
+      supabase.rpc("list_friendships_with_profiles"),
+    ]);
+
+    const { data, error: songsError } = songsResult;
+    const { data: friendshipsData, error: friendshipsError } = friendshipsResult;
 
     if (songsError) {
       setError(songsError.message);
+    } else if (friendshipsError) {
+      setError(friendshipsError.message);
     } else {
       setSongs(data || []);
+      setFriendships(friendshipsData || []);
     }
 
     setLoadingSongs(false);
@@ -314,18 +323,70 @@ function Library() {
     setSavingEdit(false);
   }
 
-  // This prepares the list for the screen: filter by search and sort the result.
+  const acceptedFriends = useMemo(
+    () =>
+      friendships
+        .filter((friendship) => friendship.status === "accepted")
+        .map((friendship) => ({
+          id:
+            friendship.requester_id === user.id
+              ? friendship.addressee_id
+              : friendship.requester_id,
+          name:
+            friendship.other_display_name ||
+            friendship.other_email ||
+            "Friend",
+        }))
+        .sort((firstFriend, secondFriend) =>
+          firstFriend.name.localeCompare(secondFriend.name)
+        ),
+    [friendships, user.id]
+  );
+
+  const friendsById = useMemo(
+    () =>
+      acceptedFriends.reduce((friendMap, friend) => {
+        friendMap[friend.id] = friend;
+        return friendMap;
+      }, {}),
+    [acceptedFriends]
+  );
+
+  // This prepares the list for the screen: filter by shelf, friend, search, and sort.
   // It does not re-query Supabase.
   const visibleSongs = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
     return songs
       .filter((song) => {
+        const isMine = song.owner_id === user.id;
+
+        if (activeShelf === "mine" && !isMine) {
+          return false;
+        }
+
+        if (activeShelf === "friends" && isMine) {
+          return false;
+        }
+
+        if (
+          activeShelf === "friends" &&
+          friendFilter !== "all" &&
+          song.owner_id !== friendFilter
+        ) {
+          return false;
+        }
+
         if (!query) {
           return true;
         }
 
-        return song.title?.toLowerCase().includes(query);
+        const ownerName = friendsById[song.owner_id]?.name || "";
+
+        return (
+          song.title?.toLowerCase().includes(query) ||
+          ownerName.toLowerCase().includes(query)
+        );
       })
       .sort((firstSong, secondSong) => {
         if (sortMode === "newest") {
@@ -351,7 +412,15 @@ function Library() {
 
         return (firstSong.title || "").localeCompare(secondSong.title || "");
       });
-  }, [searchQuery, songs, sortMode]);
+  }, [activeShelf, friendFilter, friendsById, searchQuery, songs, sortMode, user.id]);
+
+  const mySongsCount = songs.filter((song) => song.owner_id === user.id).length;
+  const friendSongsCount = songs.filter((song) => song.owner_id !== user.id).length;
+  const isMyShelf = activeShelf === "mine";
+  const selectedFriendSongsCount =
+    friendFilter === "all"
+      ? friendSongsCount
+      : songs.filter((song) => song.owner_id === friendFilter).length;
 
   function formatSongDate(song) {
     // Some older rows or test data may not have created_at populated.
@@ -372,25 +441,30 @@ function Library() {
         <aside className="library-sidebar" aria-label="Song library sections">
           <div className="library-brand-block">
             <p className="eyebrow">PDF library</p>
-            <h1>My Library</h1>
-            <p>Open charts, organize your scores, and sort songs by title or key.</p>
+            <h1>{isMyShelf ? "My Library" : "Friends Library"}</h1>
+            <p>
+              {isMyShelf
+                ? "Open your charts, organize your scores, and sort songs by title or key."
+                : "Open charts shared by your accepted friends!"}
+            </p>
           </div>
 
           <div className="library-shelves" aria-label="Library shelves">
             <button
-              className="active"
+              className={isMyShelf ? "active" : ""}
+              onClick={() => setActiveShelf("mine")}
               type="button"
             >
               <span>My Library</span>
-              <strong>{songs.length}</strong>
+              <strong>{mySongsCount}</strong>
             </button>
             <button
-              disabled
+              className={activeShelf === "friends" ? "active" : ""}
+              onClick={() => setActiveShelf("friends")}
               type="button"
-              title="Coming in a later step"
             >
-              <span>Friends' Libraries</span>
-              <strong>Next</strong>
+              <span>Friends Library</span>
+              <strong>{friendSongsCount}</strong>
             </button>
             <button disabled type="button" title="Coming in a later step">
               <span>Setlists</span>
@@ -404,61 +478,95 @@ function Library() {
         </aside>
 
         <section className="score-browser">
-          <form className="upload-card upload-card-main form-stack" onSubmit={handleUpload}>
-            <div className="upload-card-heading">
-              <h2>Add Score</h2>
-              <p>Add a PDF chart with a required song key.</p>
-            </div>
-            <label>
-              Song title
-              <input
-                onChange={(event) => setTitle(event.target.value)}
-                placeholder="Amazing Grace"
-                type="text"
-                value={title}
-              />
-            </label>
-            <label>
-              Key
-              <select
-                onChange={(event) => setSongKey(event.target.value)}
-                required
-                value={songKey}
-              >
-                <option value="">Choose key</option>
-                {songKeyOptions.map((keyName) => (
-                  <option key={keyName} value={keyName}>
-                    {keyName}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              PDF file
-              <input
-                accept="application/pdf"
-                onChange={(event) => setFile(event.target.files?.[0] || null)}
-                required
-                type="file"
-              />
-            </label>
-            <button className="primary-button" disabled={submitting} type="submit">
-              {submitting ? "Uploading..." : "Upload score"}
-            </button>
-            {message && <p className="form-message success">{message}</p>}
-            {error && <p className="form-message error">{error}</p>}
-          </form>
+          {isMyShelf && (
+            <form className="upload-card upload-card-main form-stack" onSubmit={handleUpload}>
+              <div className="upload-card-heading">
+                <h2>Add Score</h2>
+                <p>Add a PDF chart with a required song key.</p>
+              </div>
+              <label>
+                Song title
+                <input
+                  onChange={(event) => setTitle(event.target.value)}
+                  placeholder="Amazing Grace"
+                  type="text"
+                  value={title}
+                />
+              </label>
+              <label>
+                Key
+                <select
+                  onChange={(event) => setSongKey(event.target.value)}
+                  required
+                  value={songKey}
+                >
+                  <option value="">Choose key</option>
+                  {songKeyOptions.map((keyName) => (
+                    <option key={keyName} value={keyName}>
+                      {keyName}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                PDF file
+                <input
+                  accept="application/pdf"
+                  onChange={(event) => setFile(event.target.files?.[0] || null)}
+                  required
+                  type="file"
+                />
+              </label>
+              <button className="primary-button" disabled={submitting} type="submit">
+                {submitting ? "Uploading..." : "Upload score"}
+              </button>
+              {message && <p className="form-message success">{message}</p>}
+              {error && <p className="form-message error">{error}</p>}
+            </form>
+          )}
 
-          <div className="library-toolbar">
-            <div className="library-count" aria-label="Library summary">
-              <strong>{songs.length}</strong>
-              <span>{songs.length === 1 ? "song" : "songs"}</span>
+          {!isMyShelf && error && <p className="form-message error">{error}</p>}
+
+          {!isMyShelf && (
+            <div className="friends-library-callout">
+              <div>
+                <strong>Need to add a friend?</strong>
+                <p>Manage requests to unlock more shared songs.</p>
+              </div>
+              <Link to="/friends">Add friends</Link>
             </div>
+          )}
+
+          <div className={`library-toolbar ${isMyShelf ? "" : "friends-library-toolbar"}`}>
+            <div className="library-count" aria-label="Library summary">
+              <strong>{isMyShelf ? mySongsCount : selectedFriendSongsCount}</strong>
+              <span>
+                {(isMyShelf ? mySongsCount : selectedFriendSongsCount) === 1
+                  ? "song"
+                  : "songs"}
+              </span>
+            </div>
+            {!isMyShelf && (
+              <label>
+                Friend
+                <select
+                  onChange={(event) => setFriendFilter(event.target.value)}
+                  value={friendFilter}
+                >
+                  <option value="all">All friends</option>
+                  {acceptedFriends.map((friend) => (
+                    <option key={friend.id} value={friend.id}>
+                      {friend.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
             <label>
               Search
               <input
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search by title"
+                placeholder={isMyShelf ? "Search by title" : "Search by title or friend"}
                 type="search"
                 value={searchQuery}
               />
@@ -476,10 +584,19 @@ function Library() {
 
           {loadingSongs ? (
             <p className="empty-state">Loading songs...</p>
-          ) : songs.length === 0 ? (
+          ) : (isMyShelf ? mySongsCount : friendSongsCount) === 0 ? (
             <div className="library-empty-state">
-              <h3>No scores yet</h3>
-              <p>Upload your first PDF chart from the Add Score panel.</p>
+              <h3>{isMyShelf ? "No scores yet" : "No friend scores yet"}</h3>
+              <p>
+                {isMyShelf
+                  ? "Upload your first PDF chart from the Add Score panel."
+                  : "Songs from accepted friends will appear here."}
+              </p>
+              {!isMyShelf && (
+                <Link className="empty-state-action" to="/friends">
+                  Add or manage friends
+                </Link>
+              )}
             </div>
           ) : visibleSongs.length === 0 ? (
             <div className="library-empty-state">
@@ -489,9 +606,7 @@ function Library() {
           ) : (
             <ul className="score-list">
               {visibleSongs.map((song) => {
-                // Owners can delete their own songs. Friends can only open them.
                 const isOwner = song.owner_id === user.id;
-
                 // Only one row can be edited at a time.
                 const isEditing = editingSongId === song.id;
 
@@ -531,7 +646,10 @@ function Library() {
                         <span className="score-main">
                           <strong>{song.title}</strong>
                           <span>
-                            {isOwner ? "My library" : "Friend library"} · Added{" "}
+                            {isOwner
+                              ? "My library"
+                              : friendsById[song.owner_id]?.name || "Friends library"}{" "}
+                            · Added{" "}
                             {formatSongDate(song)}
                           </span>
                         </span>

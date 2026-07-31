@@ -49,7 +49,7 @@ function Navbar() {
                 <span aria-hidden="true" className="account-icon" />
               </button>
               <div className="account-dropdown">
-                {/* Friends lets users share access to songs with accepted friends. */}
+                {/* Friends lets users manage sharing access. */}
                 <NavLink to="/friends">Friends</NavLink>
                 <button type="button" onClick={handleSignOut}>
                   Sign out

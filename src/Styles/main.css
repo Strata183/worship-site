@@ -1152,6 +1152,7 @@ nav a.active:not(.site-title) {
   justify-content: space-between;
   padding: 0.8rem 0.85rem;
   text-align: left;
+  text-decoration: none;
 }
 
 .library-shelves button:hover,
@@ -1172,7 +1173,7 @@ nav a.active:not(.site-title) {
   background-color: transparent;
 }
 
-.library-shelves strong {
+.library-shelves button strong {
   background-color: white;
   border: 1px solid var(--color-border);
   border-radius: 999px;
@@ -1255,6 +1256,46 @@ nav a.active:not(.site-title) {
   padding: 1rem;
 }
 
+.friends-library-toolbar {
+  grid-template-columns: max-content minmax(180px, 240px) minmax(220px, 1fr) minmax(180px, 240px);
+}
+
+.friends-library-callout {
+  align-items: center;
+  background-color: var(--color-accent-light);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+  padding: 1rem;
+}
+
+.friends-library-callout strong {
+  color: var(--color-text);
+  font-family: var(--font-heading);
+}
+
+.friends-library-callout p {
+  font-size: 0.92rem;
+  margin: 0.2rem 0 0;
+  max-width: none;
+  text-align: left;
+}
+
+.friends-library-callout a,
+.empty-state-action {
+  background-color: var(--color-accent);
+  border-radius: 6px;
+  color: white;
+  display: inline-flex;
+  font-weight: 800;
+  padding: 0.7rem 0.9rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
 .library-count {
   align-self: stretch;
   border-right: 1px solid var(--color-border);
@@ -1314,6 +1355,10 @@ nav a.active:not(.site-title) {
 .library-empty-state p {
   font-size: 1rem;
   margin: 0;
+}
+
+.empty-state-action {
+  margin-top: 1rem;
 }
 
 /* Main song list. Each row has an open area and owner-only actions. */
@@ -1864,6 +1909,15 @@ nav a.active:not(.site-title) {
   .library-toolbar,
   .upload-card-main {
     grid-template-columns: 1fr;
+  }
+
+  .friends-library-callout {
+    align-items: stretch;
+    display: grid;
+  }
+
+  .friends-library-callout a {
+    justify-content: center;
   }
 
   .library-count {

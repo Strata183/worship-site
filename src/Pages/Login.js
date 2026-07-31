@@ -32,7 +32,7 @@ function Login() {
   const [submitting, setSubmitting] = useState(false);
 
   // If the user came from ProtectedRoute, go back there after login.
-  // Otherwise, default to the Songs library.
+  // Otherwise, default to My Library.
   const from = location.state?.from?.pathname || "/songs";
 
   if (user) {

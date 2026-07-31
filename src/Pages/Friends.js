@@ -178,7 +178,7 @@ function Friends() {
         <h1>Friends</h1>
         <p>
           Add a friend by email, then accept each other to unlock PDF
-          access.
+          access in the Songs page.
         </p>
       </section>
 
