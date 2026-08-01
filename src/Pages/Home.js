@@ -66,7 +66,7 @@ function Home() {
           most profound divine truth
         </h2>
         <p>
-          My name is Derek Smith and I hope to provide a place to find chord charts, tutorials, articles, and practical help for
+          My name is Derek Smith and this is my personal website! I hope to provide a place to find chord charts, tutorials, articles, and practical help for
           serving the local church in worship ministry
         </p>
       </section>
