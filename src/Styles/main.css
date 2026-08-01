@@ -407,6 +407,11 @@ nav a.active:not(.site-title) {
   width: 100%;
 }
 
+.resource-card-image-crop {
+  object-fit: cover;
+  padding: 0;
+}
+
 .resource-card p {
   font-size: 0.98rem;
   margin: 0;

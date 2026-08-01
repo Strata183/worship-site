@@ -19,6 +19,9 @@ const homeSections = [
     title: "Worthy for Song",
     description: "Worthy for Song, Lord willing, will be my first and upcoming album!",
     path: "/worthy-for-song",
+    image: "/worthy_for_song.png",
+    imageAlt: "Worthy for Song artwork",
+    imageClassName: "resource-card-image-crop",
   },
   {
     title: "VBS 2026, Kinder Music",
@@ -26,6 +29,7 @@ const homeSections = [
     path: "/vbs-2026-kinder-music",
     image: "/vbs-2026-god-of-light.png",
     imageAlt: "VBS 2026 God of Light artwork",
+    imageClassName: "resource-card-image-crop",
   },
   {
     title: "Learn with Tutorials",
@@ -76,7 +80,7 @@ function Home() {
             <p>{section.description}</p>
             {section.image && (
               <img
-                className="resource-card-image"
+                className={`resource-card-image ${section.imageClassName || ""}`}
                 src={section.image}
                 alt={section.imageAlt}
               />
