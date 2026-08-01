@@ -156,6 +156,28 @@ Home card image example:
 
 This is a good model for a simple informational page.
 
+## Pages/WorthyForSong.js
+
+`page-worthy`: page wrapper for the album page.
+
+`worthy-album-hero`: two-column album intro with artwork and copy.
+
+`worthy-album-art`: square album artwork image.
+
+`worthy-album-copy`: album title and description text.
+
+`worthy-track-panel`: white panel containing the track list.
+
+`worthy-track-heading`: label and heading above the track list.
+
+`worthy-track-list`: numbered album track list.
+
+`worthy-track-number`: two-digit track number.
+
+`worthy-track-title`: track name.
+
+Edit the `albumTracks` array in [WorthyForSong.js](src/Pages/WorthyForSong.js) to change the track names.
+
 ## Pages/VbsKinderMusic.js
 
 `page-vbs`: page wrapper.
@@ -294,7 +316,7 @@ Use these only in [Footer.js](src/Components/Footer.js).
 
 ## Creating A New Page
 
-For something like [WorthyForSong.js](src/Pages/WorthyForSong.js), use this shape:
+For a new page, use this shape:
 
 ```jsx
 function WorthyForSong() {

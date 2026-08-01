@@ -738,6 +738,85 @@ nav a.active:not(.site-title) {
 }
 
 /* ==========================================================================
+   Pages/WorthyForSong.js
+   ========================================================================== */
+
+.page-worthy {
+  max-width: 1040px;
+  text-align: left;
+}
+
+.worthy-album-hero {
+  align-items: center;
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+  margin: 0 auto 1.5rem;
+}
+
+.worthy-album-art {
+  aspect-ratio: 1;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: 0 16px 36px rgba(45, 67, 48, 0.14);
+  display: block;
+  object-fit: cover;
+  width: 100%;
+}
+
+.worthy-album-copy p {
+  margin-left: 0;
+  text-align: left;
+}
+
+.worthy-track-panel {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.worthy-track-heading {
+  margin-bottom: 1rem;
+}
+
+.worthy-track-heading h2 {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.worthy-track-list {
+  display: grid;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.worthy-track-list li {
+  align-items: center;
+  border-top: 1px solid var(--color-border);
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  padding: 0.9rem 0;
+}
+
+.worthy-track-number {
+  color: var(--color-accent);
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.worthy-track-title {
+  color: var(--color-text);
+  font-family: var(--font-heading);
+  font-weight: 800;
+}
+
+/* ==========================================================================
    Pages/VbsKinderMusic.js
    ========================================================================== */
 
@@ -1916,6 +1995,14 @@ nav a.active:not(.site-title) {
   .library-toolbar,
   .upload-card-main {
     grid-template-columns: 1fr;
+  }
+
+  .worthy-album-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .worthy-album-art {
+    max-width: 320px;
   }
 
   .friends-library-callout {
