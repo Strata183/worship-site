@@ -58,6 +58,14 @@ Used by every file.
 
 Use these only in [Navbar.js](src/Components/Navbar.js).
 
+## Components/KoFiWidget.js
+
+This component loads Ko-fi's floating donation widget script and draws the floating `Support me` button.
+
+It does not have local CSS in `main.css`; Ko-fi injects and styles the widget from their script.
+
+Edit `koFiUsername` in [KoFiWidget.js](src/Components/KoFiWidget.js) if the Ko-fi page name changes.
+
 ## Shared Page Helpers
 
 Used across several files.
@@ -88,6 +96,8 @@ Used across several files.
 
 `resource-card`: clickable home page card.
 
+`resource-card-disabled`: non-clickable card state, used when a feature needs setup before it can open.
+
 `resource-card-image`: small image inside a resource card.
 
 `resource-card-image-crop`: add to card images that should fill the image box with cropping.
@@ -101,6 +111,8 @@ Home card image example:
   imageClassName: "resource-card-image-crop",
 }
 ```
+
+The donation card uses `REACT_APP_DONATION_URL` from `.env.local`. See [.env.example](.env.example).
 
 ## Pages/About.js
 

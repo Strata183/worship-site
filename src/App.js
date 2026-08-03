@@ -3,6 +3,7 @@ import { AuthProvider } from "./AuthContext";
 
 import Navbar from "./Components/Navbar";
 import Footer from "./Components/Footer";
+import KoFiWidget from "./Components/KoFiWidget";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import ScrollToTop from "./Components/ScrollToTop";
 
@@ -78,6 +79,9 @@ function App() {
 
         {/* Footer appears on every route because it also sits outside <Routes>. */}
         <Footer />
+
+        {/* Ko-fi donation widget floats above the app without affecting routes. */}
+        <KoFiWidget />
       </BrowserRouter>
     </AuthProvider>
   );

@@ -402,6 +402,18 @@ nav a.active:not(.site-title) {
   transform: translateY(-2px);
 }
 
+.resource-card-disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.resource-card-disabled:hover,
+.resource-card-disabled:focus {
+  border-color: var(--color-border);
+  box-shadow: none;
+  transform: none;
+}
+
 .resource-card h2 {
   font-family: var(--font-heading);
   font-size: 1.25rem;
@@ -438,6 +450,10 @@ nav a.active:not(.site-title) {
   font-weight: 800;
   margin-top: auto;
   padding-top: 1.25rem;
+}
+
+.resource-card-disabled span {
+  color: var(--color-muted);
 }
 
 /* ==========================================================================

@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 
+const donationUrl = process.env.REACT_APP_DONATION_URL;
+
 // This array is the data for the cards on the home page.
 // Keeping the card information here makes the JSX below shorter.
 const homeSections = [
@@ -46,6 +48,12 @@ const homeSections = [
     description: "Learn why this resource exists and who it is meant to serve.",
     path: "/about",
   },
+  {
+    title: "Support Worthy for Worship",
+    description: "Give a donation through Ko-fi to help support this resource.",
+    externalUrl: donationUrl,
+    actionLabel: donationUrl ? "Donate on Ko-fi" : "Donation link coming soon",
+  },
 ];
 
 // Home is the landing page visitors see at "/".
@@ -73,21 +81,55 @@ function Home() {
 
       {/* The cards are created by looping over homeSections with map(). */}
       <section className="resource-grid" aria-label="Worship resource sections">
-        {homeSections.map((section) => (
+        {homeSections.map((section) => {
+          const cardContent = (
+            <>
+              <h2>{section.title}</h2>
+              <p>{section.description}</p>
+              {section.image && (
+                <img
+                  className={`resource-card-image ${section.imageClassName || ""}`}
+                  src={section.image}
+                  alt={section.imageAlt}
+                />
+              )}
+              <span>{section.actionLabel || "Open section"}</span>
+            </>
+          );
+
+          if (section.externalUrl) {
+            return (
+              <a
+                className="resource-card"
+                href={section.externalUrl}
+                key={section.title}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                {cardContent}
+              </a>
+            );
+          }
+
+          if (!section.path) {
+            return (
+              <div
+                aria-disabled="true"
+                className="resource-card resource-card-disabled"
+                key={section.title}
+              >
+                {cardContent}
+              </div>
+            );
+          }
+
           // key helps React track each card efficiently.
-          <Link className="resource-card" key={section.title} to={section.path}>
-            <h2>{section.title}</h2>
-            <p>{section.description}</p>
-            {section.image && (
-              <img
-                className={`resource-card-image ${section.imageClassName || ""}`}
-                src={section.image}
-                alt={section.imageAlt}
-              />
-            )}
-            <span>Open section</span>
-          </Link>
-        ))}
+          return (
+            <Link className="resource-card" key={section.title} to={section.path}>
+              {cardContent}
+            </Link>
+          );
+        })}
       </section>
     </main>
   );
