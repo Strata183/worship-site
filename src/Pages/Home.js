@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
-const donationUrl = process.env.REACT_APP_DONATION_URL;
+const donationUrl =
+  process.env.REACT_APP_DONATION_URL || "https://ko-fi.com/dereksmith183";
 
 // This array is the data for the cards on the home page.
 // Keeping the card information here makes the JSX below shorter.
