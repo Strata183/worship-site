@@ -51,7 +51,7 @@ const homeSections = [
   },
   {
     title: "Support Worthy for Worship",
-    description: "Give a donation through Ko-fi to help support this resource.",
+    description: "Give a tip through Ko-fi to help support this resource.",
     externalUrl: donationUrl,
     actionLabel: donationUrl ? "Donate on Ko-fi" : "Donation link coming soon",
   },
