@@ -17,6 +17,14 @@ function About() {
       {/* Scripture quotations are grouped in the reusable verse-ref style. */}
       <section className="about-content">
         <p className="verse-ref">
+          "But an hour is coming, and now is, when the true worshipers will
+          worship the Father in spirit and truth; for such people the Father
+          seeks to be His worshipers. God is spirit, and those who worship Him
+          must worship in spirit and truth."
+          <span>John 4:23-24 (LSB)</span>
+        </p>
+
+        <p className="verse-ref">
           "Let the word of Christ dwell in you richly, with all wisdom
           teaching and admonishing one another with psalms and hymns
           and spiritual songs, singing with gratefulness in your hearts

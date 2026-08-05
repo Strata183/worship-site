@@ -132,6 +132,7 @@ function Home() {
           );
         })}
       </section>
+
     </main>
   );
 }
