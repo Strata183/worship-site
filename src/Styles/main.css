@@ -1042,7 +1042,84 @@ nav a.active:not(.site-title) {
   align-items: center;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  max-width: 1360px;
+  text-align: left;
+}
+
+.prayer-heading {
+  margin: 0 auto 2rem;
+  max-width: 760px;
+  text-align: center;
+  width: 100%;
+}
+
+.prayer-heading h1 {
+  text-align: center;
+}
+
+.prayer-heading .eyebrow {
+  margin-bottom: 0.65rem;
+  text-align: center;
+}
+
+.prayer-layout {
+  align-items: start;
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(180px, 1fr) minmax(0, 820px) minmax(180px, 1fr);
+  width: 100%;
+}
+
+.prayer-toc {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  justify-self: end;
+  padding: 1rem;
+  position: sticky;
+  top: 6rem;
+  width: min(100%, 220px);
+}
+
+.prayer-toc h2 {
+  color: var(--color-text);
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  line-height: 1.2;
+  margin: 0 0 0.75rem;
+}
+
+.prayer-toc ol {
+  display: grid;
+  gap: 0.35rem;
+  list-style-position: inside;
+  margin: 0;
+  padding: 0;
+}
+
+.prayer-toc li {
+  color: var(--color-muted);
+  font-size: 0.92rem;
+}
+
+.prayer-toc a {
+  border-radius: 6px;
+  color: var(--color-accent);
+  font-weight: 800;
+  padding: 0.25rem 0.35rem;
+  text-decoration: none;
+}
+
+.prayer-toc a:hover,
+.prayer-toc a:focus {
+  background-color: var(--color-accent-light);
+}
+
+.prayer-content {
+  display: grid;
+  gap: 1.25rem;
+  grid-column: 2;
+  min-width: 0;
 }
 
 .prayer-section {
@@ -1051,6 +1128,94 @@ nav a.active:not(.site-title) {
   border-radius: 8px;
   padding: 1.5rem;
   text-align: left;
+  width: 100%;
+}
+
+.prayer-section p {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  margin: 0;
+  max-width: none;
+  text-align: left;
+}
+
+.prayer-guide {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+}
+
+.prayer-point {
+  align-items: start;
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-left: 5px solid var(--color-accent);
+  border-radius: 8px;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding: 1.25rem;
+  scroll-margin-top: 6.5rem;
+}
+
+.prayer-point-number {
+  align-items: center;
+  background-color: var(--color-accent);
+  border-radius: 999px;
+  color: white;
+  display: inline-flex;
+  font-weight: 800;
+  height: 2.25rem;
+  justify-content: center;
+  line-height: 1;
+  width: 2.25rem;
+}
+
+.prayer-point h2 {
+  color: var(--color-text);
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  line-height: 1.2;
+  margin: 0 0 0.35rem;
+}
+
+.prayer-point p {
+  font-size: 1rem;
+  line-height: 1.65;
+  margin: 0;
+  max-width: none;
+  text-align: left;
+}
+
+.prayer-point-list {
+  color: var(--color-muted);
+  display: grid;
+  gap: 0.8rem;
+  line-height: 1.65;
+  list-style-position: outside;
+  margin: 0;
+  padding-left: 1.15rem;
+}
+
+.prayer-point-list > li::marker {
+  color: var(--color-accent);
+}
+
+.prayer-point-list > li > span {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.prayer-point-list ul {
+  display: grid;
+  gap: 0.35rem;
+  list-style-type: circle;
+  margin: 0.4rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.prayer-point-list ul li::marker {
+  color: var(--color-border);
 }
 
 
@@ -2000,6 +2165,20 @@ nav a.active:not(.site-title) {
 
   .library-sidebar {
     position: static;
+  }
+
+  .prayer-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .prayer-toc {
+    justify-self: stretch;
+    position: static;
+    width: 100%;
+  }
+
+  .prayer-content {
+    grid-column: auto;
   }
 
   .friend-dashboard,
