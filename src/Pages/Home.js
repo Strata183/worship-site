@@ -54,6 +54,9 @@ const homeSections = [
     title: "Prayer Guide",
     description: "Here is a helpful resource to guide your prayer time with the Lord.",
     path: "/prayer",
+    image: "/prayer-bible.png",
+    imageAlt: "Prayer Image",
+    imageClassName: "resource-card-image-crop",
   },
   {
     title: "Support Worthy for Worship",
