@@ -34,11 +34,12 @@ const homeSections = [
     imageAlt: "VBS 2026 God of Light artwork",
     imageClassName: "resource-card-image-crop",
   },
-  {
-    title: "Learn with Tutorials",
-    description: "Practice with walkthroughs made for growing worship leaders.",
-    path: "/tutorials",
-  },
+  // THIS IS A CARD FOR TUTORIALS THAT I WILL ADD BACK LATER. RIGHT NOW I DON'T HAVE TUTORIALS SO I DON'T NEED THIS CARD
+  // {
+  //   title: "Learn with Tutorials",   
+  //   description: "Practice with walkthroughs made for growing worship leaders.",
+  //   path: "/tutorials",
+  // },
   {
     title: "Read Articles",
     description: "Explore thoughts on biblical worship and serving the church.",
@@ -50,11 +51,17 @@ const homeSections = [
     path: "/about",
   },
   {
+    title: "Prayer Guide",
+    description: "Here is a helpful resource to guide your prayer time with the Lord.",
+    path: "/prayer",
+  },
+  {
     title: "Support Worthy for Worship",
     description: "Give a tip through Ko-fi to help support this resource.",
     externalUrl: donationUrl,
     actionLabel: donationUrl ? "Donate on Ko-fi" : "Donation link coming soon",
-  },
+  }
+  
 ];
 
 // Home is the landing page visitors see at "/".

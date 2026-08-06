@@ -1035,6 +1035,45 @@ nav a.active:not(.site-title) {
 }
 
 /* ==========================================================================
+   Pages/Prayer.js
+   ========================================================================== */
+
+.page-prayer {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.prayer-section {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: left;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================================
    Components/Footer.js
    ========================================================================== */
 

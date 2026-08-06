@@ -17,6 +17,7 @@ import VbsKinderMusic from "./Pages/VbsKinderMusic";
 import Friends from "./Pages/Friends";
 import Library from "./Pages/Library";
 import Login from "./Pages/Login";
+import Prayer from "./Pages/Prayer";
 
 // App is the main "layout" component for the whole website.
 // It decides which page appears for each URL.
@@ -51,6 +52,7 @@ function App() {
           <Route path="/tutorials" element={<Tutorials />} />
           <Route path="/steadfast" element={<Steadfast />} />
           <Route path="/worthy-for-song" element={<WorthyForSong />} />
+          <Route path="/prayer" element={<Prayer />} />
           <Route
             path="/vbs-2026-kinder-music"
             element={
