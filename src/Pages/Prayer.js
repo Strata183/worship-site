@@ -13,22 +13,19 @@ const prayerPoints = [
       {
         text: "Achknowledge dependance upon the Holy Spirit",
         children: [
-          "Placeholder sub-point for slowing down before prayer.",
-          "Placeholder sub-point for remembering your dependence on God.",
+          "Romans 8",
         ],
       },
       {
         text: "Pray that the Father would recieve this time as worship",
         children: [
-          "Placeholder sub-point for slowing down before prayer.",
-          "Placeholder sub-point for remembering your dependence on God.",
+          "Psalm 104:34; Psalm 141:2",
         ],
       },
       {
         text: "Confess your sin",
         children: [
-          "Placeholder sub-point for slowing down before prayer.",
-          "Placeholder sub-point for remembering your dependence on God.",
+          "1 John 1:7,9; Psalm 66:18; 1 Peter 3:7; Matthew 6:12",
         ],
       },
     ],
@@ -38,17 +35,33 @@ const prayerPoints = [
     title: "Praise and Thanksgiving",
     bullets: [
       {
-        text: "Praise God for who He is",
+        text: "Delight in all the God is for you in Christ",
         children: [
-          "Placeholder sub-point for God's holiness.",
-          "Placeholder sub-point for God's mercy.",
+          "Psalm 37:4; Psalm 32:11; Psalm 40:16; Psalm 90:14",
         ],
       },
       {
-        text: "Thank God for what He has done",
+        text: "Meditate on the beauty of His manifold perfections",
         children: [
-          "Placeholder sub-point for specific answered prayers.",
-          "Placeholder sub-point for daily provisions.",
+          "Psalm 145:3-9",
+        ],
+      },
+      {
+        text: "Meditate on His wondorous deeds throughout the ages",
+        children: [
+          "Psalm 145:4-5; Psalm 111:2; Psalm 105, 107",
+        ],
+      },
+      {
+        text: "Ascribe to the Lord glory due His name",
+        children: [
+          "Psalm 96",
+        ],
+      },
+      {
+        text: "Honor Him as God by giving thanks",
+        children: [
+          "Romans 1:21; 1 Thessolonians 5:17-18; James 1:17",
         ],
       },
     ],
@@ -58,17 +71,22 @@ const prayerPoints = [
     title: "God-Centered Petitions",
     bullets: [
       {
-        text: "Pray for God's name to be honored",
+        text: "Pray for God's name to be glorified above all things by all peoples",
         children: [
-          "Placeholder sub-point for worship in your own life.",
-          "Placeholder sub-point for worship in the church.",
+          "Matthew 6:9",
         ],
       },
       {
-        text: "Pray for God's will to be done",
+        text: "Pray for His kingdom to increase through the ministry of the church",
         children: [
-          "Placeholder sub-point for obedience.",
-          "Placeholder sub-point for wisdom.",
+          "Matthew 6:10",
+          "Salvation, second-coming of Christ"
+        ],
+      },
+      {
+        text: "Pray for His will to be done",
+        children: [
+
         ],
       },
     ],
@@ -78,57 +96,99 @@ const prayerPoints = [
     title: "Personal Petitions",
     bullets: [
       {
-        text: "Bring your needs before the Lord",
+        text: "Pray for growth in godliness",
         children: [
-          "Placeholder sub-point for spiritual needs.",
-          "Placeholder sub-point for practical needs.",
+          
         ],
       },
       {
-        text: "Ask for growth in Christlikeness",
+        text: "Pray for opprotunities of personal ministry",
         children: [
-          "Placeholder sub-point for humility.",
-          "Placeholder sub-point for faithfulness.",
+     
+        ],
+      },
+      {
+        text: "Pray for God to continue to provide for your daily necessities",
+        children: [
+          "Continued dependance every single day",
+        ],
+      },
+      {
+        text: "Pray for freedom from temptation",
+        children: [
+         
+        ],
+      },
+      {
+        text: "Pray for strength to persevere",
+        children: [
+          "Affliction with You is better than no afflication without You",
         ],
       },
     ],
   },
   {
     id: "intercessory-prayer",
-    title: "Intercessory Prayer",
+    title: "Intercessory Prayer (example structure)",
     bullets: [
       {
-        text: "Pray for other believers",
+        text: "Monday",
         children: [
-          "Placeholder sub-point for family.",
-          "Placeholder sub-point for church members.",
+          "Pray for: Immediate/Extended family",
         ],
       },
       {
-        text: "Pray for ministry and witness",
+        text: "Tuesday",
         children: [
-          "Placeholder sub-point for pastors and leaders.",
-          "Placeholder sub-point for gospel opportunities.",
+          "Pray for: Small group from Bible study",
+        ],
+      },
+      {
+        text: "Wednesday",
+        children: [
+          "Pray for: Pastors, Elders, Missionaries",
+        ],
+      },
+      {
+        text: "Thursday",
+        children: [
+          "Pray for: Co-workers",
+        ],
+      },
+      {
+        text: "Friday",
+        children: [
+          "Pray for: Other friends",
         ],
       },
     ],
   },
   {
     id: "meditation",
-    title: "Meditation",
+    title: "Meditation (Pray through scripture)",
     bullets: [
       {
-        text: "Reflect on Scripture",
+        text: "Not a random passage",
         children: [
-          "Placeholder sub-point for a verse or passage.",
-          "Placeholder sub-point for what it teaches about God.",
+        
         ],
       },
       {
-        text: "Respond to truth in prayer",
+        text: "Maybe main/supplimental texts from your pastor's sermons along with review from sermon notes",
         children: [
-          "Placeholder sub-point for worship.",
-          "Placeholder sub-point for application.",
+          "Imagine if your pastor knew that you had spend prayer time through the materials that he spend 10's of hours a week studying",
+        ],
+      },
+            {
+        text: "Maybe a Psalm a day",
+        children: [
+         
+        ],
+      },
+            {
+        text: "Devotion guide",
+        children: [
+          "ex. Be Thou My Vision: A Liturgy for Daily Worship (Gibson)",
         ],
       },
     ],
@@ -138,17 +198,9 @@ const prayerPoints = [
     title: "Summarize",
     bullets: [
       {
-        text: "Review what you prayed",
+        text: "Thank God for the time spent in His word",
         children: [
-          "Placeholder sub-point for main requests.",
-          "Placeholder sub-point for convictions or reminders.",
-        ],
-      },
-      {
-        text: "Close with trust",
-        children: [
-          "Placeholder sub-point for resting in God's care.",
-          "Placeholder sub-point for committing the day to Him.",
+          "Psalm 27:4",
         ],
       },
     ],
@@ -197,11 +249,21 @@ function Prayer() {
         <div className="prayer-content">
           <section className="prayer-section">
             <p>
-              Prayer is one of the most important things we do as Christians maintain our
-              relationship with God. I recently listened to a sermon by one of the
+              Prayer is a privillage for the Christian to maintain a
+              relationship with God. I recently listened to a sermon by one of my
               elders, Mike Riccardi, and he presented 7 areas of prayer that we
               should be focusing on and that will direct our prayer time by having a
               proper plan. I wanted to list them here as a practical resource!
+            </p>
+            <p className="prayer-credit">
+              Adapted from a sermon by Mike Riccardi.{" "}
+              <a
+                href="https://gracechurch.org/sermons/25281"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Listen to the sermon
+              </a>
             </p>
           </section>
 
