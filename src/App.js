@@ -18,6 +18,7 @@ import Friends from "./Pages/Friends";
 import Library from "./Pages/Library";
 import Login from "./Pages/Login";
 import Prayer from "./Pages/Prayer";
+import Resources from "./Pages/Resources";
 
 // App is the main "layout" component for the whole website.
 // It decides which page appears for each URL.
@@ -49,6 +50,7 @@ function App() {
             }
           />
           {/* Public informational pages. */}
+          <Route path="/resources" element={<Resources />} />
           <Route path="/tutorials" element={<Tutorials />} />
           <Route path="/steadfast" element={<Steadfast />} />
           <Route path="/worthy-for-song" element={<WorthyForSong />} />

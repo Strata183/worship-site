@@ -26,6 +26,10 @@ function Navbar() {
           </li>
 
           <li>
+            <NavLink to="/resources">Resources</NavLink>
+          </li>
+
+          <li>
             <NavLink to="/tutorials">Tutorials</NavLink>
           </li>
           <li>
