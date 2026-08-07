@@ -127,45 +127,61 @@ function MastersBibleStudy() {
     setLoadingRequests(false);
   }, []);
 
+  const loadAccessState = useCallback(async () => {
+    if (!user) {
+      return false;
+    }
+
+    setCheckingAccess(true);
+
+    const [accessResult, adminResult, requestResult] = await Promise.all([
+      supabase
+        .from("masters_bible_study_access")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle(),
+      supabase.rpc("is_masters_bible_study_admin", {
+        user_id: user.id,
+      }),
+      supabase
+        .from("masters_bible_study_access_requests")
+        .select("status")
+        .eq("user_id", user.id)
+        .maybeSingle(),
+    ]);
+
+    const accessStateError =
+      accessResult.error || adminResult.error || requestResult.error;
+
+    if (accessStateError) {
+      setAccessError(accessStateError.message);
+      setCheckingAccess(false);
+      return false;
+    }
+
+    const nextIsAdmin = Boolean(adminResult.data);
+    const nextIsUnlocked = Boolean(accessResult.data) || nextIsAdmin;
+
+    setIsAdmin(nextIsAdmin);
+    setIsUnlocked(nextIsUnlocked);
+    setRequestStatus(requestResult.data?.status || "");
+    setCheckingAccess(false);
+
+    if (nextIsAdmin) {
+      loadAccessRequests();
+    }
+
+    return nextIsUnlocked;
+  }, [loadAccessRequests, user]);
+
   useEffect(() => {
     let ignore = false;
 
     async function checkAccess() {
-      if (!user) {
-        return;
-      }
-
-      setCheckingAccess(true);
-
-      const [accessResult, adminResult, requestResult] = await Promise.all([
-        supabase
-          .from("masters_bible_study_access")
-          .select("user_id")
-          .eq("user_id", user.id)
-          .maybeSingle(),
-        supabase.rpc("is_masters_bible_study_admin", {
-          user_id: user.id,
-        }),
-        supabase
-          .from("masters_bible_study_access_requests")
-          .select("status")
-          .eq("user_id", user.id)
-          .maybeSingle(),
-      ]);
+      await loadAccessState();
 
       if (ignore) {
-        return;
-      }
-
-      const nextIsAdmin = Boolean(adminResult.data);
-
-      setIsAdmin(nextIsAdmin);
-      setIsUnlocked(Boolean(accessResult.data) || nextIsAdmin);
-      setRequestStatus(requestResult.data?.status || "");
-      setCheckingAccess(false);
-
-      if (nextIsAdmin) {
-        loadAccessRequests();
+        setCheckingAccess(false);
       }
     }
 
@@ -174,7 +190,7 @@ function MastersBibleStudy() {
     return () => {
       ignore = true;
     };
-  }, [loadAccessRequests, user]);
+  }, [loadAccessState]);
 
   async function handleAccessSubmit(event) {
     event.preventDefault();
@@ -191,8 +207,15 @@ function MastersBibleStudy() {
     }
 
     setAccessCode("");
-    setIsUnlocked(true);
-    setAccessMessage("Access unlocked.");
+    const savedAccess = await loadAccessState();
+
+    if (savedAccess) {
+      setAccessMessage("Access unlocked.");
+    } else {
+      setAccessError(
+        "The password worked, but saved access was not found. Check that the latest Supabase migration has been applied."
+      );
+    }
   }
 
   async function requestAccess() {
