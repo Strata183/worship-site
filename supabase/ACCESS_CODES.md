@@ -28,4 +28,16 @@ on conflict (page_key) do update
       updated_at = now();
 ```
 
+```sql
+insert into public.page_access_codes (page_key, access_code_hash, updated_at)
+values (
+  'steadfast',
+  extensions.crypt('PUT_STEADFAST_PASSWORD_HERE', extensions.gen_salt('bf')),
+  now()
+)
+on conflict (page_key) do update
+  set access_code_hash = excluded.access_code_hash,
+      updated_at = now();
+```
+
 Use the real passwords only in Supabase. Do not commit them to GitHub.

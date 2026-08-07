@@ -53,7 +53,14 @@ function App() {
           {/* Public informational pages. */}
           <Route path="/resources" element={<Resources />} />
           <Route path="/tutorials" element={<Tutorials />} />
-          <Route path="/steadfast" element={<Steadfast />} />
+          <Route
+            path="/steadfast"
+            element={
+              <ProtectedRoute>
+                <Steadfast />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/worthy-for-song" element={<WorthyForSong />} />
           <Route path="/prayer" element={<Prayer />} />
           <Route
