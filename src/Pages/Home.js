@@ -33,19 +33,19 @@ const homeSections = [
     imageClassName: "resource-card-image-crop",
   },
   {
-    title: "Master's Bible Study",
+    title: "Master's Bible Study 🔒",
     description: "Resources such as song lyrics, prayer requests, and notes from the Master's Bible study.",
     path: "/masters-bible-study",
   }, 
   {
-    title: "Steadfast",
+    title: "Steadfast 🔒",
     description: "Find resources for practicing and leading Steadfast in worship.",
     path: "/steadfast",
     image: "/steadfast-banner.png",
     imageAlt: "Steadfast logo",
   },
   {
-    title: "VBS 2026, Kinder Music",
+    title: "VBS 2026, Kinder Music 🔒",
     description: "Charts and practice resources for the Kinder music team.",
     path: "/vbs-2026-kinder-music",
     image: "/vbs-2026-god-of-light.png",
