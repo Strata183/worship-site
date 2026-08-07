@@ -56,10 +56,21 @@ function App() {
           <Route path="/steadfast" element={<Steadfast />} />
           <Route path="/worthy-for-song" element={<WorthyForSong />} />
           <Route path="/prayer" element={<Prayer />} />
-          <Route path="/masters-bible-study" element={<MastersBibleStudy />} />
+          <Route
+            path="/masters-bible-study"
+            element={
+              <ProtectedRoute>
+                <MastersBibleStudy />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/masters-bible-study/:weekSlug"
-            element={<MastersBibleStudy />}
+            element={
+              <ProtectedRoute>
+                <MastersBibleStudy />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/vbs-2026-kinder-music"

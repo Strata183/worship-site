@@ -1,6 +1,5 @@
--- Allow signed-in users to claim access to the VBS Kinder Music page with a
--- shared team password. The password hash is stored in public.page_access_codes,
--- so the real password does not live in this repo.
+-- Move shared page access passwords out of SQL function bodies.
+-- Set the real passwords directly in Supabase with hashed rows in page_access_codes.
 
 create extension if not exists pgcrypto with schema extensions;
 
@@ -43,21 +42,6 @@ $$;
 
 grant execute on function public.access_code_matches(text, text) to authenticated;
 
-create table if not exists public.vbs_kinder_access (
-  user_id uuid primary key references auth.users (id) on delete cascade,
-  granted_at timestamptz not null default now()
-);
-
-alter table public.vbs_kinder_access enable row level security;
-
-drop policy if exists "Users can read their own VBS Kinder access" on public.vbs_kinder_access;
-
-create policy "Users can read their own VBS Kinder access"
-on public.vbs_kinder_access
-for select
-to authenticated
-using (auth.uid() = user_id);
-
 create or replace function public.claim_vbs_kinder_access(access_code text)
 returns boolean
 language plpgsql
@@ -85,5 +69,39 @@ end;
 $$;
 
 grant execute on function public.claim_vbs_kinder_access(text) to authenticated;
+
+create or replace function public.claim_masters_bible_study_access(access_code text)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  requester uuid := auth.uid();
+begin
+  if requester is null then
+    raise exception 'You must be signed in to unlock Master''s Bible Study.';
+  end if;
+
+  if not public.access_code_matches('masters_bible_study', access_code) then
+    raise exception 'That password did not work. Please try again.';
+  end if;
+
+  insert into public.masters_bible_study_access (user_id)
+  values (requester)
+  on conflict (user_id) do update
+    set granted_at = public.masters_bible_study_access.granted_at;
+
+  update public.masters_bible_study_access_requests
+  set status = 'approved',
+      reviewed_at = now(),
+      reviewed_by = requester
+  where user_id = requester;
+
+  return true;
+end;
+$$;
+
+grant execute on function public.claim_masters_bible_study_access(text) to authenticated;
 
 notify pgrst, 'reload schema';

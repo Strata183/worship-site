@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
+import { useAuth } from "../AuthContext";
 import mastersBibleStudyWeeks from "../Data/mastersBibleStudyWeeks";
+import { supabase } from "../supabaseClient";
 
 const sortedStudyWeeks = [...mastersBibleStudyWeeks].sort(
   (firstWeek, secondWeek) => new Date(secondWeek.date) - new Date(firstWeek.date)
@@ -92,14 +94,202 @@ function NoteBody({ body }) {
 }
 
 function MastersBibleStudy() {
+  const { user } = useAuth();
   const { weekSlug } = useParams();
+  const [accessCode, setAccessCode] = useState("");
+  const [accessError, setAccessError] = useState("");
+  const [accessMessage, setAccessMessage] = useState("");
+  const [checkingAccess, setCheckingAccess] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [requestStatus, setRequestStatus] = useState("");
+  const [accessRequests, setAccessRequests] = useState([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
   const newestWeek = sortedStudyWeeks[0];
   const selectedWeek = weekSlug
     ? sortedStudyWeeks.find((week) => week.date === weekSlug)
     : newestWeek;
 
+  const loadAccessRequests = useCallback(async () => {
+    setLoadingRequests(true);
+
+    const { data, error } = await supabase.rpc(
+      "list_masters_bible_study_access_requests"
+    );
+
+    if (error) {
+      setAccessError(error.message);
+      setAccessRequests([]);
+    } else {
+      setAccessRequests(data || []);
+    }
+
+    setLoadingRequests(false);
+  }, []);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function checkAccess() {
+      if (!user) {
+        return;
+      }
+
+      setCheckingAccess(true);
+
+      const [accessResult, adminResult, requestResult] = await Promise.all([
+        supabase
+          .from("masters_bible_study_access")
+          .select("user_id")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        supabase.rpc("is_masters_bible_study_admin", {
+          user_id: user.id,
+        }),
+        supabase
+          .from("masters_bible_study_access_requests")
+          .select("status")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+      ]);
+
+      if (ignore) {
+        return;
+      }
+
+      const nextIsAdmin = Boolean(adminResult.data);
+
+      setIsAdmin(nextIsAdmin);
+      setIsUnlocked(Boolean(accessResult.data) || nextIsAdmin);
+      setRequestStatus(requestResult.data?.status || "");
+      setCheckingAccess(false);
+
+      if (nextIsAdmin) {
+        loadAccessRequests();
+      }
+    }
+
+    checkAccess();
+
+    return () => {
+      ignore = true;
+    };
+  }, [loadAccessRequests, user]);
+
+  async function handleAccessSubmit(event) {
+    event.preventDefault();
+    setAccessError("");
+    setAccessMessage("");
+
+    const { error } = await supabase.rpc("claim_masters_bible_study_access", {
+      access_code: accessCode,
+    });
+
+    if (error) {
+      setAccessError(error.message);
+      return;
+    }
+
+    setAccessCode("");
+    setIsUnlocked(true);
+    setAccessMessage("Access unlocked.");
+  }
+
+  async function requestAccess() {
+    setAccessError("");
+    setAccessMessage("");
+
+    const { error } = await supabase.rpc("request_masters_bible_study_access");
+
+    if (error) {
+      setAccessError(error.message);
+      return;
+    }
+
+    setRequestStatus("pending");
+    setAccessMessage("Access request sent.");
+  }
+
+  async function reviewAccessRequest(requestId, nextStatus) {
+    setAccessError("");
+    setAccessMessage("");
+
+    const { error } = await supabase.rpc(
+      "review_masters_bible_study_access_request",
+      {
+        request_id: requestId,
+        next_status: nextStatus,
+      }
+    );
+
+    if (error) {
+      setAccessError(error.message);
+      return;
+    }
+
+    setAccessMessage(`Request ${nextStatus}.`);
+    loadAccessRequests();
+  }
+
   if (!selectedWeek && newestWeek) {
     return <Navigate replace to={`/masters-bible-study/${newestWeek.date}`} />;
+  }
+
+  if (checkingAccess) {
+    return (
+      <main className="page page-masters-study">
+        <p>Checking Master&apos;s Bible Study access...</p>
+      </main>
+    );
+  }
+
+  if (!isUnlocked) {
+    return (
+      <main className="page page-masters-study">
+        <section className="masters-hero">
+          <p className="eyebrow">Weekly gathering</p>
+          <h1>Master&apos;s Bible Study</h1>
+          <p>
+            Enter the Bible study password or request access for your account.
+          </p>
+        </section>
+
+        <section className="masters-access-panel">
+          <form className="form-stack" onSubmit={handleAccessSubmit}>
+            <label htmlFor="masters-access-code">Password</label>
+            <input
+              id="masters-access-code"
+              onChange={(event) => setAccessCode(event.target.value)}
+              type="password"
+              value={accessCode}
+            />
+
+            <button className="primary-button" type="submit">
+              Unlock Bible study
+            </button>
+          </form>
+
+          <div className="masters-request-access">
+            <h2>Need access?</h2>
+            <p>
+              Send a request and an approved admin can unlock this page for your
+              account.
+            </p>
+            <button
+              className="secondary-button"
+              disabled={requestStatus === "pending"}
+              onClick={requestAccess}
+              type="button"
+            >
+              {requestStatus === "pending" ? "Request pending" : "Request access"}
+            </button>
+          </div>
+
+          {accessError && <p className="form-message error">{accessError}</p>}
+          {accessMessage && <p className="form-message success">{accessMessage}</p>}
+        </section>
+      </main>
+    );
   }
 
   return (
@@ -204,6 +394,56 @@ function MastersBibleStudy() {
           </section>
         </section>
       </section>
+
+      {isAdmin && (
+        <section className="masters-admin-panel">
+          <div className="masters-panel-heading">
+            <p className="eyebrow">Admin</p>
+            <h2>Access Requests</h2>
+          </div>
+
+          {accessError && <p className="form-message error">{accessError}</p>}
+          {accessMessage && <p className="form-message success">{accessMessage}</p>}
+
+          {loadingRequests ? (
+            <p className="empty-state">Loading access requests...</p>
+          ) : accessRequests.length === 0 ? (
+            <p className="empty-state">No access requests yet.</p>
+          ) : (
+            <ul className="masters-access-request-list">
+              {accessRequests.map((request) => (
+                <li key={request.id}>
+                  <div>
+                    <strong>
+                      {request.display_name || request.email || "Unknown user"}
+                    </strong>
+                    {request.email && <span>{request.email}</span>}
+                    <small>Status: {request.status}</small>
+                  </div>
+
+                  {request.status === "pending" && (
+                    <div className="row-actions">
+                      <button
+                        type="button"
+                        onClick={() => reviewAccessRequest(request.id, "approved")}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        className="subtle-danger-button"
+                        type="button"
+                        onClick={() => reviewAccessRequest(request.id, "rejected")}
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
     </main>
   );
 }
