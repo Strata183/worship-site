@@ -12,11 +12,17 @@ const homeSections = [
     path: "/songs",
   },
   {
-    title: "Steadfast",
-    description: "Find resources for practicing and leading Steadfast in worship.",
-    path: "/steadfast",
-    image: "/steadfast-banner.png",
-    imageAlt: "Steadfast logo",
+    title: "What Is Worship?",
+    description: "Read a biblical look at worship and why it reaches beyond music.",
+    path: "/articles/what-is-worship",
+  },
+  {
+    title: "Prayer Guide",
+    description: "Here is a helpful resource to guide your prayer time with the Lord.",
+    path: "/prayer",
+    image: "/prayer-bible.png",
+    imageAlt: "Prayer Image",
+    imageClassName: "resource-card-image-crop",
   },
   {
     title: "Worthy for Song",
@@ -25,6 +31,18 @@ const homeSections = [
     image: "/worthy_for_song.png",
     imageAlt: "Worthy for Song artwork",
     imageClassName: "resource-card-image-crop",
+  },
+  {
+    title: "Master's Bible Study",
+    description: "Resources such as song lyrics, prayer requests, and notes from the Master's Bible study.",
+    path: "/masters-bible-study",
+  }, 
+  {
+    title: "Steadfast",
+    description: "Find resources for practicing and leading Steadfast in worship.",
+    path: "/steadfast",
+    image: "/steadfast-banner.png",
+    imageAlt: "Steadfast logo",
   },
   {
     title: "VBS 2026, Kinder Music",
@@ -40,29 +58,11 @@ const homeSections = [
   //   description: "Practice with walkthroughs made for growing worship leaders.",
   //   path: "/tutorials",
   // },
-  {
-    title: "Read Articles",
-    description: "Explore thoughts on biblical worship and serving the church.",
-    path: "/articles",
-  },
   // {
   //   title: "About Worthy for Worship",
   //   description: "Learn why this resource exists and who it is meant to serve.",
   //   path: "/about",
   // },
-  {
-    title: "Master's Bible Study",
-    description: "Resources such as song lyrics, prayer requests, and notes from the Master's Bible study.",
-    path: "/masters-bible-study",
-  }, 
-  {
-    title: "Prayer Guide",
-    description: "Here is a helpful resource to guide your prayer time with the Lord.",
-    path: "/prayer",
-    image: "/prayer-bible.png",
-    imageAlt: "Prayer Image",
-    imageClassName: "resource-card-image-crop",
-  },
   {
     title: "Support Worthy for Worship",
     description: "Give a tip through Ko-fi to help support this resource.",
