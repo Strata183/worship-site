@@ -11,13 +11,13 @@ const prayerPoints = [
         
       },
       {
-        text: "Achknowledge dependance upon the Holy Spirit",
+        text: "Acknowledge dependence upon the Holy Spirit",
         children: [
           "Romans 8",
         ],
       },
       {
-        text: "Pray that the Father would recieve this time as worship",
+        text: "Pray that the Father would receive this time as worship",
         children: [
           "Psalm 104:34; Psalm 141:2",
         ],
@@ -47,7 +47,7 @@ const prayerPoints = [
         ],
       },
       {
-        text: "Meditate on His wondorous deeds throughout the ages",
+        text: "Meditate on His wondrous deeds throughout the ages",
         children: [
           "Psalm 145:4-5; Psalm 111:2; Psalm 105, 107",
         ],
@@ -61,7 +61,7 @@ const prayerPoints = [
       {
         text: "Honor Him as God by giving thanks",
         children: [
-          "Romans 1:21; 1 Thessolonians 5:17-18; James 1:17",
+          "Romans 1:21; 1 Thessalonians 5:17-18; James 1:17",
         ],
       },
     ],
@@ -102,7 +102,7 @@ const prayerPoints = [
         ],
       },
       {
-        text: "Pray for opprotunities of personal ministry",
+        text: "Pray for opportunities of personal ministry",
         children: [
      
         ],
@@ -110,7 +110,7 @@ const prayerPoints = [
       {
         text: "Pray for God to continue to provide for your daily necessities",
         children: [
-          "Continued dependance every single day",
+          "Continued dependence every single day",
         ],
       },
       {
@@ -122,7 +122,7 @@ const prayerPoints = [
       {
         text: "Pray for strength to persevere",
         children: [
-          "Affliction with You is better than no afflication without You",
+          "Affliction with You is better than no affliction without You",
         ],
       },
     ],
@@ -165,7 +165,7 @@ const prayerPoints = [
   },
   {
     id: "meditation",
-    title: "Meditation (Pray through scripture)",
+    title: "Meditation (Pray through Scripture)",
     bullets: [
       {
         text: "Not a random passage",
@@ -174,9 +174,9 @@ const prayerPoints = [
         ],
       },
       {
-        text: "Maybe main/supplimental texts from your pastor's sermons along with review from sermon notes",
+        text: "Maybe main/supplemental texts from your pastor's sermons along with review from sermon notes",
         children: [
-          "Imagine if your pastor knew that you had spend prayer time through the materials that he spend 10's of hours a week studying",
+          "Imagine if your pastor knew that you had spent prayer time through the materials that he spent 10's of hours a week studying",
         ],
       },
             {
@@ -231,7 +231,7 @@ function Prayer() {
     <main className="page page-prayer">
       <section className="prayer-heading">
         <p className="eyebrow">Prayer</p>
-        <h1>Guidence for Prayer</h1>
+        <h1>Guidance for Prayer</h1>
       </section>
 
       <section className="prayer-layout">
@@ -249,7 +249,7 @@ function Prayer() {
         <div className="prayer-content">
           <section className="prayer-section">
             <p>
-              Prayer is a privillage for the Christian to maintain a
+              Prayer is a privilege for the Christian to maintain a
               relationship with God. I recently listened to a sermon by one of my
               elders, Mike Riccardi, and he presented 7 areas of prayer that we
               should be focusing on and that will direct our prayer time by having a
