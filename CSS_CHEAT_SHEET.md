@@ -114,6 +114,28 @@ Home card image example:
 
 The donation card uses `REACT_APP_DONATION_URL` from `.env.local`. See [.env.example](.env.example).
 
+## Pages/MastersBibleStudy.js
+
+Weekly content lives in [mastersBibleStudyWeeks.js](src/Data/mastersBibleStudyWeeks.js).
+
+Add a new week by copying one object in the `mastersBibleStudyWeeks` array and changing `date`, `songs`, `prayerRequests`, and `notes`.
+
+`page-masters-study`: page wrapper.
+
+`masters-hero`: centered page intro.
+
+`masters-shell`: two-column layout with date navigation and selected week content.
+
+`masters-date-nav`: left date selector.
+
+`masters-week-view`: selected week content area.
+
+`masters-dashboard`: layout for song sheets, prayer requests, and notes.
+
+`masters-panel`: white section panel.
+
+`masters-song-card`: one song sheet card.
+
 ## Pages/About.js
 
 `page-about`: narrower About page wrapper.

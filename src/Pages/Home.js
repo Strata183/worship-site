@@ -45,11 +45,16 @@ const homeSections = [
     description: "Explore thoughts on biblical worship and serving the church.",
     path: "/articles",
   },
+  // {
+  //   title: "About Worthy for Worship",
+  //   description: "Learn why this resource exists and who it is meant to serve.",
+  //   path: "/about",
+  // },
   {
-    title: "About Worthy for Worship",
-    description: "Learn why this resource exists and who it is meant to serve.",
-    path: "/about",
-  },
+    title: "Master's Bible Study",
+    description: "Resources such as song lyrics, prayer requests, and notes from the Master's Bible study.",
+    path: "/masters-bible-study",
+  }, 
   {
     title: "Prayer Guide",
     description: "Here is a helpful resource to guide your prayer time with the Lord.",

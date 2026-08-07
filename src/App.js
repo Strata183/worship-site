@@ -19,6 +19,7 @@ import Library from "./Pages/Library";
 import Login from "./Pages/Login";
 import Prayer from "./Pages/Prayer";
 import Resources from "./Pages/Resources";
+import MastersBibleStudy from "./Pages/MastersBibleStudy";
 
 // App is the main "layout" component for the whole website.
 // It decides which page appears for each URL.
@@ -55,6 +56,11 @@ function App() {
           <Route path="/steadfast" element={<Steadfast />} />
           <Route path="/worthy-for-song" element={<WorthyForSong />} />
           <Route path="/prayer" element={<Prayer />} />
+          <Route path="/masters-bible-study" element={<MastersBibleStudy />} />
+          <Route
+            path="/masters-bible-study/:weekSlug"
+            element={<MastersBibleStudy />}
+          />
           <Route
             path="/vbs-2026-kinder-music"
             element={

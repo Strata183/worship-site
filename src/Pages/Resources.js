@@ -20,6 +20,11 @@ const resourceGroups = [
         description: "A practical guide for focused prayer time.",
         path: "/prayer",
       },
+      {
+        title: "Master's Bible Study",
+        description: "Weekly songs, prayer requests, and study notes.",
+        path: "/masters-bible-study",
+      },
     ],
   },
   {
