@@ -433,51 +433,67 @@ function MastersBibleStudy() {
 
       {isAdmin && (
         <section className="masters-admin-panel">
-          <div className="masters-panel-heading">
-            <p className="eyebrow">Admin</p>
-            <h2>Access Requests</h2>
-          </div>
+          <details>
+            <summary>
+              <span>
+                <small>Admin</small>
+                <strong>Access Requests</strong>
+              </span>
+              <em>
+                {accessRequests.filter((request) => request.status === "pending").length}{" "}
+                pending
+              </em>
+            </summary>
 
-          {accessError && <p className="form-message error">{accessError}</p>}
-          {accessMessage && <p className="form-message success">{accessMessage}</p>}
+            <div className="masters-admin-content">
+              {accessError && <p className="form-message error">{accessError}</p>}
+              {accessMessage && (
+                <p className="form-message success">{accessMessage}</p>
+              )}
 
-          {loadingRequests ? (
-            <p className="empty-state">Loading access requests...</p>
-          ) : accessRequests.length === 0 ? (
-            <p className="empty-state">No access requests yet.</p>
-          ) : (
-            <ul className="masters-access-request-list">
-              {accessRequests.map((request) => (
-                <li key={request.id}>
-                  <div>
-                    <strong>
-                      {request.display_name || request.email || "Unknown user"}
-                    </strong>
-                    {request.email && <span>{request.email}</span>}
-                    <small>Status: {request.status}</small>
-                  </div>
+              {loadingRequests ? (
+                <p className="empty-state">Loading access requests...</p>
+              ) : accessRequests.length === 0 ? (
+                <p className="empty-state">No access requests yet.</p>
+              ) : (
+                <ul className="masters-access-request-list">
+                  {accessRequests.map((request) => (
+                    <li key={request.id}>
+                      <div>
+                        <strong>
+                          {request.display_name || request.email || "Unknown user"}
+                        </strong>
+                        {request.email && <span>{request.email}</span>}
+                        <small>Status: {request.status}</small>
+                      </div>
 
-                  {request.status === "pending" && (
-                    <div className="row-actions">
-                      <button
-                        type="button"
-                        onClick={() => reviewAccessRequest(request.id, "approved")}
-                      >
-                        Approve
-                      </button>
-                      <button
-                        className="subtle-danger-button"
-                        type="button"
-                        onClick={() => reviewAccessRequest(request.id, "rejected")}
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
+                      {request.status === "pending" && (
+                        <div className="row-actions">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              reviewAccessRequest(request.id, "approved")
+                            }
+                          >
+                            Approve
+                          </button>
+                          <button
+                            className="subtle-danger-button"
+                            type="button"
+                            onClick={() =>
+                              reviewAccessRequest(request.id, "rejected")
+                            }
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </details>
         </section>
       )}
     </main>
