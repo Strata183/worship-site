@@ -731,7 +731,8 @@ nav a.active:not(.site-title) {
   white-space: nowrap;
 }
 
-.masters-prayer-list ul {
+.masters-prayer-list ul,
+.masters-notes-list ul {
   color: var(--color-muted);
   display: grid;
   gap: 0.45rem;
@@ -740,7 +741,8 @@ nav a.active:not(.site-title) {
   padding-left: 1.25rem;
 }
 
-.masters-prayer-list li::marker {
+.masters-prayer-list li::marker,
+.masters-notes-list li::marker {
   color: var(--color-accent);
 }
 

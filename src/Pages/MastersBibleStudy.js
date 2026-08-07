@@ -77,6 +77,20 @@ function SongSheetPdf({ dateLabel, pdfPath }) {
   );
 }
 
+function NoteBody({ body }) {
+  if (Array.isArray(body)) {
+    return (
+      <ul>
+        {body.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    );
+  }
+
+  return <p>{body}</p>;
+}
+
 function MastersBibleStudy() {
   const { weekSlug } = useParams();
   const newestWeek = sortedStudyWeeks[0];
@@ -162,7 +176,7 @@ function MastersBibleStudy() {
                 {selectedWeek.notes.map((note) => (
                   <article key={note.title}>
                     <h4>{note.title}</h4>
-                    <p>{note.body}</p>
+                    <NoteBody body={note.body} />
                   </article>
                 ))}
               </div>

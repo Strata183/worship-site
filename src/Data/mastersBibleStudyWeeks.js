@@ -1,70 +1,84 @@
 const mastersBibleStudyWeeks = [
   {
-    date: "2026-08-13",
-    songSheetPdf: "/masters-bible-study/2026-08-12-song-sheet.pdf",
+    date: "2026-09-03",
+    songSheetPdf: "/masters-bible-study/2026-09-03-song-sheet.pdf",
     songs: [
       {
         title: "Song Title One",
-        key: "Key: G",
+        key: "Key: ?",
       },
       {
         title: "Song Title Two",
-        key: "Key: D",
-      },
-    ],
-    prayerRequests: [
-      {
-        name: "Request Category",
-        items: [
-          "Placeholder prayer request for the group.",
-          "Placeholder prayer request for ministry, school, work, or family.",
-        ],
-      },
-      {
-        name: "Praise Reports",
-        items: [
-          "Placeholder praise report from this week.",
-          "Placeholder answered prayer or encouragement.",
-        ],
+        key: "Key: ?",
       },
     ],
     notes: [
       {
         title: "Main Passage",
-        body: "Add the Bible passage or topic for this week's study here.",
+        body: "Ecclesiastes",
       },
       {
         title: "Big Idea",
-        body: "Write the main takeaway, theme, or discussion focus here.",
+        body: "Introduction to Ecclesiastes",
       },
       {
         title: "Announcements",
-        body: "Add upcoming dates, reminders, or group details here.",
+        body: "",
+      },
+    ],
+    prayerRequests: [
+      {
+        name: "Praise Reports",
+        items: [
+          "We are back at school!",
+        ],
+      },
+      {
+        name: "Prayer Requests",
+        items: [
+          "Pray for our Bible study through Ecclesiastes to be profitable and a great time of learning and fellowship",
+        "Pray for all the students coming back to school to be ready to work hard for the Lord"
+        ]
       },
     ],
   },
   {
-    date: "2026-08-06",
-    songSheetPdf: "",
+    date: "2026-04-30",
+    songSheetPdf: "/masters-bible-study/2026-08-12-song-sheet.pdf",
     songs: [
       {
-        title: "Previous Week Song",
-        key: "Key: C",
+        title: "It was finished upon that cross",
+        key: "Key: E",
+      },
+      {
+        title: "I stand amazed",
+        key: "Key: E",
+      },
+    ],
+    notes: [
+      {
+        title: "Main Passage",
+        body: "Romans 15-16",
+      },
+      {
+        title: "Big Idea",
+        body: "Conclusion of Romans!",
+      },
+      {
+        title: "Announcements",
+        body: [
+          "Summer Break is here! Praise God for His faithfulness!",
+          "Be thinking about what book we want to study next semester! (James, Ecclesiastes, 1 John, Revelation)?",
+        ],
       },
     ],
     prayerRequests: [
       {
         name: "Group Requests",
         items: [
-          "Older prayer request placeholder.",
-          "Another older prayer request placeholder.",
+          "",
+          "",
         ],
-      },
-    ],
-    notes: [
-      {
-        title: "Review",
-        body: "Use this space for notes from a previous gathering.",
       },
     ],
   },
