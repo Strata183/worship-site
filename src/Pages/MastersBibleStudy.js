@@ -193,9 +193,12 @@ function MastersBibleStudy() {
     setAccessError("");
     setAccessMessage("");
 
-    const { error } = await supabase.rpc("claim_masters_bible_study_access", {
-      access_code: accessCode,
-    });
+    const { data, error } = await supabase.rpc(
+      "claim_masters_bible_study_access",
+      {
+        access_code: accessCode,
+      }
+    );
 
     if (error) {
       setAccessError(error.message);
@@ -203,6 +206,14 @@ function MastersBibleStudy() {
     }
 
     setAccessCode("");
+
+    if (data) {
+      setIsUnlocked(true);
+      setAccessMessage("Access unlocked.");
+      loadAccessState();
+      return;
+    }
+
     const savedAccess = await loadAccessState();
 
     if (savedAccess.unlocked) {

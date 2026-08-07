@@ -92,12 +92,6 @@ begin
   on conflict (user_id) do update
     set granted_at = public.masters_bible_study_access.granted_at;
 
-  update public.masters_bible_study_access_requests
-  set status = 'approved',
-      reviewed_at = now(),
-      reviewed_by = requester
-  where user_id = requester;
-
   return true;
 end;
 $$;
