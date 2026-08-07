@@ -139,11 +139,7 @@ function MastersBibleStudy() {
       supabase.rpc("is_masters_bible_study_admin", {
         user_id: user.id,
       }),
-      supabase
-        .from("masters_bible_study_access_requests")
-        .select("status")
-        .eq("user_id", user.id)
-        .maybeSingle(),
+      supabase.rpc("get_masters_bible_study_access_request_status"),
     ]);
 
     const accessStateError =
@@ -156,11 +152,21 @@ function MastersBibleStudy() {
     }
 
     const nextIsAdmin = Boolean(adminResult.data);
-    const nextIsUnlocked = Boolean(accessResult.data);
+    let nextIsUnlocked = Boolean(accessResult.data);
+
+    if (!nextIsUnlocked) {
+      const { data: savedAccess } = await supabase
+        .from("masters_bible_study_access")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      nextIsUnlocked = Boolean(savedAccess);
+    }
 
     setIsAdmin(nextIsAdmin);
     setIsUnlocked(nextIsUnlocked);
-    setRequestStatus(requestResult.data?.status || "");
+    setRequestStatus(requestResult.data || "");
     setCheckingAccess(false);
 
     if (nextIsAdmin) {

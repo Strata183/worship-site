@@ -69,6 +69,9 @@ alter table public.masters_bible_study_access enable row level security;
 alter table public.masters_bible_study_access_requests enable row level security;
 alter table public.masters_bible_study_admins enable row level security;
 
+grant select on public.masters_bible_study_access to authenticated;
+grant select on public.masters_bible_study_access_requests to authenticated;
+
 drop policy if exists "Users can read their own Masters Bible Study access" on public.masters_bible_study_access;
 drop policy if exists "Users can read their own Masters Bible Study request" on public.masters_bible_study_access_requests;
 

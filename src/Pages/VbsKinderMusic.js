@@ -35,23 +35,83 @@ function VbsKinderMusic() {
   const [checkingAccess, setCheckingAccess] = useState(true);
   const [loadingCharts, setLoadingCharts] = useState(false);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [requestStatus, setRequestStatus] = useState("");
+  const [accessRequests, setAccessRequests] = useState([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
 
-  useEffect(() => {
-    let ignore = false;
+  const loadAccessRequests = useCallback(async () => {
+    setLoadingRequests(true);
 
-    async function checkAccess() {
-      if (!user) {
-        return;
-      }
+    const { data, error: requestsError } = await supabase.rpc(
+      "list_vbs_kinder_access_requests"
+    );
 
-      const { data } = await supabase
+    if (requestsError) {
+      setError(requestsError.message);
+      setAccessRequests([]);
+    } else {
+      setAccessRequests(data || []);
+    }
+
+    setLoadingRequests(false);
+  }, []);
+
+  const loadAccessState = useCallback(async () => {
+    if (!user) {
+      return;
+    }
+
+    setCheckingAccess(true);
+
+    const [accessResult, adminResult, requestResult] = await Promise.all([
+      supabase.rpc("has_vbs_kinder_access"),
+      supabase.rpc("is_vbs_kinder_admin", {
+        user_id: user.id,
+      }),
+      supabase.rpc("get_vbs_kinder_access_request_status"),
+    ]);
+
+    const accessStateError =
+      accessResult.error || adminResult.error || requestResult.error;
+
+    if (accessStateError) {
+      setError(accessStateError.message);
+      setCheckingAccess(false);
+      return;
+    }
+
+    const nextIsAdmin = Boolean(adminResult.data);
+    let nextIsUnlocked = Boolean(accessResult.data);
+
+    if (!nextIsUnlocked) {
+      const { data: savedAccess } = await supabase
         .from("vbs_kinder_access")
         .select("user_id")
         .eq("user_id", user.id)
         .maybeSingle();
 
-      if (!ignore) {
-        setIsUnlocked(Boolean(data));
+      nextIsUnlocked = Boolean(savedAccess);
+    }
+
+    setIsAdmin(nextIsAdmin);
+    setIsUnlocked(nextIsUnlocked);
+    setRequestStatus(requestResult.data || "");
+    setCheckingAccess(false);
+
+    if (nextIsAdmin) {
+      loadAccessRequests();
+    }
+  }, [loadAccessRequests, user]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function checkAccess() {
+      await loadAccessState();
+
+      if (ignore) {
         setCheckingAccess(false);
       }
     }
@@ -61,13 +121,14 @@ function VbsKinderMusic() {
     return () => {
       ignore = true;
     };
-  }, [user]);
+  }, [loadAccessState]);
 
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");
+    setMessage("");
 
-    const { error: accessError } = await supabase.rpc(
+    const { data, error: accessError } = await supabase.rpc(
       "claim_vbs_kinder_access",
       {
         access_code: password,
@@ -79,8 +140,53 @@ function VbsKinderMusic() {
       return;
     }
 
-    setIsUnlocked(true);
     setPassword("");
+
+    if (data) {
+      setIsUnlocked(true);
+      setMessage("Access unlocked.");
+      loadAccessState();
+    } else {
+      setError("The password worked, but saved access was not found.");
+    }
+  }
+
+  async function requestAccess() {
+    setError("");
+    setMessage("");
+
+    const { error: requestError } = await supabase.rpc(
+      "request_vbs_kinder_access"
+    );
+
+    if (requestError) {
+      setError(requestError.message);
+      return;
+    }
+
+    setRequestStatus("pending");
+    setMessage("Access request sent.");
+  }
+
+  async function reviewAccessRequest(requestId, nextStatus) {
+    setError("");
+    setMessage("");
+
+    const { error: reviewError } = await supabase.rpc(
+      "review_vbs_kinder_access_request",
+      {
+        request_id: requestId,
+        next_status: nextStatus,
+      }
+    );
+
+    if (reviewError) {
+      setError(reviewError.message);
+      return;
+    }
+
+    setMessage(`Request ${nextStatus}.`);
+    loadAccessRequests();
   }
 
   const loadCharts = useCallback(async () => {
@@ -184,25 +290,44 @@ function VbsKinderMusic() {
           <p className="eyebrow">Team resources</p>
           <h1>VBS 2026, Kinder Music</h1>
           <p>
-            Enter the team password once to unlock this page for your account.
+            Enter the team password or request access for your account.
           </p>
         </section>
 
-        <form className="vbs-password-panel form-stack" onSubmit={handleSubmit}>
-          <label htmlFor="vbs-password">Password</label>
-          <input
-            id="vbs-password"
-            onChange={(event) => setPassword(event.target.value)}
-            type="password"
-            value={password}
-          />
+        <section className="vbs-password-panel">
+          <form className="form-stack" onSubmit={handleSubmit}>
+            <label htmlFor="vbs-password">Password</label>
+            <input
+              id="vbs-password"
+              onChange={(event) => setPassword(event.target.value)}
+              type="password"
+              value={password}
+            />
+
+            <button className="primary-button" type="submit">
+              Open VBS charts
+            </button>
+          </form>
+
+          <div className="masters-request-access">
+            <h2>Need access?</h2>
+            <p>
+              Send a request and a VBS admin can unlock this page for your
+              account.
+            </p>
+            <button
+              className="secondary-button"
+              disabled={requestStatus === "pending"}
+              onClick={requestAccess}
+              type="button"
+            >
+              {requestStatus === "pending" ? "Request pending" : "Request access"}
+            </button>
+          </div>
 
           {error && <p className="form-message error">{error}</p>}
-
-          <button className="primary-button" type="submit">
-            Open VBS charts
-          </button>
-        </form>
+          {message && <p className="form-message success">{message}</p>}
+        </section>
       </main>
     );
   }
@@ -269,6 +394,56 @@ function VbsKinderMusic() {
           </p>
         )}
       </section>
+
+      {isAdmin && (
+        <section className="vbs-chart-panel masters-admin-panel">
+          <div className="masters-panel-heading">
+            <p className="eyebrow">Admin</p>
+            <h2>Access Requests</h2>
+          </div>
+
+          {error && <p className="form-message error">{error}</p>}
+          {message && <p className="form-message success">{message}</p>}
+
+          {loadingRequests ? (
+            <p className="empty-state">Loading access requests...</p>
+          ) : accessRequests.length === 0 ? (
+            <p className="empty-state">No access requests yet.</p>
+          ) : (
+            <ul className="masters-access-request-list">
+              {accessRequests.map((request) => (
+                <li key={request.id}>
+                  <div>
+                    <strong>
+                      {request.display_name || request.email || "Unknown user"}
+                    </strong>
+                    {request.email && <span>{request.email}</span>}
+                    <small>Status: {request.status}</small>
+                  </div>
+
+                  {request.status === "pending" && (
+                    <div className="row-actions">
+                      <button
+                        type="button"
+                        onClick={() => reviewAccessRequest(request.id, "approved")}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        className="subtle-danger-button"
+                        type="button"
+                        onClick={() => reviewAccessRequest(request.id, "rejected")}
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
     </main>
   );
 }
