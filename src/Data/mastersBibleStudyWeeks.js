@@ -1,24 +1,15 @@
 const mastersBibleStudyWeeks = [
   {
-    date: "2026-08-12",
+    date: "2026-08-13",
+    songSheetPdf: "/masters-bible-study/2026-08-12-song-sheet.pdf",
     songs: [
       {
         title: "Song Title One",
         key: "Key: G",
-        lyrics: [
-          "Verse or chorus lyric line one goes here.",
-          "Verse or chorus lyric line two goes here.",
-          "Verse or chorus lyric line three goes here.",
-        ],
       },
       {
         title: "Song Title Two",
         key: "Key: D",
-        lyrics: [
-          "Add this week's lyrics here.",
-          "Keep each lyric line as a separate item.",
-          "That makes the page easier to edit later.",
-        ],
       },
     ],
     prayerRequests: [
@@ -53,15 +44,12 @@ const mastersBibleStudyWeeks = [
     ],
   },
   {
-    date: "2026-08-05",
+    date: "2026-08-06",
+    songSheetPdf: "",
     songs: [
       {
         title: "Previous Week Song",
         key: "Key: C",
-        lyrics: [
-          "Older lyric line one goes here.",
-          "Older lyric line two goes here.",
-        ],
       },
     ],
     prayerRequests: [

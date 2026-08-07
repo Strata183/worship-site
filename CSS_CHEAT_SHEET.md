@@ -120,6 +120,8 @@ Weekly content lives in [mastersBibleStudyWeeks.js](src/Data/mastersBibleStudyWe
 
 Add a new week by copying one object in the `mastersBibleStudyWeeks` array and changing `date`, `songs`, `prayerRequests`, and `notes`.
 
+Weekly song sheet PDFs live in [public/masters-bible-study](public/masters-bible-study).
+
 `page-masters-study`: page wrapper.
 
 `masters-hero`: centered page intro.

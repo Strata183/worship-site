@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import mastersBibleStudyWeeks from "../Data/mastersBibleStudyWeeks";
 
@@ -11,6 +12,69 @@ function formatStudyDate(date) {
     day: "numeric",
     year: "numeric",
   }).format(new Date(`${date}T00:00:00`));
+}
+
+function SongSheetPdf({ dateLabel, pdfPath }) {
+  const [pdfStatus, setPdfStatus] = useState(pdfPath ? "checking" : "missing");
+
+  useEffect(() => {
+    let ignoreResponse = false;
+
+    if (!pdfPath) {
+      setPdfStatus("missing");
+      return () => {
+        ignoreResponse = true;
+      };
+    }
+
+    setPdfStatus("checking");
+
+    fetch(pdfPath, { method: "HEAD", cache: "no-store" })
+      .then((response) => {
+        const contentType = response.headers.get("content-type") || "";
+        const isPdf =
+          response.ok &&
+          (contentType.includes("application/pdf") ||
+            contentType.includes("application/octet-stream"));
+
+        if (!ignoreResponse) {
+          setPdfStatus(isPdf ? "ready" : "missing");
+        }
+      })
+      .catch(() => {
+        if (!ignoreResponse) {
+          setPdfStatus("missing");
+        }
+      });
+
+    return () => {
+      ignoreResponse = true;
+    };
+  }, [pdfPath]);
+
+  if (pdfStatus === "checking") {
+    return <p className="masters-pdf-empty">Checking for this week's PDF...</p>;
+  }
+
+  if (pdfStatus === "missing") {
+    return (
+      <p className="masters-pdf-empty">
+        Upload this week's song sheet PDF to show it here.
+      </p>
+    );
+  }
+
+  return (
+    <div className="masters-pdf-viewer">
+      <div className="masters-pdf-heading">
+        <h4>Weekly Song Sheet PDF</h4>
+        <a href={pdfPath} rel="noopener noreferrer" target="_blank">
+          Open PDF
+        </a>
+      </div>
+      <iframe src={pdfPath} title={`${dateLabel} song sheet`} />
+    </div>
+  );
 }
 
 function MastersBibleStudy() {
@@ -78,14 +142,14 @@ function MastersBibleStudy() {
                       <h4>{song.title}</h4>
                       <span>{song.key}</span>
                     </div>
-                    <ol>
-                      {song.lyrics.map((line) => (
-                        <li key={line}>{line}</li>
-                      ))}
-                    </ol>
                   </article>
                 ))}
               </div>
+
+              <SongSheetPdf
+                dateLabel={formatStudyDate(selectedWeek.date)}
+                pdfPath={selectedWeek.songSheetPdf}
+              />
             </section>
 
             <section className="masters-panel">
