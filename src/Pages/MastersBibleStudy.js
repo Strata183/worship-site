@@ -129,17 +129,13 @@ function MastersBibleStudy() {
 
   const loadAccessState = useCallback(async () => {
     if (!user) {
-      return false;
+      return { error: "", unlocked: false };
     }
 
     setCheckingAccess(true);
 
     const [accessResult, adminResult, requestResult] = await Promise.all([
-      supabase
-        .from("masters_bible_study_access")
-        .select("user_id")
-        .eq("user_id", user.id)
-        .maybeSingle(),
+      supabase.rpc("has_masters_bible_study_access"),
       supabase.rpc("is_masters_bible_study_admin", {
         user_id: user.id,
       }),
@@ -156,11 +152,11 @@ function MastersBibleStudy() {
     if (accessStateError) {
       setAccessError(accessStateError.message);
       setCheckingAccess(false);
-      return false;
+      return { error: accessStateError.message, unlocked: false };
     }
 
     const nextIsAdmin = Boolean(adminResult.data);
-    const nextIsUnlocked = Boolean(accessResult.data) || nextIsAdmin;
+    const nextIsUnlocked = Boolean(accessResult.data);
 
     setIsAdmin(nextIsAdmin);
     setIsUnlocked(nextIsUnlocked);
@@ -171,7 +167,7 @@ function MastersBibleStudy() {
       loadAccessRequests();
     }
 
-    return nextIsUnlocked;
+    return { error: "", unlocked: nextIsUnlocked };
   }, [loadAccessRequests, user]);
 
   useEffect(() => {
@@ -209,9 +205,9 @@ function MastersBibleStudy() {
     setAccessCode("");
     const savedAccess = await loadAccessState();
 
-    if (savedAccess) {
+    if (savedAccess.unlocked) {
       setAccessMessage("Access unlocked.");
-    } else {
+    } else if (!savedAccess.error) {
       setAccessError(
         "The password worked, but saved access was not found. Check that the latest Supabase migration has been applied."
       );
