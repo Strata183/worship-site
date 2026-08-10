@@ -506,7 +506,6 @@ function Steadfast() {
             <h2>Steadfast Audio Recordings</h2>
             <p>
               A place to keep voice recordings from the songs we sing together.
-              Add a recording for each week and list the songs included.
             </p>
           </div>
 
