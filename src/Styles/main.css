@@ -865,6 +865,54 @@ nav a.active:not(.site-title) {
   font-size: 0.9rem;
 }
 
+.admin-mode-toggle {
+  align-items: center;
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(45, 67, 48, 0.08);
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin: 0 auto 1.25rem;
+  max-width: 920px;
+  padding: 0.9rem 1rem;
+  text-align: left;
+}
+
+.admin-mode-toggle h2 {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.admin-mode-toggle .eyebrow {
+  margin-bottom: 0.2rem;
+}
+
+.admin-mode-toggle label {
+  align-items: center;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 0.45rem;
+  padding: 0.35rem 0.7rem;
+}
+
+.admin-mode-toggle input {
+  accent-color: var(--color-accent);
+}
+
+.admin-mode-toggle span {
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-weight: 800;
+  min-width: 1.75rem;
+}
+
 .masters-prayer-list article,
 .masters-notes-list article {
   border-left: 4px solid var(--color-accent);
@@ -1329,49 +1377,6 @@ nav a.active:not(.site-title) {
   font-size: 0.95rem;
   font-weight: 800;
   padding: 0.75rem 0.85rem;
-}
-
-.steadfast-link-grid {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.steadfast-resource-card {
-  background-color: white;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  color: var(--color-text);
-  min-height: 10rem;
-  padding: 1.15rem;
-  text-align: left;
-  text-decoration: none;
-  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
-}
-
-.steadfast-resource-card:hover,
-.steadfast-resource-card:focus {
-  border-color: var(--color-accent);
-  box-shadow: 0 14px 28px rgba(45, 67, 48, 0.1);
-  transform: translateY(-2px);
-}
-
-.steadfast-resource-card span {
-  display: block;
-  font-family: var(--font-heading);
-  font-size: 1.1rem;
-  font-weight: 800;
-  line-height: 1.2;
-  margin-bottom: 0.65rem;
-}
-
-.steadfast-resource-card p {
-  color: var(--color-muted);
-  font-size: 0.95rem;
-  line-height: 1.55;
-  margin: 0;
-  max-width: none;
-  text-align: left;
 }
 
 .steadfast-audio-section {
@@ -3001,10 +3006,6 @@ nav a.active:not(.site-title) {
     grid-template-columns: 1fr;
   }
 
-  .steadfast-link-grid {
-    grid-template-columns: 1fr;
-  }
-
   .steadfast-audio-upload-grid {
     grid-template-columns: 1fr;
   }
@@ -3123,6 +3124,11 @@ nav a.active:not(.site-title) {
   .steadfast-hero,
   .steadfast-section {
     padding: 1.15rem;
+  }
+
+  .admin-mode-toggle {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .friend-list li {

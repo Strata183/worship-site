@@ -134,6 +134,7 @@ function MastersBibleStudy() {
   const [accessError, setAccessError] = useState("");
   const [accessMessage, setAccessMessage] = useState("");
   const [checkingAccess, setCheckingAccess] = useState(true);
+  const [adminMode, setAdminMode] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [requestStatus, setRequestStatus] = useState("");
@@ -472,6 +473,23 @@ function MastersBibleStudy() {
         </p>
       </section>
 
+      {isAdmin && (
+        <section className="admin-mode-toggle">
+          <div>
+            <p className="eyebrow">Admin</p>
+            <h2>Admin Mode</h2>
+          </div>
+          <label>
+            <input
+              checked={adminMode}
+              onChange={(event) => setAdminMode(event.target.checked)}
+              type="checkbox"
+            />
+            <span>{adminMode ? "On" : "Off"}</span>
+          </label>
+        </section>
+      )}
+
       <section className="masters-shell" aria-label="Bible study weeks">
         <aside className="masters-date-nav" aria-label="Bible study dates">
           <h2>Dates</h2>
@@ -519,7 +537,7 @@ function MastersBibleStudy() {
                 ))}
               </div>
 
-              {isAdmin && (
+              {isAdmin && adminMode && (
                 <form className="masters-upload-panel" onSubmit={uploadSongSheet}>
                   <label htmlFor="masters-song-sheet-upload">
                     Upload weekly song sheet PDF
@@ -588,7 +606,7 @@ function MastersBibleStudy() {
         </section>
       </section>
 
-      {isAdmin && (
+      {isAdmin && adminMode && (
         <section className="masters-admin-panel">
           <details>
             <summary>

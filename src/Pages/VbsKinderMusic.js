@@ -36,6 +36,7 @@ function VbsKinderMusic() {
   const [loadingCharts, setLoadingCharts] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [adminMode, setAdminMode] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [requestStatus, setRequestStatus] = useState("");
   const [accessRequests, setAccessRequests] = useState([]);
@@ -346,6 +347,23 @@ function VbsKinderMusic() {
         </div>
       </section>
 
+      {isAdmin && (
+        <section className="admin-mode-toggle">
+          <div>
+            <p className="eyebrow">Admin</p>
+            <h2>Admin Mode</h2>
+          </div>
+          <label>
+            <input
+              checked={adminMode}
+              onChange={(event) => setAdminMode(event.target.checked)}
+              type="checkbox"
+            />
+            <span>{adminMode ? "On" : "Off"}</span>
+          </label>
+        </section>
+      )}
+
       <section className="vbs-chart-panel">
         <div className="vbs-panel-heading">
           <div>
@@ -395,7 +413,7 @@ function VbsKinderMusic() {
         )}
       </section>
 
-      {isAdmin && (
+      {isAdmin && adminMode && (
         <section className="vbs-chart-panel masters-admin-panel">
           <details>
             <summary>

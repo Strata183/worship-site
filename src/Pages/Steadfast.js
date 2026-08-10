@@ -3,24 +3,6 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { supabase } from "../supabaseClient";
 
-const steadfastQuickLinks = [
-  {
-    title: "What Is Worship?",
-    description: "A grounding article for thinking carefully about worship.",
-    path: "/articles/what-is-worship",
-  },
-  {
-    title: "Prayer Guide",
-    description: "A longer guide for shaping personal and group prayer.",
-    path: "/prayer",
-  },
-  {
-    title: "Songs Library",
-    description: "Chord charts and song resources for worship sets.",
-    path: "/songs",
-  },
-];
-
 function formatRecordingDate(date) {
   return new Intl.DateTimeFormat("en-US", {
     month: "long",
@@ -121,6 +103,7 @@ function Steadfast() {
   const [accessCode, setAccessCode] = useState("");
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
+  const [adminMode, setAdminMode] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [requestStatus, setRequestStatus] = useState("");
   const [accessRequests, setAccessRequests] = useState([]);
@@ -462,6 +445,23 @@ function Steadfast() {
         </div>
       </section>
 
+      {isAdmin && (
+        <section className="admin-mode-toggle">
+          <div>
+            <p className="eyebrow">Admin</p>
+            <h2>Admin Mode</h2>
+          </div>
+          <label>
+            <input
+              checked={adminMode}
+              onChange={(event) => setAdminMode(event.target.checked)}
+              type="checkbox"
+            />
+            <span>{adminMode ? "On" : "Off"}</span>
+          </label>
+        </section>
+      )}
+
       <section className="steadfast-content" aria-label="Steadfast resources">
         <section className="steadfast-section steadfast-feature">
           <div>
@@ -481,15 +481,6 @@ function Steadfast() {
           </div>
         </section>
 
-        <section className="steadfast-link-grid" aria-label="Steadfast quick links">
-          {steadfastQuickLinks.map((resource) => (
-            <Link className="steadfast-resource-card" key={resource.title} to={resource.path}>
-              <span>{resource.title}</span>
-              <p>{resource.description}</p>
-            </Link>
-          ))}
-        </section>
-
         <section className="steadfast-section steadfast-callout">
           <div className="steadfast-section-heading">
             <p className="eyebrow">Serving</p>
@@ -500,6 +491,12 @@ function Steadfast() {
             prerequisites since we will be facilitating and leading worship.
             These are simply resources; they are not what make someone eligible
             to serve. My goal is unity.
+          </p>
+          <p>
+            To start, please take some time to read{" "}
+            <Link to="/articles/what-is-worship">What Is Worship?</Link> since
+            worship leadership should be shaped by a biblical understanding of
+            worship itself.
           </p>
         </section>
 
@@ -513,7 +510,7 @@ function Steadfast() {
             </p>
           </div>
 
-          {isAdmin && (
+          {isAdmin && adminMode && (
             <form className="steadfast-audio-upload" onSubmit={uploadRecording}>
               <div className="steadfast-audio-upload-grid">
                 <label>
@@ -613,7 +610,7 @@ function Steadfast() {
         </section>
       </section>
 
-      {isAdmin && (
+      {isAdmin && adminMode && (
         <section className="masters-admin-panel">
           <details>
             <summary>
