@@ -256,6 +256,37 @@ Deno.serve(async (req) => {
       return jsonResponse({ signedUrl });
     }
 
+    if (body.action === "masters-bible-study-signed-url") {
+      const weekDate = String(body.weekDate || "");
+
+      // RLS on masters_bible_study_song_sheets only exposes rows to users who
+      // have unlocked or been approved for Master's Bible Study.
+      const { data: songSheet, error: songSheetError } = await supabase
+        .from("masters_bible_study_song_sheets")
+        .select("file_path")
+        .eq("week_date", weekDate)
+        .single();
+
+      if (songSheetError || !songSheet) {
+        return jsonResponse(
+          { error: "Song sheet not found or not shared with you." },
+          404,
+        );
+      }
+
+      // A signed URL is temporary access to a private R2 object.
+      const signedUrl = await getSignedUrl(
+        r2,
+        new GetObjectCommand({
+          Bucket: bucket,
+          Key: songSheet.file_path,
+        }),
+        { expiresIn: 300 },
+      );
+
+      return jsonResponse({ signedUrl });
+    }
+
     if (body.action === "vbs-kinder-files") {
       // RLS only returns chart rows when the signed-in user has claimed VBS
       // Kinder access with the team password.

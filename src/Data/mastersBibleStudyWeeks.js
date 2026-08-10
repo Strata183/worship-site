@@ -1,7 +1,6 @@
 const mastersBibleStudyWeeks = [
   {
     date: "2026-09-03",
-    songSheetPdf: "/masters-bible-study/2026-09-03-song-sheet.pdf",
     songs: [
       {
         title: "Song Title One",
@@ -44,7 +43,6 @@ const mastersBibleStudyWeeks = [
   },
   {
     date: "2026-04-30",
-    songSheetPdf: "/masters-bible-study/2026-08-12-song-sheet.pdf",
     songs: [
       {
         title: "It was finished upon that cross",

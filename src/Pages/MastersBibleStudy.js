@@ -16,43 +16,77 @@ function formatStudyDate(date) {
   }).format(new Date(`${date}T00:00:00`));
 }
 
-function SongSheetPdf({ dateLabel, pdfPath }) {
-  const [pdfStatus, setPdfStatus] = useState(pdfPath ? "checking" : "missing");
+async function getFunctionErrorMessage(error) {
+  if (error?.context instanceof Response) {
+    try {
+      const body = await error.context.json();
+
+      if (body?.error) {
+        return body.error;
+      }
+    } catch {
+      try {
+        const text = await error.context.text();
+
+        if (text) {
+          return text;
+        }
+      } catch {
+        // Fall back to the Supabase client error message below.
+      }
+    }
+  }
+
+  return error?.message || "Unexpected Edge Function error.";
+}
+
+function SongSheetPdf({ dateLabel, songSheet, weekDate }) {
+  const [pdfStatus, setPdfStatus] = useState(songSheet ? "checking" : "missing");
+  const [signedUrl, setSignedUrl] = useState("");
+  const [pdfError, setPdfError] = useState("");
 
   useEffect(() => {
     let ignoreResponse = false;
 
-    if (!pdfPath) {
-      setPdfStatus("missing");
-      return () => {
-        ignoreResponse = true;
-      };
+    async function loadSignedUrl() {
+      if (!songSheet) {
+        setSignedUrl("");
+        setPdfError("");
+        setPdfStatus("missing");
+        return;
+      }
+
+      setPdfStatus("checking");
+      setPdfError("");
+
+      const { data, error } = await supabase.functions.invoke("r2-song-files", {
+        body: {
+          action: "masters-bible-study-signed-url",
+          weekDate,
+        },
+      });
+
+      if (ignoreResponse) {
+        return;
+      }
+
+      if (error) {
+        setSignedUrl("");
+        setPdfError(await getFunctionErrorMessage(error));
+        setPdfStatus("missing");
+        return;
+      }
+
+      setSignedUrl(data.signedUrl);
+      setPdfStatus("ready");
     }
 
-    setPdfStatus("checking");
-
-    fetch(pdfPath, { method: "HEAD", cache: "no-store" })
-      .then((response) => {
-        const contentType = response.headers.get("content-type") || "";
-        const isPdf =
-          response.ok &&
-          (contentType.includes("application/pdf") ||
-            contentType.includes("application/octet-stream"));
-
-        if (!ignoreResponse) {
-          setPdfStatus(isPdf ? "ready" : "missing");
-        }
-      })
-      .catch(() => {
-        if (!ignoreResponse) {
-          setPdfStatus("missing");
-        }
-      });
+    loadSignedUrl();
 
     return () => {
       ignoreResponse = true;
     };
-  }, [pdfPath]);
+  }, [songSheet, weekDate]);
 
   if (pdfStatus === "checking") {
     return <p className="masters-pdf-empty">Checking for this week's PDF...</p>;
@@ -61,7 +95,7 @@ function SongSheetPdf({ dateLabel, pdfPath }) {
   if (pdfStatus === "missing") {
     return (
       <p className="masters-pdf-empty">
-        Upload this week's song sheet PDF to show it here.
+        {pdfError || "Upload this week's song sheet PDF to show it here."}
       </p>
     );
   }
@@ -70,11 +104,11 @@ function SongSheetPdf({ dateLabel, pdfPath }) {
     <div className="masters-pdf-viewer">
       <div className="masters-pdf-heading">
         <h4>Weekly Song Sheet PDF</h4>
-        <a href={pdfPath} rel="noopener noreferrer" target="_blank">
+        <a href={signedUrl} rel="noopener noreferrer" target="_blank">
           Open PDF
         </a>
       </div>
-      <iframe src={pdfPath} title={`${dateLabel} song sheet`} />
+      <iframe src={signedUrl} title={`${dateLabel} song sheet`} />
     </div>
   );
 }
@@ -105,10 +139,14 @@ function MastersBibleStudy() {
   const [requestStatus, setRequestStatus] = useState("");
   const [accessRequests, setAccessRequests] = useState([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
+  const [songSheets, setSongSheets] = useState({});
+  const [selectedSongSheetFile, setSelectedSongSheetFile] = useState(null);
+  const [uploadingSongSheet, setUploadingSongSheet] = useState(false);
   const newestWeek = sortedStudyWeeks[0];
   const selectedWeek = weekSlug
     ? sortedStudyWeeks.find((week) => week.date === weekSlug)
     : newestWeek;
+  const selectedSongSheet = selectedWeek ? songSheets[selectedWeek.date] : null;
 
   const loadAccessRequests = useCallback(async () => {
     setLoadingRequests(true);
@@ -126,6 +164,31 @@ function MastersBibleStudy() {
 
     setLoadingRequests(false);
   }, []);
+
+  const loadSongSheets = useCallback(async () => {
+    if (!isUnlocked) {
+      setSongSheets({});
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("masters_bible_study_song_sheets")
+      .select("week_date, file_path, uploaded_at")
+      .order("week_date", { ascending: false });
+
+    if (error) {
+      setAccessError(error.message);
+      setSongSheets({});
+      return;
+    }
+
+    setSongSheets(
+      (data || []).reduce((sheetMap, songSheet) => {
+        sheetMap[songSheet.week_date] = songSheet;
+        return sheetMap;
+      }, {})
+    );
+  }, [isUnlocked]);
 
   const loadAccessState = useCallback(async () => {
     if (!user) {
@@ -193,6 +256,14 @@ function MastersBibleStudy() {
       ignore = true;
     };
   }, [loadAccessState]);
+
+  useEffect(() => {
+    loadSongSheets();
+  }, [loadSongSheets]);
+
+  useEffect(() => {
+    setSelectedSongSheetFile(null);
+  }, [selectedWeek?.date]);
 
   async function handleAccessSubmit(event) {
     event.preventDefault();
@@ -265,6 +336,68 @@ function MastersBibleStudy() {
 
     setAccessMessage(`Request ${nextStatus}.`);
     loadAccessRequests();
+  }
+
+  async function uploadSongSheet(event) {
+    event.preventDefault();
+
+    if (!selectedWeek || !selectedSongSheetFile || !user) {
+      return;
+    }
+
+    setAccessError("");
+    setAccessMessage("");
+
+    if (selectedSongSheetFile.type !== "application/pdf") {
+      setAccessError("Please choose a PDF file.");
+      return;
+    }
+
+    setUploadingSongSheet(true);
+
+    const formData = new FormData();
+    const filePath = `${user.id}/masters-bible-study/${selectedWeek.date}-song-sheet.pdf`;
+
+    formData.append("action", "upload");
+    formData.append("filePath", filePath);
+    formData.append("file", selectedSongSheetFile);
+
+    const { data: uploadData, error: uploadError } = await supabase.functions.invoke(
+      "r2-song-files",
+      {
+        body: formData,
+      }
+    );
+
+    if (uploadError) {
+      setAccessError(await getFunctionErrorMessage(uploadError));
+      setUploadingSongSheet(false);
+      return;
+    }
+
+    const { data: savedSheet, error: saveError } = await supabase
+      .from("masters_bible_study_song_sheets")
+      .upsert({
+        week_date: selectedWeek.date,
+        file_path: uploadData.filePath,
+        uploaded_by: user.id,
+      })
+      .select("week_date, file_path, uploaded_at")
+      .single();
+
+    if (saveError) {
+      setAccessError(saveError.message);
+      setUploadingSongSheet(false);
+      return;
+    }
+
+    setSongSheets((currentSongSheets) => ({
+      ...currentSongSheets,
+      [savedSheet.week_date]: savedSheet,
+    }));
+    setSelectedSongSheetFile(null);
+    setUploadingSongSheet(false);
+    setAccessMessage("Song sheet uploaded.");
   }
 
   if (!selectedWeek && newestWeek) {
@@ -386,9 +519,33 @@ function MastersBibleStudy() {
                 ))}
               </div>
 
+              {isAdmin && (
+                <form className="masters-upload-panel" onSubmit={uploadSongSheet}>
+                  <label htmlFor="masters-song-sheet-upload">
+                    Upload weekly song sheet PDF
+                  </label>
+                  <input
+                    accept="application/pdf"
+                    id="masters-song-sheet-upload"
+                    onChange={(event) =>
+                      setSelectedSongSheetFile(event.target.files?.[0] || null)
+                    }
+                    type="file"
+                  />
+                  <button
+                    className="secondary-button"
+                    disabled={!selectedSongSheetFile || uploadingSongSheet}
+                    type="submit"
+                  >
+                    {uploadingSongSheet ? "Uploading..." : "Upload PDF"}
+                  </button>
+                </form>
+              )}
+
               <SongSheetPdf
                 dateLabel={formatStudyDate(selectedWeek.date)}
-                pdfPath={selectedWeek.songSheetPdf}
+                songSheet={selectedSongSheet}
+                weekDate={selectedWeek.date}
               />
             </section>
 

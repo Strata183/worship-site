@@ -1,9 +1,5 @@
-Drop weekly song sheet PDFs in this folder.
+Master's Bible Study song sheet PDFs are now private.
 
-Example:
-
-2026-08-12-song-sheet.pdf
-
-Then reference it from src/Data/mastersBibleStudyWeeks.js:
-
-songSheetPdf: "/masters-bible-study/2026-08-12-song-sheet.pdf"
+Do not add weekly PDFs to this public folder. Upload them from the admin-only
+upload control on the Master's Bible Study page instead. The site stores the PDF
+in Cloudflare R2 and keeps only the private file path in Supabase.
