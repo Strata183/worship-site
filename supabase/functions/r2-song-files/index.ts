@@ -87,6 +87,16 @@ function safeZipName(name: string, index: number) {
   return `${String(index + 1).padStart(2, "0")}-${cleanName}.pdf`;
 }
 
+function isAudioFile(file: File) {
+  const audioExtensions = [".aac", ".aiff", ".m4a", ".mp3", ".ogg", ".wav", ".webm"];
+  const lowerName = file.name.toLowerCase();
+
+  return (
+    file.type.startsWith("audio/") ||
+    audioExtensions.some((extension) => lowerName.endsWith(extension))
+  );
+}
+
 function bytesToBase64(bytes: Uint8Array) {
   let binary = "";
   const chunkSize = 0x8000;
@@ -169,16 +179,19 @@ Deno.serve(async (req) => {
 
       // Make sure the frontend actually sent a file.
       if (!(file instanceof File)) {
-        return jsonResponse({ error: "Missing PDF file." }, 400);
+        return jsonResponse({ error: "Missing file." }, 400);
       }
 
-      // Only allow PDFs in this storage path.
-      if (file.type !== "application/pdf") {
-        return jsonResponse({ error: "Only PDF files can be uploaded." }, 400);
+      // Only allow PDFs and audio files in this storage path.
+      if (file.type !== "application/pdf" && !isAudioFile(file)) {
+        return jsonResponse(
+          { error: "Only PDF or audio files can be uploaded." },
+          400,
+        );
       }
 
       // Important security check: users may only upload into their own folder.
-      if (!filePath.startsWith(`${user.id}/`) || !filePath.endsWith(".pdf")) {
+      if (!filePath.startsWith(`${user.id}/`)) {
         return jsonResponse({ error: "Invalid file path." }, 400);
       }
 
@@ -187,7 +200,7 @@ Deno.serve(async (req) => {
         new PutObjectCommand({
           Body: new Uint8Array(await file.arrayBuffer()),
           Bucket: bucket,
-          ContentType: "application/pdf",
+          ContentType: file.type || "application/octet-stream",
           Key: filePath,
         }),
       );
@@ -280,6 +293,36 @@ Deno.serve(async (req) => {
         new GetObjectCommand({
           Bucket: bucket,
           Key: songSheet.file_path,
+        }),
+        { expiresIn: 300 },
+      );
+
+      return jsonResponse({ signedUrl });
+    }
+
+    if (body.action === "steadfast-audio-signed-url") {
+      const recordingId = String(body.recordingId || "");
+
+      // RLS on steadfast_audio_recordings only exposes rows to users who have
+      // unlocked or been approved for Steadfast.
+      const { data: recording, error: recordingError } = await supabase
+        .from("steadfast_audio_recordings")
+        .select("file_path")
+        .eq("id", recordingId)
+        .single();
+
+      if (recordingError || !recording) {
+        return jsonResponse(
+          { error: "Recording not found or not shared with you." },
+          404,
+        );
+      }
+
+      const signedUrl = await getSignedUrl(
+        r2,
+        new GetObjectCommand({
+          Bucket: bucket,
+          Key: recording.file_path,
         }),
         { expiresIn: 300 },
       );

@@ -3,6 +3,118 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { supabase } from "../supabaseClient";
 
+const steadfastQuickLinks = [
+  {
+    title: "What Is Worship?",
+    description: "A grounding article for thinking carefully about worship.",
+    path: "/articles/what-is-worship",
+  },
+  {
+    title: "Prayer Guide",
+    description: "A longer guide for shaping personal and group prayer.",
+    path: "/prayer",
+  },
+  {
+    title: "Songs Library",
+    description: "Chord charts and song resources for worship sets.",
+    path: "/songs",
+  },
+];
+
+function formatRecordingDate(date) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(`${date}T00:00:00`));
+}
+
+function isAudioFile(file) {
+  const audioExtensions = [".aac", ".aiff", ".m4a", ".mp3", ".ogg", ".wav", ".webm"];
+  const lowerName = file.name.toLowerCase();
+
+  return (
+    file.type.startsWith("audio/") ||
+    audioExtensions.some((extension) => lowerName.endsWith(extension))
+  );
+}
+
+async function getFunctionErrorMessage(error) {
+  if (error?.context instanceof Response) {
+    try {
+      const body = await error.context.json();
+
+      if (body?.error) {
+        return body.error;
+      }
+    } catch {
+      try {
+        const text = await error.context.text();
+
+        if (text) {
+          return text;
+        }
+      } catch {
+        // Fall back to the Supabase client error message below.
+      }
+    }
+  }
+
+  return error?.message || "Unexpected Edge Function error.";
+}
+
+function SteadfastAudioPlayer({ recording }) {
+  const [audioUrl, setAudioUrl] = useState("");
+  const [audioError, setAudioError] = useState("");
+
+  useEffect(() => {
+    let ignoreResponse = false;
+
+    async function loadAudioUrl() {
+      setAudioError("");
+
+      const { data, error } = await supabase.functions.invoke("r2-song-files", {
+        body: {
+          action: "steadfast-audio-signed-url",
+          recordingId: recording.id,
+        },
+      });
+
+      if (ignoreResponse) {
+        return;
+      }
+
+      if (error) {
+        setAudioUrl("");
+        setAudioError(await getFunctionErrorMessage(error));
+        return;
+      }
+
+      setAudioUrl(data.signedUrl);
+    }
+
+    loadAudioUrl();
+
+    return () => {
+      ignoreResponse = true;
+    };
+  }, [recording.id]);
+
+  if (audioError) {
+    return <div className="steadfast-audio-placeholder">{audioError}</div>;
+  }
+
+  if (!audioUrl) {
+    return <div className="steadfast-audio-placeholder">Loading audio...</div>;
+  }
+
+  return (
+    <audio controls src={audioUrl}>
+      Your browser does not support the audio element.
+    </audio>
+  );
+}
+
 // Steadfast is a group-specific resource page.
 function Steadfast() {
   const { user } = useAuth();
@@ -15,6 +127,16 @@ function Steadfast() {
   const [loadingRequests, setLoadingRequests] = useState(false);
   const [accessError, setAccessError] = useState("");
   const [accessMessage, setAccessMessage] = useState("");
+  const [recordings, setRecordings] = useState([]);
+  const [loadingRecordings, setLoadingRecordings] = useState(false);
+  const [recordingForm, setRecordingForm] = useState({
+    date: "",
+    note: "",
+    songs: "",
+    title: "",
+  });
+  const [selectedAudioFile, setSelectedAudioFile] = useState(null);
+  const [uploadingRecording, setUploadingRecording] = useState(false);
 
   const loadAccessRequests = useCallback(async () => {
     setLoadingRequests(true);
@@ -32,6 +154,30 @@ function Steadfast() {
 
     setLoadingRequests(false);
   }, []);
+
+  const loadRecordings = useCallback(async () => {
+    if (!isUnlocked) {
+      setRecordings([]);
+      return;
+    }
+
+    setLoadingRecordings(true);
+
+    const { data, error } = await supabase
+      .from("steadfast_audio_recordings")
+      .select("id, recorded_on, title, songs, note, file_path, content_type")
+      .order("recorded_on", { ascending: false })
+      .order("uploaded_at", { ascending: false });
+
+    if (error) {
+      setAccessError(error.message);
+      setRecordings([]);
+    } else {
+      setRecordings(data || []);
+    }
+
+    setLoadingRecordings(false);
+  }, [isUnlocked]);
 
   const loadAccessState = useCallback(async () => {
     if (!user) {
@@ -98,6 +244,10 @@ function Steadfast() {
     };
   }, [loadAccessState]);
 
+  useEffect(() => {
+    loadRecordings();
+  }, [loadRecordings]);
+
   async function handleAccessSubmit(event) {
     event.preventDefault();
     setAccessError("");
@@ -154,6 +304,92 @@ function Steadfast() {
 
     setAccessMessage(`Request ${nextStatus}.`);
     loadAccessRequests();
+  }
+
+  function updateRecordingForm(field, value) {
+    setRecordingForm((currentForm) => ({
+      ...currentForm,
+      [field]: value,
+    }));
+  }
+
+  async function uploadRecording(event) {
+    event.preventDefault();
+
+    if (!selectedAudioFile || !user) {
+      return;
+    }
+
+    setAccessError("");
+    setAccessMessage("");
+
+    if (!isAudioFile(selectedAudioFile)) {
+      setAccessError("Please choose an audio file.");
+      return;
+    }
+
+    if (!recordingForm.date || !recordingForm.title.trim()) {
+      setAccessError("Please add a recording date and title.");
+      return;
+    }
+
+    setUploadingRecording(true);
+
+    const extension = selectedAudioFile.name.split(".").pop() || "audio";
+    const cleanDate = recordingForm.date;
+    const filePath = `${user.id}/steadfast-audio/${cleanDate}-${Date.now()}.${extension}`;
+    const formData = new FormData();
+
+    formData.append("action", "upload");
+    formData.append("filePath", filePath);
+    formData.append("file", selectedAudioFile);
+
+    const { data: uploadData, error: uploadError } = await supabase.functions.invoke(
+      "r2-song-files",
+      {
+        body: formData,
+      }
+    );
+
+    if (uploadError) {
+      setAccessError(await getFunctionErrorMessage(uploadError));
+      setUploadingRecording(false);
+      return;
+    }
+
+    const songs = recordingForm.songs
+      .split("\n")
+      .map((song) => song.trim())
+      .filter(Boolean);
+
+    const { error: saveError } = await supabase
+      .from("steadfast_audio_recordings")
+      .insert({
+        content_type: selectedAudioFile.type,
+        file_path: uploadData.filePath,
+        note: recordingForm.note.trim(),
+        recorded_on: recordingForm.date,
+        songs,
+        title: recordingForm.title.trim(),
+        uploaded_by: user.id,
+      });
+
+    if (saveError) {
+      setAccessError(saveError.message);
+      setUploadingRecording(false);
+      return;
+    }
+
+    setRecordingForm({
+      date: "",
+      note: "",
+      songs: "",
+      title: "",
+    });
+    setSelectedAudioFile(null);
+    setUploadingRecording(false);
+    setAccessMessage("Audio recording uploaded.");
+    loadRecordings();
   }
 
   if (checkingAccess) {
@@ -218,49 +454,162 @@ function Steadfast() {
       <section className="steadfast-hero">
         <div className="steadfast-hero-copy">
           <p className="eyebrow">Steadfast</p>
-          <h1>Welcome, Steadfast!</h1>
+          <h1>Steadfast Worship Resources</h1>
           <p>
-            Thank you for making your way to this new website as I continue
-            developing it for the local church.
+            A private place for song resources, worship preparation, and audio
+            recordings from our fellowship group.
           </p>
         </div>
       </section>
 
       <section className="steadfast-content" aria-label="Steadfast resources">
-        <section className="steadfast-section">
-          <h2>Start here</h2>
-          <p>
-            If you have not already, go ahead and check out the{" "}
-            <Link to="/about">About</Link> section, where I explain the point
-            of this website and what I am trying to accomplish in more depth.
-          </p>
-          <p>
-            Long story short, my desire is that the local church would be more
-            united in song choices and, ultimately, in proper worship.
-          </p>
-          <p>
-            This page is specifically for Steadfast, so it will make the most
-            sense if you are part of the Steadfast fellowship group at Grace
-            Community Church.
-          </p>
+        <section className="steadfast-section steadfast-feature">
+          <div>
+            <p className="eyebrow">Start here</p>
+            <h2>For Serving Together</h2>
+            <p>
+              This page is for the Steadfast fellowship group at Grace Community
+              Church. My hope is that these resources help us grow in unity,
+              song choices, preparation, and thoughtful worship.
+            </p>
+          </div>
+
+          <div className="steadfast-feature-list">
+            <span>Prepare songs before Sunday</span>
+            <span>Review recordings from previous weeks</span>
+            <span>Stay anchored in biblical worship</span>
+          </div>
+        </section>
+
+        <section className="steadfast-link-grid" aria-label="Steadfast quick links">
+          {steadfastQuickLinks.map((resource) => (
+            <Link className="steadfast-resource-card" key={resource.title} to={resource.path}>
+              <span>{resource.title}</span>
+              <p>{resource.description}</p>
+            </Link>
+          ))}
         </section>
 
         <section className="steadfast-section steadfast-callout">
-          <h2>Helpful prerequisites for service</h2>
+          <div className="steadfast-section-heading">
+            <p className="eyebrow">Serving</p>
+            <h2>Helpful Prerequisites</h2>
+          </div>
           <p>
             If you serve with me, I would love for us to be united around a few
             prerequisites since we will be facilitating and leading worship.
             These are simply resources; they are not what make someone eligible
             to serve. My goal is unity.
           </p>
-          <p>
-            To start, please take some time to read{" "}
-            <Link to="/articles/what-is-worship">What is worship?</Link>
-          </p>
-          <p>
-            If we are going to lead worship, it is only fair that we know what
-            worship is.
-          </p>
+        </section>
+
+        <section className="steadfast-section steadfast-audio-section">
+          <div className="steadfast-section-heading">
+            <p className="eyebrow">Archive</p>
+            <h2>Steadfast Audio Recordings</h2>
+            <p>
+              A place to keep voice recordings from the songs we sing together.
+              Add a recording for each week and list the songs included.
+            </p>
+          </div>
+
+          {isAdmin && (
+            <form className="steadfast-audio-upload" onSubmit={uploadRecording}>
+              <div className="steadfast-audio-upload-grid">
+                <label>
+                  Date
+                  <input
+                    onChange={(event) =>
+                      updateRecordingForm("date", event.target.value)
+                    }
+                    type="date"
+                    value={recordingForm.date}
+                  />
+                </label>
+                <label>
+                  Title
+                  <input
+                    onChange={(event) =>
+                      updateRecordingForm("title", event.target.value)
+                    }
+                    placeholder="Sunday worship set"
+                    type="text"
+                    value={recordingForm.title}
+                  />
+                </label>
+                <label>
+                  Audio file
+                  <input
+                    accept="audio/*"
+                    onChange={(event) =>
+                      setSelectedAudioFile(event.target.files?.[0] || null)
+                    }
+                    type="file"
+                  />
+                </label>
+                <label>
+                  Songs
+                  <textarea
+                    onChange={(event) =>
+                      updateRecordingForm("songs", event.target.value)
+                    }
+                    placeholder={"One song per line"}
+                    rows="4"
+                    value={recordingForm.songs}
+                  />
+                </label>
+                <label>
+                  Note
+                  <textarea
+                    onChange={(event) =>
+                      updateRecordingForm("note", event.target.value)
+                    }
+                    placeholder="Optional note"
+                    rows="4"
+                    value={recordingForm.note}
+                  />
+                </label>
+              </div>
+
+              <button
+                className="secondary-button"
+                disabled={uploadingRecording || !selectedAudioFile}
+                type="submit"
+              >
+                {uploadingRecording ? "Uploading..." : "Upload recording"}
+              </button>
+            </form>
+          )}
+
+          <div className="steadfast-recording-list">
+            {loadingRecordings ? (
+              <p className="empty-state">Loading recordings...</p>
+            ) : recordings.length > 0 ? (
+              recordings.map((recording) => (
+                <article className="steadfast-recording-card" key={recording.id}>
+                  <div className="steadfast-recording-copy">
+                    <small>{formatRecordingDate(recording.recorded_on)}</small>
+                    <h3>{recording.title}</h3>
+                    {recording.songs.length > 0 && (
+                      <ul>
+                        {recording.songs.map((song) => (
+                          <li key={song}>{song}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {recording.note && <p>{recording.note}</p>}
+                  </div>
+
+                  <SteadfastAudioPlayer recording={recording} />
+                </article>
+              ))
+            ) : (
+              <p className="empty-state">
+                No recordings have been uploaded yet.
+              </p>
+            )}
+          </div>
+
         </section>
       </section>
 
