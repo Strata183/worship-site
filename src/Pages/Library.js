@@ -891,15 +891,13 @@ function Library() {
     setError("");
     setMessage("");
 
-    const { data, error: insertError } = await supabase
+    const { error: insertError } = await supabase
       .from("setlist_folders")
       .insert({
         name: folderName,
         owner_id: user.id,
         parent_folder_id: currentSetlistFolderId,
       })
-      .select("*")
-      .single();
 
     if (insertError) {
       setError(insertError.message);
@@ -913,12 +911,6 @@ function Library() {
             : [...currentFolderIds, currentSetlistFolderId]
         );
       }
-      setCurrentSetlistFolderId(data.id);
-      setOpenSetlistFolderIds((currentFolderIds) =>
-        currentFolderIds.includes(data.id)
-          ? currentFolderIds
-          : [...currentFolderIds, data.id]
-      );
       setMessage("Folder created.");
       await loadSetlistWorkspace();
     }
@@ -1433,6 +1425,11 @@ function Library() {
 
                     {setlistCreateMode === "folder" && (
                       <form className="setlist-sidebar-form" onSubmit={createSetlistFolder}>
+                        <p>
+                          {currentSetlistFolder
+                            ? `Adding inside ${currentSetlistFolder.name}`
+                            : "Adding at the top level"}
+                        </p>
                         <label>
                           Folder name
                           <input
@@ -1460,6 +1457,11 @@ function Library() {
 
                     {setlistCreateMode === "setlist" && (
                       <form className="setlist-sidebar-form" onSubmit={createSetlist}>
+                        <p>
+                          {currentSetlistFolder
+                            ? `Adding inside ${currentSetlistFolder.name}`
+                            : "Adding at the top level"}
+                        </p>
                         <label>
                           Title
                           <input
@@ -1500,6 +1502,21 @@ function Library() {
                   </div>
 
                   <div className="setlist-tree" aria-label="Setlist folders and setlists">
+                    <button
+                      className={`setlist-root-row ${
+                        currentSetlistFolderId === null && !selectedSetlistId
+                          ? "active"
+                          : ""
+                      }`}
+                      type="button"
+                      onClick={() => {
+                        setCurrentSetlistFolderId(null);
+                        setSelectedSetlistId(null);
+                      }}
+                    >
+                      <span>Top level</span>
+                      <small>Create folders and setlists here</small>
+                    </button>
                     {setlistFolders.length === 0 && setlists.length === 0 ? (
                       <p className="song-resource-muted">No setlists yet.</p>
                     ) : (

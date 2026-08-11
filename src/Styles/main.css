@@ -2911,6 +2911,15 @@ nav a.active:not(.site-title) {
   padding: 0.65rem;
 }
 
+.setlist-sidebar-form p {
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  margin: 0;
+  max-width: none;
+  text-align: left;
+}
+
 .setlist-control-card h2,
 .setlist-detail-heading h2,
 .setlist-add-card h3,
@@ -2999,6 +3008,33 @@ nav a.active:not(.site-title) {
 .setlist-tree-children {
   display: grid;
   gap: 0.25rem;
+}
+
+.setlist-root-row {
+  background-color: transparent;
+  border: 0;
+  border-radius: 7px;
+  color: var(--color-text);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  font-weight: 800;
+  gap: 0.12rem;
+  padding: 0.55rem 0.6rem;
+  text-align: left;
+}
+
+.setlist-root-row small {
+  color: var(--color-muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.setlist-root-row:hover,
+.setlist-root-row:focus,
+.setlist-root-row.active {
+  background-color: var(--color-accent-light);
+  color: var(--color-accent);
 }
 
 .setlist-tree-group {
