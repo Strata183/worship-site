@@ -365,6 +365,40 @@ Deno.serve(async (req) => {
       return jsonResponse({ signedUrl });
     }
 
+    if (body.action === "delete-song-resource-file") {
+      const resourceId = String(body.resourceId || "");
+
+      // The frontend deletes the database row after this. This action only
+      // removes the private R2 file, and only for resources owned by the user.
+      const { data: resource, error: resourceError } = await supabase
+        .from("song_resources")
+        .select("file_path, owner_id, resource_type")
+        .eq("id", resourceId)
+        .single();
+
+      if (resourceError || !resource) {
+        return jsonResponse({ error: "Resource not found." }, 404);
+      }
+
+      if (resource.owner_id !== user.id) {
+        return jsonResponse(
+          { error: "Only the owner can delete this resource." },
+          403,
+        );
+      }
+
+      if (resource.resource_type === "audio" && resource.file_path) {
+        await r2.send(
+          new DeleteObjectCommand({
+            Bucket: bucket,
+            Key: resource.file_path,
+          }),
+        );
+      }
+
+      return jsonResponse({ ok: true });
+    }
+
     if (body.action === "vbs-kinder-files") {
       // RLS only returns chart rows when the signed-in user has claimed VBS
       // Kinder access with the team password.

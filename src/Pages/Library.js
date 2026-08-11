@@ -158,6 +158,7 @@ function Library() {
   const [submitting, setSubmitting] = useState(false);
   const [copyingSongId, setCopyingSongId] = useState(null);
   const [savingResourceSongId, setSavingResourceSongId] = useState(null);
+  const [deletingResourceId, setDeletingResourceId] = useState(null);
   const [resourceForms, setResourceForms] = useState({});
 
   // message and error display feedback below the upload form.
@@ -506,7 +507,7 @@ function Library() {
       );
 
       if (uploadError) {
-        setError(await getFunctionErrorMessage(uploadError));
+        setError(`Audio upload failed: ${await getFunctionErrorMessage(uploadError)}`);
         setSavingResourceSongId(null);
         return;
       }
@@ -524,7 +525,7 @@ function Library() {
     });
 
     if (insertError) {
-      setError(insertError.message);
+      setError(`Resource save failed: ${insertError.message}`);
       setSavingResourceSongId(null);
       return;
     }
@@ -542,6 +543,42 @@ function Library() {
     setMessage("Resource added.");
     setSavingResourceSongId(null);
     await loadSongs();
+  }
+
+  async function deleteSongResource(resource) {
+    setDeletingResourceId(resource.id);
+    setError("");
+    setMessage("");
+
+    const { error: storageError } = await supabase.functions.invoke(
+      "r2-song-files",
+      {
+        body: {
+          action: "delete-song-resource-file",
+          resourceId: resource.id,
+        },
+      }
+    );
+
+    if (storageError) {
+      setError(await getFunctionErrorMessage(storageError));
+      setDeletingResourceId(null);
+      return;
+    }
+
+    const { error: deleteError } = await supabase
+      .from("song_resources")
+      .delete()
+      .eq("id", resource.id);
+
+    if (deleteError) {
+      setError(deleteError.message);
+    } else {
+      setMessage("Resource deleted.");
+      await loadSongs();
+    }
+
+    setDeletingResourceId(null);
   }
 
   function startEditingSong(song) {
@@ -1058,18 +1095,33 @@ function Library() {
                           <div className="song-resource-list">
                             {resources.map((resource) => (
                               <article className="song-resource-card" key={resource.id}>
-                                <div>
-                                  <small>{resource.resource_type}</small>
-                                  {resource.title && <h4>{resource.title}</h4>}
-                                  {resource.body && <p>{resource.body}</p>}
-                                  {resource.resource_type === "link" && resource.url && (
-                                    <a
-                                      href={resource.url}
-                                      rel="noopener noreferrer"
-                                      target="_blank"
+                                <div className="song-resource-card-copy">
+                                  <div>
+                                    <small>{resource.resource_type}</small>
+                                    {resource.title && <h4>{resource.title}</h4>}
+                                    {resource.body && <p>{resource.body}</p>}
+                                    {resource.resource_type === "link" && resource.url && (
+                                      <a
+                                        href={resource.url}
+                                        rel="noopener noreferrer"
+                                        target="_blank"
+                                      >
+                                        Open link
+                                      </a>
+                                    )}
+                                  </div>
+
+                                  {isOwner && (
+                                    <button
+                                      className="song-resource-delete"
+                                      disabled={deletingResourceId === resource.id}
+                                      type="button"
+                                      onClick={() => deleteSongResource(resource)}
                                     >
-                                      Open link
-                                    </a>
+                                      {deletingResourceId === resource.id
+                                        ? "Deleting..."
+                                        : "Delete"}
+                                    </button>
                                   )}
                                 </div>
 
