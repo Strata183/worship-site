@@ -3364,10 +3364,23 @@ nav a.active:not(.site-title) {
   border: 0;
   border-bottom: 1px solid var(--color-border);
   border-radius: 0;
+  cursor: grab;
   display: grid;
   gap: 0.85rem;
   grid-template-columns: minmax(0, 1fr) max-content;
   padding: 0.75rem 0;
+  transition: background-color 160ms ease, opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.setlist-item-list li:active {
+  cursor: grabbing;
+}
+
+.setlist-item-list li.dragging {
+  background-color: var(--color-accent-light);
+  opacity: 0.62;
+  transform: scale(0.995);
 }
 
 .setlist-item-list li.placeholder-item {
@@ -3377,11 +3390,11 @@ nav a.active:not(.site-title) {
 .setlist-item-main {
   align-items: start;
   display: grid;
-  gap: 0.75rem;
-  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: 0.65rem;
+  grid-template-columns: 2rem 1.5rem minmax(0, 1fr);
 }
 
-.setlist-item-main > span {
+.setlist-item-main > span:first-child {
   align-items: center;
   background-color: var(--color-background);
   border: 1px solid var(--color-border);
@@ -3393,6 +3406,30 @@ nav a.active:not(.site-title) {
   height: 2rem;
   justify-content: center;
   width: 2rem;
+}
+
+.setlist-drag-handle {
+  align-items: center;
+  background-color: transparent;
+  cursor: grab;
+  display: grid;
+  gap: 0.16rem;
+  height: 2rem;
+  justify-content: center;
+  width: 1.5rem;
+}
+
+.setlist-drag-handle i {
+  background-color: var(--color-muted);
+  border-radius: 999px;
+  display: block;
+  height: 0.14rem;
+  width: 1rem;
+}
+
+.setlist-item-list li:hover .setlist-drag-handle i,
+.setlist-item-list li.dragging .setlist-drag-handle i {
+  background-color: var(--color-accent);
 }
 
 .setlist-item-main strong {

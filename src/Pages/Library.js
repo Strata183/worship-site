@@ -175,6 +175,7 @@ function Library() {
   const [savingSetlistAction, setSavingSetlistAction] = useState(false);
   const [openSetlistFolderIds, setOpenSetlistFolderIds] = useState([]);
   const [setlistCreateMode, setSetlistCreateMode] = useState("");
+  const [draggingSetlistItemId, setDraggingSetlistItemId] = useState(null);
 
   // message and error display feedback below the upload form.
   const [message, setMessage] = useState("");
@@ -1051,37 +1052,59 @@ function Library() {
     setSavingSetlistAction(false);
   }
 
-  async function moveSetlistItem(item, direction) {
-    const currentIndex = selectedSetlistItems.findIndex(
-      (setlistItem) => setlistItem.id === item.id
-    );
-    const nextIndex = currentIndex + direction;
-
-    if (currentIndex === -1 || nextIndex < 0 || nextIndex >= selectedSetlistItems.length) {
+  async function reorderSetlistItems(draggedItemId, targetItemId) {
+    if (!draggedItemId || draggedItemId === targetItemId) {
       return;
     }
 
-    const otherItem = selectedSetlistItems[nextIndex];
+    const draggedIndex = selectedSetlistItems.findIndex(
+      (setlistItem) => setlistItem.id === draggedItemId
+    );
+    const targetIndex = selectedSetlistItems.findIndex(
+      (setlistItem) => setlistItem.id === targetItemId
+    );
+
+    if (draggedIndex === -1 || targetIndex === -1) {
+      return;
+    }
+
+    const reorderedItems = [...selectedSetlistItems];
+    const [draggedItem] = reorderedItems.splice(draggedIndex, 1);
+
+    reorderedItems.splice(targetIndex, 0, draggedItem);
     setSavingSetlistAction(true);
     setError("");
     setMessage("");
 
-    const [currentUpdate, otherUpdate] = await Promise.all([
-      supabase
-        .from("setlist_items")
-        .update({ position: otherItem.position })
-        .eq("id", item.id),
-      supabase
-        .from("setlist_items")
-        .update({ position: item.position })
-        .eq("id", otherItem.id),
-    ]);
+    const updates = await Promise.all(
+      reorderedItems.map((setlistItem, index) =>
+        supabase
+          .from("setlist_items")
+          .update({ position: index })
+          .eq("id", setlistItem.id)
+      )
+    );
+    const updateError = updates.find((update) => update.error)?.error;
 
-    if (currentUpdate.error) {
-      setError(currentUpdate.error.message);
-    } else if (otherUpdate.error) {
-      setError(otherUpdate.error.message);
+    if (updateError) {
+      setError(updateError.message);
     } else {
+      setSetlistItems((currentItems) => {
+        const reorderedItemIds = new Set(
+          reorderedItems.map((setlistItem) => setlistItem.id)
+        );
+        const untouchedItems = currentItems.filter(
+          (setlistItem) => !reorderedItemIds.has(setlistItem.id)
+        );
+
+        return [
+          ...untouchedItems,
+          ...reorderedItems.map((setlistItem, index) => ({
+            ...setlistItem,
+            position: index,
+          })),
+        ];
+      });
       await loadSetlistWorkspace();
     }
 
@@ -1593,14 +1616,47 @@ function Library() {
                               return (
                                 <li
                                   className={
-                                    item.item_type === "placeholder"
+                                    `${item.item_type === "placeholder"
                                       ? "placeholder-item"
-                                      : ""
+                                      : ""} ${
+                                      draggingSetlistItemId === item.id
+                                        ? "dragging"
+                                        : ""
+                                    }`
                                   }
+                                  draggable={!savingSetlistAction}
                                   key={item.id}
+                                  onDragStart={(event) => {
+                                    setDraggingSetlistItemId(item.id);
+                                    event.dataTransfer.effectAllowed = "move";
+                                    event.dataTransfer.setData("text/plain", item.id);
+                                  }}
+                                  onDragOver={(event) => {
+                                    event.preventDefault();
+                                    event.dataTransfer.dropEffect = "move";
+                                  }}
+                                  onDrop={(event) => {
+                                    event.preventDefault();
+                                    const draggedItemId =
+                                      event.dataTransfer.getData("text/plain") ||
+                                      draggingSetlistItemId;
+
+                                    setDraggingSetlistItemId(null);
+                                    reorderSetlistItems(draggedItemId, item.id);
+                                  }}
+                                  onDragEnd={() => setDraggingSetlistItemId(null)}
                                 >
                                   <div className="setlist-item-main">
                                     <span>{index + 1}</span>
+                                    <span
+                                      aria-label="Drag to reorder"
+                                      className="setlist-drag-handle"
+                                      title="Drag to reorder"
+                                    >
+                                      <i></i>
+                                      <i></i>
+                                      <i></i>
+                                    </span>
                                     <div>
                                       <strong>
                                         {item.item_type === "song"
@@ -1623,23 +1679,6 @@ function Library() {
                                         Open
                                       </button>
                                     )}
-                                    <button
-                                      disabled={savingSetlistAction || index === 0}
-                                      type="button"
-                                      onClick={() => moveSetlistItem(item, -1)}
-                                    >
-                                      Up
-                                    </button>
-                                    <button
-                                      disabled={
-                                        savingSetlistAction ||
-                                        index === selectedSetlistItems.length - 1
-                                      }
-                                      type="button"
-                                      onClick={() => moveSetlistItem(item, 1)}
-                                    >
-                                      Down
-                                    </button>
                                     <button
                                       disabled={savingSetlistAction}
                                       type="button"
