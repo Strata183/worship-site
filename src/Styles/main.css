@@ -2854,6 +2854,325 @@ nav a.active:not(.site-title) {
   background-color: #374151;
 }
 
+.setlist-workspace {
+  display: grid;
+  gap: 1rem;
+}
+
+.setlist-control-grid {
+  align-items: start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.setlist-control-card,
+.setlist-add-card,
+.setlist-folder-panel,
+.setlist-detail-panel {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.setlist-control-card {
+  overflow: hidden;
+}
+
+.setlist-control-card summary {
+  color: var(--color-accent);
+  cursor: pointer;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  list-style: none;
+  padding: 0.7rem 0.9rem;
+}
+
+.setlist-control-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.setlist-control-card summary::after {
+  content: "+";
+  display: inline-block;
+  margin-left: 0.45rem;
+}
+
+.setlist-control-card[open] summary {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.setlist-control-card[open] summary::after {
+  content: "-";
+}
+
+.setlist-control-card form {
+  align-items: end;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: minmax(12rem, 1fr) max-content;
+  min-width: min(34rem, calc(100vw - 3rem));
+  padding: 0.85rem;
+}
+
+.setlist-control-card + .setlist-control-card form {
+  grid-template-columns: minmax(12rem, 1fr) minmax(10rem, 0.7fr) max-content;
+}
+
+.setlist-control-card h2,
+.setlist-detail-heading h2,
+.setlist-add-card h3,
+.setlist-folder-section h3,
+.setlist-print-heading h1 {
+  font-family: var(--font-heading);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.setlist-control-card p,
+.setlist-detail-notes,
+.setlist-print-heading p {
+  color: var(--color-muted);
+  font-size: 0.92rem;
+  margin: 0.25rem 0 0;
+  max-width: none;
+  text-align: left;
+}
+
+.setlist-control-card label,
+.setlist-add-card label {
+  color: var(--color-text);
+  display: grid;
+  font-size: 0.86rem;
+  font-weight: 800;
+  gap: 0.35rem;
+}
+
+.setlist-control-card input,
+.setlist-control-card textarea,
+.setlist-add-card input,
+.setlist-add-card select,
+.setlist-add-card textarea {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  font: inherit;
+  padding: 0.7rem 0.8rem;
+  width: 100%;
+}
+
+.setlist-control-card textarea,
+.setlist-add-card textarea {
+  resize: vertical;
+}
+
+.setlist-form-wide {
+  grid-column: 1 / -1;
+}
+
+.setlist-browser-grid {
+  align-items: start;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(210px, 260px) minmax(0, 1fr);
+}
+
+.setlist-folder-panel {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  position: sticky;
+  top: 1rem;
+}
+
+.setlist-breadcrumbs,
+.setlist-folder-list,
+.setlist-picker-list {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.setlist-breadcrumbs button,
+.setlist-folder-list button,
+.setlist-picker-list button {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  color: var(--color-text);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  padding: 0.65rem 0.75rem;
+  text-align: left;
+}
+
+.setlist-breadcrumbs button.active,
+.setlist-breadcrumbs button:hover,
+.setlist-folder-list button:hover,
+.setlist-picker-list button.active,
+.setlist-picker-list button:hover {
+  background-color: var(--color-accent-light);
+  color: var(--color-accent);
+}
+
+.setlist-folder-list button {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.setlist-folder-list button strong,
+.setlist-picker-list button small {
+  color: var(--color-muted);
+  font-size: 0.78rem;
+}
+
+.setlist-picker-list button {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.setlist-folder-section {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.setlist-folder-section h3 {
+  font-size: 0.95rem;
+}
+
+.setlist-detail-panel {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.setlist-detail-heading {
+  align-items: start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.setlist-detail-heading span {
+  color: var(--color-muted);
+  display: block;
+  font-weight: 700;
+  margin-top: 0.25rem;
+}
+
+.setlist-add-grid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.setlist-add-card {
+  align-items: end;
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.85rem;
+}
+
+.setlist-print-area {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.setlist-print-heading {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.85rem;
+}
+
+.setlist-item-list {
+  display: grid;
+  gap: 0.55rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.setlist-item-list li {
+  align-items: center;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  padding: 0.85rem;
+}
+
+.setlist-item-list li.placeholder-item {
+  background-color: #fffbeb;
+}
+
+.setlist-item-main {
+  align-items: start;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 2rem minmax(0, 1fr);
+}
+
+.setlist-item-main > span {
+  align-items: center;
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-accent);
+  display: flex;
+  font-size: 0.85rem;
+  font-weight: 800;
+  height: 2rem;
+  justify-content: center;
+  width: 2rem;
+}
+
+.setlist-item-main strong {
+  display: block;
+  font-family: var(--font-heading);
+  line-height: 1.25;
+}
+
+.setlist-item-main p {
+  color: var(--color-muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+  margin: 0.2rem 0 0;
+  max-width: none;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.setlist-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+}
+
+.setlist-item-actions button {
+  background-color: var(--color-accent);
+  border: 0;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  padding: 0.5rem 0.65rem;
+}
+
+.setlist-item-actions button + button:not(:disabled) {
+  background-color: #374151;
+}
+
+.setlist-item-actions button:disabled {
+  background-color: #d1d5db;
+  color: #4b5563;
+  cursor: not-allowed;
+}
+
 /* ==========================================================================
    Pages/Friends.js
    ========================================================================== */
@@ -3205,6 +3524,15 @@ nav a.active:not(.site-title) {
     position: static;
   }
 
+  .setlist-browser-grid,
+  .setlist-control-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .setlist-folder-panel {
+    position: static;
+  }
+
   .prayer-layout {
     grid-template-columns: 1fr;
   }
@@ -3287,8 +3615,24 @@ nav a.active:not(.site-title) {
   }
 
   .library-toolbar,
+  .setlist-add-grid,
+  .setlist-control-card,
   .upload-card-main {
     grid-template-columns: 1fr;
+  }
+
+  .setlist-detail-heading {
+    align-items: stretch;
+    display: grid;
+  }
+
+  .setlist-item-list li {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .setlist-item-actions {
+    justify-content: flex-start;
   }
 
   .worthy-album-hero {
@@ -3378,5 +3722,56 @@ nav a.active:not(.site-title) {
 
   .row-actions {
     justify-content: flex-start;
+  }
+}
+
+@media print {
+  body {
+    background: white;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .setlist-print-area,
+  .setlist-print-area * {
+    visibility: visible;
+  }
+
+  .setlist-print-area {
+    background: white;
+    color: #111827;
+    display: block;
+    left: 0;
+    padding: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+  }
+
+  .setlist-print-heading {
+    margin-bottom: 1rem;
+  }
+
+  .setlist-item-list {
+    display: block;
+  }
+
+  .setlist-item-list li {
+    break-inside: avoid;
+    border: 1px solid #d1d5db;
+    display: block;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .setlist-item-actions {
+    display: none;
+  }
+
+  .setlist-item-main {
+    display: grid;
+    grid-template-columns: 2rem 1fr;
   }
 }

@@ -160,6 +160,19 @@ function Library() {
   const [savingResourceSongId, setSavingResourceSongId] = useState(null);
   const [deletingResourceId, setDeletingResourceId] = useState(null);
   const [resourceForms, setResourceForms] = useState({});
+  const [setlistFolders, setSetlistFolders] = useState([]);
+  const [setlists, setSetlists] = useState([]);
+  const [setlistItems, setSetlistItems] = useState([]);
+  const [currentSetlistFolderId, setCurrentSetlistFolderId] = useState(null);
+  const [selectedSetlistId, setSelectedSetlistId] = useState(null);
+  const [newSetlistFolderName, setNewSetlistFolderName] = useState("");
+  const [newSetlistTitle, setNewSetlistTitle] = useState("");
+  const [newSetlistDate, setNewSetlistDate] = useState("");
+  const [newSetlistNotes, setNewSetlistNotes] = useState("");
+  const [setlistSongId, setSetlistSongId] = useState("");
+  const [placeholderTitle, setPlaceholderTitle] = useState("");
+  const [placeholderBody, setPlaceholderBody] = useState("");
+  const [savingSetlistAction, setSavingSetlistAction] = useState(false);
 
   // message and error display feedback below the upload form.
   const [message, setMessage] = useState("");
@@ -168,6 +181,7 @@ function Library() {
   useEffect(() => {
     // Load songs once when the Library page first appears.
     loadSongs();
+    loadSetlistWorkspace();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -195,6 +209,42 @@ function Library() {
     }
 
     setLoadingSongs(false);
+  }
+
+  async function loadSetlistWorkspace() {
+    const [foldersResult, setlistsResult, itemsResult] = await Promise.all([
+      supabase
+        .from("setlist_folders")
+        .select("*")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("setlists")
+        .select("*")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("setlist_items")
+        .select("*")
+        .order("position", { ascending: true }),
+    ]);
+
+    if (foldersResult.error) {
+      setError(foldersResult.error.message);
+      return;
+    }
+
+    if (setlistsResult.error) {
+      setError(setlistsResult.error.message);
+      return;
+    }
+
+    if (itemsResult.error) {
+      setError(itemsResult.error.message);
+      return;
+    }
+
+    setSetlistFolders(foldersResult.data || []);
+    setSetlists(setlistsResult.data || []);
+    setSetlistItems(itemsResult.data || []);
   }
 
   useEffect(() => {
@@ -737,6 +787,8 @@ function Library() {
   const mySongsCount = songs.filter((song) => song.owner_id === user.id).length;
   const friendSongsCount = songs.filter((song) => song.owner_id !== user.id).length;
   const isMyShelf = activeShelf === "mine";
+  const isFriendsShelf = activeShelf === "friends";
+  const isSetlistsShelf = activeShelf === "setlists";
   const selectedFriendSongsCount =
     friendFilter === "all"
       ? friendSongsCount
@@ -750,6 +802,77 @@ function Library() {
       ),
     [songs, user.id]
   );
+  const myLibrarySongs = useMemo(
+    () =>
+      songs
+        .filter((song) => song.owner_id === user.id)
+        .sort((firstSong, secondSong) =>
+          (firstSong.title || "").localeCompare(secondSong.title || "")
+        ),
+    [songs, user.id]
+  );
+  const currentSetlistFolder = setlistFolders.find(
+    (folder) => folder.id === currentSetlistFolderId
+  );
+  const childSetlistFolders = setlistFolders
+    .filter((folder) => folder.parent_folder_id === currentSetlistFolderId)
+    .sort((firstFolder, secondFolder) =>
+      firstFolder.name.localeCompare(secondFolder.name)
+    );
+  const currentFolderSetlists = setlists
+    .filter((setlist) => setlist.folder_id === currentSetlistFolderId)
+    .sort((firstSetlist, secondSetlist) => {
+      if (firstSetlist.event_date && secondSetlist.event_date) {
+        return new Date(secondSetlist.event_date) - new Date(firstSetlist.event_date);
+      }
+
+      if (firstSetlist.event_date) {
+        return -1;
+      }
+
+      if (secondSetlist.event_date) {
+        return 1;
+      }
+
+      return (firstSetlist.title || "").localeCompare(secondSetlist.title || "");
+    });
+  const selectedSetlist =
+    setlists.find((setlist) => setlist.id === selectedSetlistId) ||
+    currentFolderSetlists[0] ||
+    null;
+  const selectedSetlistItems = selectedSetlist
+    ? setlistItems
+        .filter((item) => item.setlist_id === selectedSetlist.id)
+        .sort((firstItem, secondItem) => firstItem.position - secondItem.position)
+    : [];
+  const songsById = useMemo(
+    () =>
+      songs.reduce((songMap, song) => {
+        songMap[song.id] = song;
+        return songMap;
+      }, {}),
+    [songs]
+  );
+  const setlistBreadcrumbs = useMemo(() => {
+    const folderMap = setlistFolders.reduce((folderLookup, folder) => {
+      folderLookup[folder.id] = folder;
+      return folderLookup;
+    }, {});
+    const breadcrumbs = [];
+    let nextFolder = currentSetlistFolderId
+      ? folderMap[currentSetlistFolderId]
+      : null;
+
+    while (nextFolder) {
+      breadcrumbs.unshift(nextFolder);
+      nextFolder = nextFolder.parent_folder_id
+        ? folderMap[nextFolder.parent_folder_id]
+        : null;
+    }
+
+    return breadcrumbs;
+  }, [currentSetlistFolderId, setlistFolders]);
+  const setlistsCount = setlists.length;
 
   function formatSongDate(song) {
     // Some older rows or test data may not have created_at populated.
@@ -764,15 +887,244 @@ function Library() {
     }).format(new Date(song.created_at));
   }
 
+  function formatSetlistDate(dateValue) {
+    if (!dateValue) {
+      return "No date";
+    }
+
+    return new Intl.DateTimeFormat("en", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(new Date(`${dateValue}T00:00:00`));
+  }
+
+  async function createSetlistFolder(event) {
+    event.preventDefault();
+    const folderName = newSetlistFolderName.trim();
+
+    if (!folderName) {
+      setError("Name the folder first.");
+      return;
+    }
+
+    setSavingSetlistAction(true);
+    setError("");
+    setMessage("");
+
+    const { error: insertError } = await supabase.from("setlist_folders").insert({
+      name: folderName,
+      owner_id: user.id,
+      parent_folder_id: currentSetlistFolderId,
+    });
+
+    if (insertError) {
+      setError(insertError.message);
+    } else {
+      setNewSetlistFolderName("");
+      setMessage("Folder created.");
+      await loadSetlistWorkspace();
+    }
+
+    setSavingSetlistAction(false);
+  }
+
+  async function createSetlist(event) {
+    event.preventDefault();
+    const setlistTitle = newSetlistTitle.trim();
+
+    if (!setlistTitle) {
+      setError("Name the setlist first.");
+      return;
+    }
+
+    setSavingSetlistAction(true);
+    setError("");
+    setMessage("");
+
+    const { data, error: insertError } = await supabase
+      .from("setlists")
+      .insert({
+        event_date: newSetlistDate || null,
+        folder_id: currentSetlistFolderId,
+        notes: newSetlistNotes.trim(),
+        owner_id: user.id,
+        title: setlistTitle,
+      })
+      .select("*")
+      .single();
+
+    if (insertError) {
+      setError(insertError.message);
+    } else {
+      setNewSetlistTitle("");
+      setNewSetlistDate("");
+      setNewSetlistNotes("");
+      setSelectedSetlistId(data.id);
+      setMessage("Setlist created.");
+      await loadSetlistWorkspace();
+    }
+
+    setSavingSetlistAction(false);
+  }
+
+  async function addSongToSetlist(event) {
+    event.preventDefault();
+
+    if (!selectedSetlist) {
+      setError("Create or choose a setlist first.");
+      return;
+    }
+
+    if (!setlistSongId) {
+      setError("Choose a song first.");
+      return;
+    }
+
+    setSavingSetlistAction(true);
+    setError("");
+    setMessage("");
+
+    const position = selectedSetlistItems.length;
+    const { error: insertError } = await supabase.from("setlist_items").insert({
+      item_type: "song",
+      owner_id: user.id,
+      position,
+      setlist_id: selectedSetlist.id,
+      song_id: setlistSongId,
+    });
+
+    if (insertError) {
+      setError(insertError.message);
+    } else {
+      setSetlistSongId("");
+      setMessage("Song added to setlist.");
+      await loadSetlistWorkspace();
+    }
+
+    setSavingSetlistAction(false);
+  }
+
+  async function addPlaceholderToSetlist(event) {
+    event.preventDefault();
+
+    if (!selectedSetlist) {
+      setError("Create or choose a setlist first.");
+      return;
+    }
+
+    const titleText = placeholderTitle.trim();
+    const bodyText = placeholderBody.trim();
+
+    if (!titleText && !bodyText) {
+      setError("Add a title or note for the blank page.");
+      return;
+    }
+
+    setSavingSetlistAction(true);
+    setError("");
+    setMessage("");
+
+    const position = selectedSetlistItems.length;
+    const { error: insertError } = await supabase.from("setlist_items").insert({
+      body: bodyText,
+      item_type: "placeholder",
+      owner_id: user.id,
+      position,
+      setlist_id: selectedSetlist.id,
+      title: titleText || "Blank page",
+    });
+
+    if (insertError) {
+      setError(insertError.message);
+    } else {
+      setPlaceholderTitle("");
+      setPlaceholderBody("");
+      setMessage("Blank page added.");
+      await loadSetlistWorkspace();
+    }
+
+    setSavingSetlistAction(false);
+  }
+
+  async function moveSetlistItem(item, direction) {
+    const currentIndex = selectedSetlistItems.findIndex(
+      (setlistItem) => setlistItem.id === item.id
+    );
+    const nextIndex = currentIndex + direction;
+
+    if (currentIndex === -1 || nextIndex < 0 || nextIndex >= selectedSetlistItems.length) {
+      return;
+    }
+
+    const otherItem = selectedSetlistItems[nextIndex];
+    setSavingSetlistAction(true);
+    setError("");
+    setMessage("");
+
+    const [currentUpdate, otherUpdate] = await Promise.all([
+      supabase
+        .from("setlist_items")
+        .update({ position: otherItem.position })
+        .eq("id", item.id),
+      supabase
+        .from("setlist_items")
+        .update({ position: item.position })
+        .eq("id", otherItem.id),
+    ]);
+
+    if (currentUpdate.error) {
+      setError(currentUpdate.error.message);
+    } else if (otherUpdate.error) {
+      setError(otherUpdate.error.message);
+    } else {
+      await loadSetlistWorkspace();
+    }
+
+    setSavingSetlistAction(false);
+  }
+
+  async function deleteSetlistItem(item) {
+    setSavingSetlistAction(true);
+    setError("");
+    setMessage("");
+
+    const { error: deleteError } = await supabase
+      .from("setlist_items")
+      .delete()
+      .eq("id", item.id);
+
+    if (deleteError) {
+      setError(deleteError.message);
+    } else {
+      setMessage("Setlist item removed.");
+      await loadSetlistWorkspace();
+    }
+
+    setSavingSetlistAction(false);
+  }
+
+  function openPrintableSetlist() {
+    window.print();
+  }
+
   return (
     <main className="page app-page library-page">
       <section className="library-shell">
         <aside className="library-sidebar" aria-label="Song library sections">
           <div className="library-brand-block">
             <p className="eyebrow">PDF library</p>
-            <h1>{isMyShelf ? "My Library" : "Friends Library"}</h1>
+            <h1>
+              {isSetlistsShelf
+                ? "Setlists"
+                : isMyShelf
+                  ? "My Library"
+                  : "Friends Library"}
+            </h1>
             <p>
-              {isMyShelf
+              {isSetlistsShelf
+                ? "Build nested setlist folders, add songs, and prepare a clean PDF to share."
+                : isMyShelf
                 ? "Open your charts, organize your scores, and sort songs by title or key."
                 : "Open charts shared by your accepted friends!"}
             </p>
@@ -788,16 +1140,20 @@ function Library() {
               <strong>{mySongsCount}</strong>
             </button>
             <button
-              className={activeShelf === "friends" ? "active" : ""}
+              className={isFriendsShelf ? "active" : ""}
               onClick={() => setActiveShelf("friends")}
               type="button"
             >
               <span>Friends Library</span>
               <strong>{friendSongsCount}</strong>
             </button>
-            <button disabled type="button" title="Coming in a later step">
+            <button
+              className={isSetlistsShelf ? "active" : ""}
+              onClick={() => setActiveShelf("setlists")}
+              type="button"
+            >
               <span>Setlists</span>
-              <strong>Next</strong>
+              <strong>{setlistsCount}</strong>
             </button>
             <button disabled type="button" title="Coming in a later step">
               <span>Folders</span>
@@ -807,6 +1163,329 @@ function Library() {
         </aside>
 
         <section className="score-browser">
+          {isSetlistsShelf ? (
+            <div className="setlist-workspace">
+              {message && <p className="form-message success">{message}</p>}
+              {error && <p className="form-message error">{error}</p>}
+
+              <div className="setlist-control-grid">
+                <details className="setlist-control-card">
+                  <summary>New folder</summary>
+                  <form onSubmit={createSetlistFolder}>
+                    <label>
+                      Folder name
+                      <input
+                        onChange={(event) => setNewSetlistFolderName(event.target.value)}
+                        placeholder={
+                          currentSetlistFolder
+                            ? `Inside ${currentSetlistFolder.name}`
+                            : "Steadfast"
+                        }
+                        type="text"
+                        value={newSetlistFolderName}
+                      />
+                    </label>
+                    <button
+                      className="primary-button"
+                      disabled={savingSetlistAction}
+                      type="submit"
+                    >
+                      Create folder
+                    </button>
+                  </form>
+                </details>
+
+                <details className="setlist-control-card">
+                  <summary>New setlist</summary>
+                  <form onSubmit={createSetlist}>
+                    <label>
+                      Setlist title
+                      <input
+                        onChange={(event) => setNewSetlistTitle(event.target.value)}
+                        placeholder="Sunday Morning"
+                        type="text"
+                        value={newSetlistTitle}
+                      />
+                    </label>
+                    <label>
+                      Date
+                      <input
+                        onChange={(event) => setNewSetlistDate(event.target.value)}
+                        type="date"
+                        value={newSetlistDate}
+                      />
+                    </label>
+                    <label className="setlist-form-wide">
+                      Notes
+                      <textarea
+                        onChange={(event) => setNewSetlistNotes(event.target.value)}
+                        placeholder="Optional notes for this set"
+                        rows="2"
+                        value={newSetlistNotes}
+                      />
+                    </label>
+                    <button
+                      className="primary-button"
+                      disabled={savingSetlistAction}
+                      type="submit"
+                    >
+                      Create setlist
+                    </button>
+                  </form>
+                </details>
+              </div>
+
+              <div className="setlist-browser-grid">
+                <aside className="setlist-folder-panel">
+                  <div className="setlist-breadcrumbs" aria-label="Setlist folder path">
+                    <button
+                      className={!currentSetlistFolderId ? "active" : ""}
+                      type="button"
+                      onClick={() => {
+                        setCurrentSetlistFolderId(null);
+                        setSelectedSetlistId(null);
+                      }}
+                    >
+                      Setlists
+                    </button>
+                    {setlistBreadcrumbs.map((folder) => (
+                      <button
+                        className={folder.id === currentSetlistFolderId ? "active" : ""}
+                        key={folder.id}
+                        type="button"
+                        onClick={() => {
+                          setCurrentSetlistFolderId(folder.id);
+                          setSelectedSetlistId(null);
+                        }}
+                      >
+                        {folder.name}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="setlist-folder-section">
+                    <h3>Folders</h3>
+                    {childSetlistFolders.length === 0 ? (
+                      <p className="song-resource-muted">No folders here yet.</p>
+                    ) : (
+                      <div className="setlist-folder-list">
+                        {childSetlistFolders.map((folder) => (
+                          <button
+                            key={folder.id}
+                            type="button"
+                            onClick={() => {
+                              setCurrentSetlistFolderId(folder.id);
+                              setSelectedSetlistId(null);
+                            }}
+                          >
+                            <span>{folder.name}</span>
+                            <strong>Open</strong>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="setlist-folder-section">
+                    <h3>Setlists</h3>
+                    {currentFolderSetlists.length === 0 ? (
+                      <p className="song-resource-muted">No setlists in this folder yet.</p>
+                    ) : (
+                      <div className="setlist-picker-list">
+                        {currentFolderSetlists.map((setlist) => (
+                          <button
+                            className={
+                              selectedSetlist?.id === setlist.id ? "active" : ""
+                            }
+                            key={setlist.id}
+                            type="button"
+                            onClick={() => setSelectedSetlistId(setlist.id)}
+                          >
+                            <span>{setlist.title}</span>
+                            <small>{formatSetlistDate(setlist.event_date)}</small>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </aside>
+
+                <div className="setlist-detail-panel">
+                  {selectedSetlist ? (
+                    <>
+                      <div className="setlist-detail-heading">
+                        <div>
+                          <p className="eyebrow">Current setlist</p>
+                          <h2>{selectedSetlist.title}</h2>
+                          <span>{formatSetlistDate(selectedSetlist.event_date)}</span>
+                        </div>
+                        <button
+                          className="secondary-button"
+                          type="button"
+                          onClick={openPrintableSetlist}
+                        >
+                          Download / print PDF
+                        </button>
+                      </div>
+
+                      {selectedSetlist.notes && (
+                        <p className="setlist-detail-notes">{selectedSetlist.notes}</p>
+                      )}
+
+                      <div className="setlist-add-grid">
+                        <form className="setlist-add-card" onSubmit={addSongToSetlist}>
+                          <h3>Add Song</h3>
+                          <label>
+                            Song from My Library
+                            <select
+                              onChange={(event) => setSetlistSongId(event.target.value)}
+                              value={setlistSongId}
+                            >
+                              <option value="">Choose song</option>
+                              {myLibrarySongs.map((song) => (
+                                <option key={song.id} value={song.id}>
+                                  {song.title} ({song.song_key || "No key"})
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <button
+                            className="primary-button"
+                            disabled={savingSetlistAction || myLibrarySongs.length === 0}
+                            type="submit"
+                          >
+                            Add song
+                          </button>
+                        </form>
+
+                        <form
+                          className="setlist-add-card"
+                          onSubmit={addPlaceholderToSetlist}
+                        >
+                          <h3>Add Blank Page</h3>
+                          <label>
+                            Title
+                            <input
+                              onChange={(event) => setPlaceholderTitle(event.target.value)}
+                              placeholder="Prayer"
+                              type="text"
+                              value={placeholderTitle}
+                            />
+                          </label>
+                          <label>
+                            Text
+                            <textarea
+                              onChange={(event) => setPlaceholderBody(event.target.value)}
+                              placeholder="Prayer, Scripture, reading, or transition note"
+                              rows="3"
+                              value={placeholderBody}
+                            />
+                          </label>
+                          <button
+                            className="primary-button"
+                            disabled={savingSetlistAction}
+                            type="submit"
+                          >
+                            Add blank page
+                          </button>
+                        </form>
+                      </div>
+
+                      <div className="setlist-print-area">
+                        <div className="setlist-print-heading">
+                          <h1>{selectedSetlist.title}</h1>
+                          <p>{formatSetlistDate(selectedSetlist.event_date)}</p>
+                          {selectedSetlist.notes && <p>{selectedSetlist.notes}</p>}
+                        </div>
+
+                        {selectedSetlistItems.length === 0 ? (
+                          <div className="library-empty-state">
+                            <h3>No songs yet</h3>
+                            <p>Add songs or blank pages to build this setlist.</p>
+                          </div>
+                        ) : (
+                          <ol className="setlist-item-list">
+                            {selectedSetlistItems.map((item, index) => {
+                              const itemSong = item.song_id
+                                ? songsById[item.song_id]
+                                : null;
+
+                              return (
+                                <li
+                                  className={
+                                    item.item_type === "placeholder"
+                                      ? "placeholder-item"
+                                      : ""
+                                  }
+                                  key={item.id}
+                                >
+                                  <div className="setlist-item-main">
+                                    <span>{index + 1}</span>
+                                    <div>
+                                      <strong>
+                                        {item.item_type === "song"
+                                          ? itemSong?.title || "Missing song"
+                                          : item.title || "Blank page"}
+                                      </strong>
+                                      <p>
+                                        {item.item_type === "song"
+                                          ? `Key: ${itemSong?.song_key || "No key"}`
+                                          : item.body || "Blank page"}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="setlist-item-actions">
+                                    {itemSong && (
+                                      <button
+                                        type="button"
+                                        onClick={() => openPdf(itemSong)}
+                                      >
+                                        Open
+                                      </button>
+                                    )}
+                                    <button
+                                      disabled={savingSetlistAction || index === 0}
+                                      type="button"
+                                      onClick={() => moveSetlistItem(item, -1)}
+                                    >
+                                      Up
+                                    </button>
+                                    <button
+                                      disabled={
+                                        savingSetlistAction ||
+                                        index === selectedSetlistItems.length - 1
+                                      }
+                                      type="button"
+                                      onClick={() => moveSetlistItem(item, 1)}
+                                    >
+                                      Down
+                                    </button>
+                                    <button
+                                      disabled={savingSetlistAction}
+                                      type="button"
+                                      onClick={() => deleteSetlistItem(item)}
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                </li>
+                              );
+                            })}
+                          </ol>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="library-empty-state">
+                      <h3>No setlist selected</h3>
+                      <p>Create a setlist or choose one from this folder.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
           {isMyShelf && (
             <form className="upload-card upload-card-main form-stack" onSubmit={handleUpload}>
               <div className="upload-card-heading">
@@ -1226,6 +1905,8 @@ function Library() {
                 );
               })}
             </ul>
+          )}
+            </>
           )}
         </section>
       </section>
