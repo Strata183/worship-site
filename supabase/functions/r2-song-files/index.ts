@@ -124,6 +124,28 @@ function safeDownloadName(name: string) {
   );
 }
 
+function assertPdfBytes(bytes: Uint8Array, label: string) {
+  const isPdf =
+    bytes.length >= 4 &&
+    bytes[0] === 0x25 &&
+    bytes[1] === 0x50 &&
+    bytes[2] === 0x44 &&
+    bytes[3] === 0x46;
+
+  if (isPdf) {
+    return;
+  }
+
+  const preview = new TextDecoder()
+    .decode(bytes.slice(0, 160))
+    .replace(/\s+/g, " ")
+    .trim();
+
+  throw new Error(
+    `${label} is not a valid PDF file. Received: ${preview || "empty file"}`,
+  );
+}
+
 function wrapPdfText(text: string, maxCharacters = 84) {
   const words = text.split(/\s+/).filter(Boolean);
   const lines: string[] = [];
@@ -523,19 +545,51 @@ Deno.serve(async (req) => {
           );
         }
 
-        const sourceBytes = await getObjectBytes(r2, bucket, song.file_path);
-        const sourcePdf = await PDFDocument.load(sourceBytes);
-        const copiedPages = await combinedPdf.copyPages(
-          sourcePdf,
-          sourcePdf.getPageIndices(),
-        );
+        const songTitle = song.title || "A setlist song";
 
-        for (const page of copiedPages) {
-          combinedPdf.addPage(page);
+        try {
+          const sourceBytes = await getObjectBytes(r2, bucket, song.file_path);
+          assertPdfBytes(sourceBytes, songTitle);
+          const sourcePdf = await PDFDocument.load(sourceBytes, {
+            ignoreEncryption: true,
+          });
+          const copiedPages = await combinedPdf.copyPages(
+            sourcePdf,
+            sourcePdf.getPageIndices(),
+          );
+
+          for (const page of copiedPages) {
+            combinedPdf.addPage(page);
+          }
+        } catch (error) {
+          return jsonResponse(
+            {
+              error: `Could not merge "${songTitle}". This PDF may be corrupted, encrypted, or exported in a format pdf-lib cannot parse. Details: ${
+                error instanceof Error ? error.message : "Unknown PDF error."
+              }`,
+            },
+            400,
+          );
         }
       }
 
-      const mergedBytes = await combinedPdf.save();
+      let mergedBytes: Uint8Array;
+
+      try {
+        // Avoid object-stream compression here. Some Edge runtimes can throw a
+        // signed/unsigned integer range error while compressing larger merged PDFs.
+        mergedBytes = await combinedPdf.save({ useObjectStreams: false });
+      } catch (error) {
+        return jsonResponse(
+          {
+            error: `The setlist PDFs were read, but the final merged PDF could not be saved. Details: ${
+              error instanceof Error ? error.message : "Unknown PDF save error."
+            }`,
+          },
+          400,
+        );
+      }
+
       const fileName = `${safeDownloadName(setlist.title)}.pdf`;
 
       return jsonResponse({
