@@ -335,6 +335,36 @@ Deno.serve(async (req) => {
       return jsonResponse({ signedUrl });
     }
 
+    if (body.action === "song-resource-audio-signed-url") {
+      const resourceId = String(body.resourceId || "");
+
+      // RLS on song_resources only exposes resources attached to songs this
+      // user can already see.
+      const { data: resource, error: resourceError } = await supabase
+        .from("song_resources")
+        .select("file_path, resource_type")
+        .eq("id", resourceId)
+        .single();
+
+      if (resourceError || !resource || resource.resource_type !== "audio") {
+        return jsonResponse(
+          { error: "Audio resource not found or not shared with you." },
+          404,
+        );
+      }
+
+      const signedUrl = await getSignedUrl(
+        r2,
+        new GetObjectCommand({
+          Bucket: bucket,
+          Key: resource.file_path,
+        }),
+        { expiresIn: 300 },
+      );
+
+      return jsonResponse({ signedUrl });
+    }
+
     if (body.action === "vbs-kinder-files") {
       // RLS only returns chart rows when the signed-in user has claimed VBS
       // Kinder access with the team password.

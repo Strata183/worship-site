@@ -59,6 +59,67 @@ function isPresetSongKey(songKey) {
   return songKeyOptions.includes(songKey);
 }
 
+function isAudioFile(file) {
+  const audioExtensions = [".aac", ".aiff", ".m4a", ".mp3", ".ogg", ".wav", ".webm"];
+  const lowerName = file.name.toLowerCase();
+
+  return (
+    file.type.startsWith("audio/") ||
+    audioExtensions.some((extension) => lowerName.endsWith(extension))
+  );
+}
+
+function SongResourceAudio({ resource }) {
+  const [audioUrl, setAudioUrl] = useState("");
+  const [audioError, setAudioError] = useState("");
+
+  useEffect(() => {
+    let ignoreResponse = false;
+
+    async function loadAudioUrl() {
+      const { data, error } = await supabase.functions.invoke("r2-song-files", {
+        body: {
+          action: "song-resource-audio-signed-url",
+          resourceId: resource.id,
+        },
+      });
+
+      if (ignoreResponse) {
+        return;
+      }
+
+      if (error) {
+        setAudioUrl("");
+        setAudioError(await getFunctionErrorMessage(error));
+        return;
+      }
+
+      setAudioError("");
+      setAudioUrl(data.signedUrl);
+    }
+
+    loadAudioUrl();
+
+    return () => {
+      ignoreResponse = true;
+    };
+  }, [resource.id]);
+
+  if (audioError) {
+    return <p className="song-resource-muted">{audioError}</p>;
+  }
+
+  if (!audioUrl) {
+    return <p className="song-resource-muted">Loading audio...</p>;
+  }
+
+  return (
+    <audio controls src={audioUrl}>
+      Your browser does not support the audio element.
+    </audio>
+  );
+}
+
 // Library is the protected My Library page.
 // Signed-in users can upload, open, edit, and delete their own PDF songs.
 function Library() {
@@ -66,8 +127,10 @@ function Library() {
 
   // songs holds the rows loaded from the Supabase "songs" table.
   const [songs, setSongs] = useState([]);
+  const [songResources, setSongResources] = useState({});
   const [friendships, setFriendships] = useState([]);
   const [activeShelf, setActiveShelf] = useState("mine");
+  const [expandedSongId, setExpandedSongId] = useState(null);
 
   // title and file track the upload form inputs.
   const [title, setTitle] = useState("");
@@ -94,6 +157,8 @@ function Library() {
   // submitting prevents duplicate uploads while one upload is already running.
   const [submitting, setSubmitting] = useState(false);
   const [copyingSongId, setCopyingSongId] = useState(null);
+  const [savingResourceSongId, setSavingResourceSongId] = useState(null);
+  const [resourceForms, setResourceForms] = useState({});
 
   // message and error display feedback below the upload form.
   const [message, setMessage] = useState("");
@@ -130,6 +195,39 @@ function Library() {
 
     setLoadingSongs(false);
   }
+
+  useEffect(() => {
+    async function loadSongResources() {
+      if (songs.length === 0) {
+        setSongResources({});
+        return;
+      }
+
+      const { data, error: resourceError } = await supabase
+        .from("song_resources")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (resourceError) {
+        setError(resourceError.message);
+        setSongResources({});
+        return;
+      }
+
+      setSongResources(
+        (data || []).reduce((resourceMap, resource) => {
+          if (!resourceMap[resource.song_id]) {
+            resourceMap[resource.song_id] = [];
+          }
+
+          resourceMap[resource.song_id].push(resource);
+          return resourceMap;
+        }, {})
+      );
+    }
+
+    loadSongResources();
+  }, [songs]);
 
   async function handleUpload(event) {
     // Prevent the browser from refreshing the page after form submit.
@@ -325,6 +423,125 @@ function Library() {
     }
 
     setCopyingSongId(null);
+  }
+
+  function getResourceForm(songId) {
+    return (
+      resourceForms[songId] || {
+        audioFile: null,
+        body: "",
+        title: "",
+        type: "note",
+        url: "",
+      }
+    );
+  }
+
+  function updateResourceForm(songId, field, value) {
+    setResourceForms((currentForms) => ({
+      ...currentForms,
+      [songId]: {
+        ...getResourceForm(songId),
+        [field]: value,
+      },
+    }));
+  }
+
+  async function saveSongResource(song) {
+    const resourceForm = getResourceForm(song.id);
+    const resourceTitle = resourceForm.title.trim();
+    const resourceBody = resourceForm.body.trim();
+    const resourceUrl = resourceForm.url.trim();
+
+    setError("");
+    setMessage("");
+
+    if (song.owner_id !== user.id) {
+      setError("Only the song owner can add resources.");
+      return;
+    }
+
+    if (resourceForm.type === "link" && !resourceUrl) {
+      setError("Add a link URL first.");
+      return;
+    }
+
+    if (resourceForm.type === "note" && !resourceTitle && !resourceBody) {
+      setError("Add a note title or note text first.");
+      return;
+    }
+
+    if (resourceForm.type === "audio" && !resourceForm.audioFile) {
+      setError("Choose an audio file first.");
+      return;
+    }
+
+    if (resourceForm.type === "audio" && !isAudioFile(resourceForm.audioFile)) {
+      setError("Please choose an audio file.");
+      return;
+    }
+
+    setSavingResourceSongId(song.id);
+
+    let filePath = "";
+    let contentType = "";
+
+    if (resourceForm.type === "audio") {
+      const resourceId = crypto.randomUUID();
+      const extension = resourceForm.audioFile.name.split(".").pop() || "audio";
+      const safeName = cleanFileName(resourceTitle || song.title || "demo") || "demo";
+      filePath = `${user.id}/song-resources/${song.id}/${resourceId}-${safeName}.${extension}`;
+      contentType = resourceForm.audioFile.type;
+
+      const formData = new FormData();
+      formData.append("action", "upload");
+      formData.append("filePath", filePath);
+      formData.append("file", resourceForm.audioFile);
+
+      const { error: uploadError } = await supabase.functions.invoke(
+        "r2-song-files",
+        {
+          body: formData,
+        }
+      );
+
+      if (uploadError) {
+        setError(await getFunctionErrorMessage(uploadError));
+        setSavingResourceSongId(null);
+        return;
+      }
+    }
+
+    const { error: insertError } = await supabase.from("song_resources").insert({
+      body: resourceBody,
+      content_type: contentType,
+      file_path: filePath,
+      owner_id: user.id,
+      resource_type: resourceForm.type,
+      song_id: song.id,
+      title: resourceTitle,
+      url: resourceUrl,
+    });
+
+    if (insertError) {
+      setError(insertError.message);
+      setSavingResourceSongId(null);
+      return;
+    }
+
+    setResourceForms((currentForms) => ({
+      ...currentForms,
+      [song.id]: {
+        audioFile: null,
+        body: "",
+        title: "",
+        type: "note",
+        url: "",
+      },
+    }));
+    setMessage("Resource added.");
+    setSavingResourceSongId(null);
+    await loadSongs();
   }
 
   function startEditingSong(song) {
@@ -693,6 +910,9 @@ function Library() {
               {visibleSongs.map((song) => {
                 const isOwner = song.owner_id === user.id;
                 const isAlreadyCopied = copiedSongSourceIds.has(song.id);
+                const isExpanded = expandedSongId === song.id;
+                const resources = songResources[song.id] || [];
+                const resourceForm = getResourceForm(song.id);
                 // Only one row can be edited at a time.
                 const isEditing = editingSongId === song.id;
 
@@ -736,13 +956,33 @@ function Library() {
                         </label>
                       </div>
                     ) : (
-                      <button
-                        className="score-open-button"
-                        type="button"
-                        onClick={() => openPdf(song)}
-                      >
+                      <div className="score-open-button">
                         <span className="score-main">
-                          <strong>{song.title}</strong>
+                          <span className="score-title-line">
+                            <button
+                              className="score-title-button"
+                              type="button"
+                              onClick={() => openPdf(song)}
+                            >
+                              <strong>{song.title}</strong>
+                            </button>
+                            <button
+                              aria-label={
+                                isExpanded ? "Hide song resources" : "Show song resources"
+                              }
+                              className="score-resource-trigger"
+                              onClick={() => setExpandedSongId(isExpanded ? null : song.id)}
+                              title="Resources"
+                              type="button"
+                            >
+                              <span></span>
+                              <span></span>
+                              <span></span>
+                              {resources.length > 0 && (
+                                <em>{resources.length}</em>
+                              )}
+                            </button>
+                          </span>
                           <span>
                             {isOwner
                               ? "My library"
@@ -752,7 +992,7 @@ function Library() {
                           </span>
                         </span>
                         <span className="score-key">{song.song_key || "No key"}</span>
-                      </button>
+                      </div>
                     )}
 
                     <div className="score-actions">
@@ -800,6 +1040,136 @@ function Library() {
                         </>
                       )}
                     </div>
+
+                    {isExpanded && (
+                      <div className="song-resource-drawer">
+                        <div className="song-resource-heading">
+                          <div>
+                            <strong>Attached Resources</strong>
+                            <span>
+                              {resources.length === 0
+                                ? "No resources yet."
+                                : `${resources.length} attached`}
+                            </span>
+                          </div>
+                        </div>
+
+                        {resources.length > 0 && (
+                          <div className="song-resource-list">
+                            {resources.map((resource) => (
+                              <article className="song-resource-card" key={resource.id}>
+                                <div>
+                                  <small>{resource.resource_type}</small>
+                                  {resource.title && <h4>{resource.title}</h4>}
+                                  {resource.body && <p>{resource.body}</p>}
+                                  {resource.resource_type === "link" && resource.url && (
+                                    <a
+                                      href={resource.url}
+                                      rel="noopener noreferrer"
+                                      target="_blank"
+                                    >
+                                      Open link
+                                    </a>
+                                  )}
+                                </div>
+
+                                {resource.resource_type === "audio" && (
+                                  <SongResourceAudio resource={resource} />
+                                )}
+                              </article>
+                            ))}
+                          </div>
+                        )}
+
+                        {isOwner && (
+                          <form
+                            className="song-resource-form"
+                            onSubmit={(event) => {
+                              event.preventDefault();
+                              saveSongResource(song);
+                            }}
+                          >
+                            <label>
+                              Type
+                              <select
+                                onChange={(event) =>
+                                  updateResourceForm(song.id, "type", event.target.value)
+                                }
+                                value={resourceForm.type}
+                              >
+                                <option value="note">Note</option>
+                                <option value="link">Link</option>
+                                <option value="audio">Audio demo</option>
+                              </select>
+                            </label>
+                            <label>
+                              Title
+                              <input
+                                onChange={(event) =>
+                                  updateResourceForm(song.id, "title", event.target.value)
+                                }
+                                placeholder="Demo, arrangement note, tutorial..."
+                                type="text"
+                                value={resourceForm.title}
+                              />
+                            </label>
+
+                            {resourceForm.type === "link" && (
+                              <label>
+                                Link
+                                <input
+                                  onChange={(event) =>
+                                    updateResourceForm(song.id, "url", event.target.value)
+                                  }
+                                  placeholder="https://..."
+                                  type="url"
+                                  value={resourceForm.url}
+                                />
+                              </label>
+                            )}
+
+                            {resourceForm.type === "audio" && (
+                              <label>
+                                Audio file
+                                <input
+                                  accept="audio/*"
+                                  onChange={(event) =>
+                                    updateResourceForm(
+                                      song.id,
+                                      "audioFile",
+                                      event.target.files?.[0] || null
+                                    )
+                                  }
+                                  type="file"
+                                />
+                              </label>
+                            )}
+
+                            <label className="song-resource-form-wide">
+                              Notes
+                              <textarea
+                                onChange={(event) =>
+                                  updateResourceForm(song.id, "body", event.target.value)
+                                }
+                                placeholder="Optional notes for this resource"
+                                rows="3"
+                                value={resourceForm.body}
+                              />
+                            </label>
+
+                            <button
+                              className="secondary-button"
+                              disabled={savingResourceSongId === song.id}
+                              type="submit"
+                            >
+                              {savingResourceSongId === song.id
+                                ? "Adding..."
+                                : "Add resource"}
+                            </button>
+                          </form>
+                        )}
+                      </div>
+                    )}
                   </li>
                 );
               })}

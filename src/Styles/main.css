@@ -2525,11 +2525,28 @@ nav a.active:not(.site-title) {
   background-color: transparent;
   border: 0;
   color: inherit;
-  cursor: pointer;
   display: grid;
   font: inherit;
   gap: 0.85rem;
   grid-template-columns: minmax(0, 1fr) max-content;
+  padding: 0;
+  text-align: left;
+}
+
+.score-title-line {
+  align-items: center;
+  display: flex;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.score-title-button {
+  background-color: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  min-width: 0;
   padding: 0;
   text-align: left;
 }
@@ -2575,7 +2592,7 @@ nav a.active:not(.site-title) {
   white-space: nowrap;
 }
 
-.score-main span {
+.score-main > span:not(.score-title-line) {
   color: var(--color-muted);
   font-size: 0.9rem;
   overflow: hidden;
@@ -2595,6 +2612,55 @@ nav a.active:not(.site-title) {
   min-width: 4.25rem;
   padding: 0.35rem 0.65rem;
   text-align: center;
+}
+
+.score-resource-trigger {
+  align-items: center;
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 0.16rem;
+  min-height: 1.75rem;
+  padding: 0.35rem 0.45rem;
+  position: relative;
+}
+
+.score-resource-trigger > span {
+  background-color: var(--color-muted);
+  border-radius: 50%;
+  display: block;
+  height: 0.22rem;
+  width: 0.22rem;
+}
+
+.score-resource-trigger:hover,
+.score-resource-trigger:focus {
+  border-color: var(--color-accent);
+}
+
+.score-resource-trigger:hover > span,
+.score-resource-trigger:focus > span {
+  background-color: var(--color-accent);
+}
+
+.score-resource-trigger em {
+  align-items: center;
+  background-color: var(--color-accent);
+  border-radius: 999px;
+  color: white;
+  display: flex;
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 800;
+  height: 1rem;
+  justify-content: center;
+  min-width: 1rem;
+  padding: 0 0.25rem;
+  position: absolute;
+  right: -0.35rem;
+  top: -0.4rem;
 }
 
 /* Row-level action buttons such as Open, Edit, Delete, Save, and Cancel. */
@@ -2621,6 +2687,136 @@ nav a.active:not(.site-title) {
   background-color: #d1d5db;
   color: #4b5563;
   cursor: not-allowed;
+}
+
+.song-resource-drawer {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  display: grid;
+  gap: 0.85rem;
+  grid-column: 1 / -1;
+  padding: 1rem;
+}
+
+.song-resource-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.song-resource-heading strong,
+.song-resource-heading span {
+  display: block;
+}
+
+.song-resource-heading strong {
+  color: var(--color-text);
+  font-family: var(--font-heading);
+  line-height: 1.2;
+}
+
+.song-resource-heading span,
+.song-resource-muted {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.song-resource-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.song-resource-card {
+  align-items: center;
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.55fr);
+  padding: 0.85rem;
+}
+
+.song-resource-card small {
+  color: var(--color-accent);
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+}
+
+.song-resource-card h4 {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  line-height: 1.2;
+  margin: 0 0 0.35rem;
+}
+
+.song-resource-card p {
+  color: var(--color-muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  margin: 0;
+  max-width: none;
+  text-align: left;
+}
+
+.song-resource-card a {
+  color: var(--color-accent);
+  display: inline-block;
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin-top: 0.45rem;
+  text-decoration: none;
+}
+
+.song-resource-card a:hover,
+.song-resource-card a:focus {
+  text-decoration: underline;
+}
+
+.song-resource-card audio {
+  width: 100%;
+}
+
+.song-resource-form {
+  align-items: end;
+  border-top: 1px solid var(--color-border);
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: minmax(8rem, 0.7fr) minmax(12rem, 1fr) minmax(12rem, 1fr);
+  padding-top: 0.85rem;
+}
+
+.song-resource-form label {
+  color: var(--color-text);
+  display: grid;
+  font-size: 0.85rem;
+  font-weight: 800;
+  gap: 0.3rem;
+}
+
+.song-resource-form input,
+.song-resource-form select,
+.song-resource-form textarea {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 500;
+  padding: 0.65rem 0.75rem;
+  width: 100%;
+}
+
+.song-resource-form textarea {
+  resize: vertical;
+}
+
+.song-resource-form-wide {
+  grid-column: 1 / -1;
 }
 
 .score-actions button + button:not(:disabled) {
@@ -3048,6 +3244,15 @@ nav a.active:not(.site-title) {
   .score-edit-form {
     align-items: stretch;
     grid-template-columns: 1fr;
+  }
+
+  .song-resource-card,
+  .song-resource-form {
+    grid-template-columns: 1fr;
+  }
+
+  .song-resource-drawer {
+    padding: 0.85rem;
   }
 
   .library-toolbar,
