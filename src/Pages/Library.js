@@ -53,6 +53,11 @@ const songKeyOptions = [
   "Bb",
   "B",
 ];
+const customKeyValue = "__custom_key__";
+
+function isPresetSongKey(songKey) {
+  return songKeyOptions.includes(songKey);
+}
 
 // Library is the protected My Library page.
 // Signed-in users can upload, open, edit, and delete their own PDF songs.
@@ -67,6 +72,7 @@ function Library() {
   // title and file track the upload form inputs.
   const [title, setTitle] = useState("");
   const [songKey, setSongKey] = useState("");
+  const [customSongKey, setCustomSongKey] = useState("");
   const [file, setFile] = useState(null);
 
   // These states only affect how the current song list is displayed.
@@ -79,6 +85,7 @@ function Library() {
   const [editingSongId, setEditingSongId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
   const [editSongKey, setEditSongKey] = useState("");
+  const [customEditSongKey, setCustomEditSongKey] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
 
   // loadingSongs controls the "Loading songs..." message.
@@ -143,7 +150,10 @@ function Library() {
       return;
     }
 
-    if (!songKey) {
+    const savedSongKey =
+      songKey === customKeyValue ? customSongKey.trim() : songKey;
+
+    if (!savedSongKey) {
       setError("Choose a key for the song before uploading.");
       setSubmitting(false);
       return;
@@ -188,7 +198,7 @@ function Library() {
       id: songId,
       owner_id: user.id,
       title: songTitle,
-      song_key: songKey,
+      song_key: savedSongKey,
       file_path: filePath,
     });
 
@@ -199,6 +209,7 @@ function Library() {
       setMessage("Song uploaded.");
       setTitle("");
       setSongKey("");
+      setCustomSongKey("");
       setFile(null);
       event.target.reset();
       await loadSongs();
@@ -271,7 +282,8 @@ function Library() {
     // The database is not changed until saveSongEdit runs.
     setEditingSongId(song.id);
     setEditTitle(song.title || "");
-    setEditSongKey(song.song_key || "");
+    setEditSongKey(isPresetSongKey(song.song_key) ? song.song_key : customKeyValue);
+    setCustomEditSongKey(isPresetSongKey(song.song_key) ? "" : song.song_key || "");
     setMessage("");
     setError("");
   }
@@ -281,6 +293,7 @@ function Library() {
     setEditingSongId(null);
     setEditTitle("");
     setEditSongKey("");
+    setCustomEditSongKey("");
   }
 
   async function saveSongEdit(song) {
@@ -292,7 +305,10 @@ function Library() {
       return;
     }
 
-    if (!editSongKey) {
+    const savedEditSongKey =
+      editSongKey === customKeyValue ? customEditSongKey.trim() : editSongKey;
+
+    if (!savedEditSongKey) {
       setError("Choose a key for the song.");
       return;
     }
@@ -305,7 +321,7 @@ function Library() {
       .from("songs")
       .update({
         title: nextTitle,
-        song_key: editSongKey,
+        song_key: savedEditSongKey,
       })
       // Both filters matter: id picks the row, owner_id makes the update
       // owner-only even if a shared song is visible in this list.
@@ -506,7 +522,17 @@ function Library() {
                       {keyName}
                     </option>
                   ))}
+                  <option value={customKeyValue}>Custom key</option>
                 </select>
+                {songKey === customKeyValue && (
+                  <input
+                    onChange={(event) => setCustomSongKey(event.target.value)}
+                    placeholder="Example: C-D"
+                    required
+                    type="text"
+                    value={customSongKey}
+                  />
+                )}
               </label>
               <label>
                 PDF file
@@ -634,7 +660,19 @@ function Library() {
                                 {keyName}
                               </option>
                             ))}
+                            <option value={customKeyValue}>Custom key</option>
                           </select>
+                          {editSongKey === customKeyValue && (
+                            <input
+                              onChange={(event) =>
+                                setCustomEditSongKey(event.target.value)
+                              }
+                              placeholder="Example: C-D"
+                              required
+                              type="text"
+                              value={customEditSongKey}
+                            />
+                          )}
                         </label>
                       </div>
                     ) : (
