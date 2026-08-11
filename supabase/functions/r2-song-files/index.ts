@@ -6,7 +6,12 @@ import {
   S3Client,
 } from "npm:@aws-sdk/client-s3@3.948.0";
 import { getSignedUrl } from "npm:@aws-sdk/s3-request-presigner@3.948.0";
-import { PDFDocument, StandardFonts, rgb } from "npm:pdf-lib@1.17.1";
+import {
+  ParseSpeeds,
+  PDFDocument,
+  StandardFonts,
+  rgb,
+} from "npm:pdf-lib@1.17.1";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 // These headers allow the browser-based React app to call this function.
@@ -552,6 +557,8 @@ Deno.serve(async (req) => {
           assertPdfBytes(sourceBytes, songTitle);
           const sourcePdf = await PDFDocument.load(sourceBytes, {
             ignoreEncryption: true,
+            parseSpeed: ParseSpeeds.Fastest,
+            throwOnInvalidObject: false,
           });
           const copiedPages = await combinedPdf.copyPages(
             sourcePdf,
