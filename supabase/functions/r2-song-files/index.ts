@@ -387,6 +387,38 @@ Deno.serve(async (req) => {
       return jsonResponse({ ok: true });
     }
 
+    if (body.action === "copy-song-file") {
+      const songId = String(body.songId || "");
+      const targetFilePath = String(body.targetFilePath || "");
+
+      if (!targetFilePath.startsWith(`${user.id}/`) || !targetFilePath.endsWith(".pdf")) {
+        return jsonResponse({ error: "Invalid target file path." }, 400);
+      }
+
+      // RLS decides whether this user can read the source song. This allows
+      // copying an accepted friend's visible song without exposing R2 credentials.
+      const { data: song, error: songError } = await supabase
+        .from("songs")
+        .select("file_path")
+        .eq("id", songId)
+        .single();
+
+      if (songError || !song) {
+        return jsonResponse({ error: "Song not found or not shared with you." }, 404);
+      }
+
+      await r2.send(
+        new PutObjectCommand({
+          Body: await getObjectBytes(r2, bucket, song.file_path),
+          Bucket: bucket,
+          ContentType: "application/pdf",
+          Key: targetFilePath,
+        }),
+      );
+
+      return jsonResponse({ filePath: targetFilePath });
+    }
+
     return jsonResponse({ error: "Unsupported action." }, 400);
   } catch (error) {
     // Convert unexpected thrown errors into JSON so the frontend can display them.

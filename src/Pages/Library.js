@@ -93,6 +93,7 @@ function Library() {
 
   // submitting prevents duplicate uploads while one upload is already running.
   const [submitting, setSubmitting] = useState(false);
+  const [copyingSongId, setCopyingSongId] = useState(null);
 
   // message and error display feedback below the upload form.
   const [message, setMessage] = useState("");
@@ -275,6 +276,54 @@ function Library() {
       setMessage("Song deleted.");
       await loadSongs();
     }
+  }
+
+  async function copySongToMyLibrary(song) {
+    if (song.owner_id === user.id) {
+      return;
+    }
+
+    setCopyingSongId(song.id);
+    setError("");
+    setMessage("");
+
+    const copiedSongId = crypto.randomUUID();
+    const safeName = cleanFileName(song.title || "song") || "song";
+    const targetFilePath = `${user.id}/${copiedSongId}-${safeName}.pdf`;
+
+    const { data: copyData, error: copyError } = await supabase.functions.invoke(
+      "r2-song-files",
+      {
+        body: {
+          action: "copy-song-file",
+          songId: song.id,
+          targetFilePath,
+        },
+      }
+    );
+
+    if (copyError) {
+      setError(await getFunctionErrorMessage(copyError));
+      setCopyingSongId(null);
+      return;
+    }
+
+    const { error: insertError } = await supabase.from("songs").insert({
+      id: copiedSongId,
+      owner_id: user.id,
+      title: song.title,
+      song_key: song.song_key,
+      file_path: copyData.filePath,
+    });
+
+    if (insertError) {
+      setError(insertError.message);
+    } else {
+      setMessage(`"${song.title}" was added to My Library.`);
+      await loadSongs();
+    }
+
+    setCopyingSongId(null);
   }
 
   function startEditingSong(song) {
@@ -723,6 +772,17 @@ function Library() {
                                 Delete
                               </button>
                             </>
+                          )}
+                          {!isOwner && (
+                            <button
+                              disabled={copyingSongId === song.id}
+                              type="button"
+                              onClick={() => copySongToMyLibrary(song)}
+                            >
+                              {copyingSongId === song.id
+                                ? "Adding..."
+                                : "Add to My Library"}
+                            </button>
                           )}
                         </>
                       )}
