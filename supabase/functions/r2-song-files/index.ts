@@ -6,6 +6,7 @@ import {
   S3Client,
 } from "npm:@aws-sdk/client-s3@3.948.0";
 import { getSignedUrl } from "npm:@aws-sdk/s3-request-presigner@3.948.0";
+import { PDFDocument, StandardFonts, rgb } from "npm:pdf-lib@1.17.1";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 // These headers allow the browser-based React app to call this function.
@@ -112,6 +113,93 @@ function bytesToBase64(bytes: Uint8Array) {
   }
 
   return btoa(binary);
+}
+
+function safeDownloadName(name: string) {
+  return (
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || "setlist"
+  );
+}
+
+function wrapPdfText(text: string, maxCharacters = 84) {
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let currentLine = "";
+
+  for (const word of words) {
+    const nextLine = currentLine ? `${currentLine} ${word}` : word;
+
+    if (nextLine.length > maxCharacters && currentLine) {
+      lines.push(currentLine);
+      currentLine = word;
+    } else {
+      currentLine = nextLine;
+    }
+  }
+
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  return lines;
+}
+
+async function addPlaceholderPage(
+  pdf: PDFDocument,
+  title: string,
+  body: string,
+  index: number,
+) {
+  const page = pdf.addPage([612, 792]);
+  const headingFont = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const bodyFont = await pdf.embedFont(StandardFonts.Helvetica);
+  const margin = 72;
+  let y = 700;
+
+  page.drawText(title || "Blank page", {
+    color: rgb(0.12, 0.16, 0.22),
+    font: headingFont,
+    size: 24,
+    x: margin,
+    y,
+  });
+
+  y -= 28;
+  page.drawText(`Setlist page ${index + 1}`, {
+    color: rgb(0.32, 0.38, 0.46),
+    font: bodyFont,
+    size: 11,
+    x: margin,
+    y,
+  });
+
+  y -= 38;
+
+  for (const line of wrapPdfText(body || "")) {
+    if (y < margin) {
+      y = 700;
+      page.drawText("(continued)", {
+        color: rgb(0.32, 0.38, 0.46),
+        font: bodyFont,
+        size: 10,
+        x: margin,
+        y,
+      });
+      y -= 28;
+    }
+
+    page.drawText(line, {
+      color: rgb(0.12, 0.16, 0.22),
+      font: bodyFont,
+      size: 13,
+      x: margin,
+      y,
+    });
+    y -= 20;
+  }
 }
 
 async function getObjectBytes(r2: S3Client, bucket: string, key: string) {
@@ -363,6 +451,97 @@ Deno.serve(async (req) => {
       );
 
       return jsonResponse({ signedUrl });
+    }
+
+    if (body.action === "combined-setlist-pdf") {
+      const setlistId = String(body.setlistId || "");
+
+      const { data: setlist, error: setlistError } = await supabase
+        .from("setlists")
+        .select("id, title, event_date, owner_id")
+        .eq("id", setlistId)
+        .single();
+
+      if (setlistError || !setlist) {
+        return jsonResponse({ error: "Setlist not found." }, 404);
+      }
+
+      if (setlist.owner_id !== user.id) {
+        return jsonResponse(
+          { error: "Only the setlist owner can combine this PDF." },
+          403,
+        );
+      }
+
+      const { data: items, error: itemsError } = await supabase
+        .from("setlist_items")
+        .select(
+          "id, item_type, title, body, position, song:songs(title, file_path, owner_id)",
+        )
+        .eq("setlist_id", setlistId)
+        .order("position", { ascending: true });
+
+      if (itemsError) {
+        return jsonResponse({ error: itemsError.message }, 400);
+      }
+
+      const orderedItems = items || [];
+
+      if (orderedItems.length === 0) {
+        return jsonResponse({ error: "Add songs before combining the setlist." }, 400);
+      }
+
+      const combinedPdf = await PDFDocument.create();
+
+      for (const [index, item] of orderedItems.entries()) {
+        if (item.item_type === "placeholder") {
+          await addPlaceholderPage(
+            combinedPdf,
+            item.title || "Blank page",
+            item.body || "",
+            index,
+          );
+          continue;
+        }
+
+        const song = Array.isArray(item.song) ? item.song[0] : item.song;
+
+        if (!song?.file_path) {
+          await addPlaceholderPage(
+            combinedPdf,
+            item.title || "Missing song",
+            "This song PDF could not be found.",
+            index,
+          );
+          continue;
+        }
+
+        if (song.owner_id !== user.id) {
+          return jsonResponse(
+            { error: "Setlists can only combine songs from your library." },
+            403,
+          );
+        }
+
+        const sourceBytes = await getObjectBytes(r2, bucket, song.file_path);
+        const sourcePdf = await PDFDocument.load(sourceBytes);
+        const copiedPages = await combinedPdf.copyPages(
+          sourcePdf,
+          sourcePdf.getPageIndices(),
+        );
+
+        for (const page of copiedPages) {
+          combinedPdf.addPage(page);
+        }
+      }
+
+      const mergedBytes = await combinedPdf.save();
+      const fileName = `${safeDownloadName(setlist.title)}.pdf`;
+
+      return jsonResponse({
+        data: bytesToBase64(mergedBytes),
+        fileName,
+      });
     }
 
     if (body.action === "delete-song-resource-file") {

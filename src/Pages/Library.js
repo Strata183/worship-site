@@ -39,6 +39,26 @@ async function getFunctionErrorMessage(error) {
   return error?.message || "Unexpected Edge Function error.";
 }
 
+function downloadBase64Pdf(base64Data, fileName) {
+  const binary = atob(base64Data);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  const blob = new Blob([bytes], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = fileName || "setlist.pdf";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 const songKeyOptions = [
   "C",
   "C#/Db",
@@ -173,6 +193,7 @@ function Library() {
   const [placeholderTitle, setPlaceholderTitle] = useState("");
   const [placeholderBody, setPlaceholderBody] = useState("");
   const [savingSetlistAction, setSavingSetlistAction] = useState(false);
+  const [combiningSetlistId, setCombiningSetlistId] = useState(null);
   const [openSetlistFolderIds, setOpenSetlistFolderIds] = useState([]);
   const [setlistCreateMode, setSetlistCreateMode] = useState("");
   const [draggingSetlistItemId, setDraggingSetlistItemId] = useState(null);
@@ -1185,8 +1206,30 @@ function Library() {
     setSavingSetlistAction(false);
   }
 
-  function openPrintableSetlist() {
-    window.print();
+  async function downloadCombinedSetlistPdf(setlist) {
+    setCombiningSetlistId(setlist.id);
+    setError("");
+    setMessage("");
+
+    const { data, error: combineError } = await supabase.functions.invoke(
+      "r2-song-files",
+      {
+        body: {
+          action: "combined-setlist-pdf",
+          setlistId: setlist.id,
+        },
+      }
+    );
+
+    if (combineError) {
+      setError(await getFunctionErrorMessage(combineError));
+      setCombiningSetlistId(null);
+      return;
+    }
+
+    downloadBase64Pdf(data.data, data.fileName);
+    setMessage("Combined setlist PDF downloaded.");
+    setCombiningSetlistId(null);
   }
 
   function toggleSetlistFolder(folderId) {
@@ -1536,10 +1579,13 @@ function Library() {
                         </div>
                         <button
                           className="secondary-button"
+                          disabled={combiningSetlistId === selectedSetlist.id}
                           type="button"
-                          onClick={openPrintableSetlist}
+                          onClick={() => downloadCombinedSetlistPdf(selectedSetlist)}
                         >
-                          Download / print PDF
+                          {combiningSetlistId === selectedSetlist.id
+                            ? "Combining..."
+                            : "Download combined PDF"}
                         </button>
                       </div>
 
