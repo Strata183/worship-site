@@ -151,6 +151,34 @@ function assertPdfBytes(bytes: Uint8Array, label: string) {
   );
 }
 
+async function normalizePdfBytes(bytes: Uint8Array, label: string) {
+  try {
+    assertPdfBytes(bytes, label);
+    const sourcePdf = await PDFDocument.load(bytes, {
+      ignoreEncryption: true,
+      parseSpeed: ParseSpeeds.Fastest,
+      throwOnInvalidObject: false,
+    });
+    const normalizedPdf = await PDFDocument.create();
+    const copiedPages = await normalizedPdf.copyPages(
+      sourcePdf,
+      sourcePdf.getPageIndices(),
+    );
+
+    for (const page of copiedPages) {
+      normalizedPdf.addPage(page);
+    }
+
+    return await normalizedPdf.save({ useObjectStreams: false });
+  } catch (error) {
+    throw new Error(
+      `${label} could not be prepared for setlist merging. Try opening it on your computer, choosing Print, then Save as PDF, and upload that new file. Details: ${
+        error instanceof Error ? error.message : "Unknown PDF error."
+      }`,
+    );
+  }
+}
+
 function wrapPdfText(text: string, maxCharacters = 84) {
   const words = text.split(/\s+/).filter(Boolean);
   const lines: string[] = [];
@@ -315,12 +343,22 @@ Deno.serve(async (req) => {
         return jsonResponse({ error: "Invalid file path." }, 400);
       }
 
+      const originalBytes = new Uint8Array(await file.arrayBuffer());
+      const uploadBody =
+        file.type === "application/pdf"
+          ? await normalizePdfBytes(originalBytes, file.name || "Uploaded PDF")
+          : originalBytes;
+      const uploadContentType =
+        file.type === "application/pdf"
+          ? "application/pdf"
+          : file.type || "application/octet-stream";
+
       // Convert the browser File into bytes and upload it to R2.
       await r2.send(
         new PutObjectCommand({
-          Body: new Uint8Array(await file.arrayBuffer()),
+          Body: uploadBody,
           Bucket: bucket,
-          ContentType: file.type || "application/octet-stream",
+          ContentType: uploadContentType,
           Key: filePath,
         }),
       );
