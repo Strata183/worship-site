@@ -309,11 +309,12 @@ function Library() {
     }
 
     const { error: insertError } = await supabase.from("songs").insert({
+      copied_from_song_id: song.id,
+      file_path: copyData.filePath,
       id: copiedSongId,
       owner_id: user.id,
-      title: song.title,
       song_key: song.song_key,
-      file_path: copyData.filePath,
+      title: song.title,
     });
 
     if (insertError) {
@@ -486,6 +487,15 @@ function Library() {
     friendFilter === "all"
       ? friendSongsCount
       : songs.filter((song) => song.owner_id === friendFilter).length;
+  const copiedSongSourceIds = useMemo(
+    () =>
+      new Set(
+        songs
+          .filter((song) => song.owner_id === user.id && song.copied_from_song_id)
+          .map((song) => song.copied_from_song_id)
+      ),
+    [songs, user.id]
+  );
 
   function formatSongDate(song) {
     // Some older rows or test data may not have created_at populated.
@@ -682,6 +692,7 @@ function Library() {
             <ul className="score-list">
               {visibleSongs.map((song) => {
                 const isOwner = song.owner_id === user.id;
+                const isAlreadyCopied = copiedSongSourceIds.has(song.id);
                 // Only one row can be edited at a time.
                 const isEditing = editingSongId === song.id;
 
@@ -775,13 +786,15 @@ function Library() {
                           )}
                           {!isOwner && (
                             <button
-                              disabled={copyingSongId === song.id}
+                              disabled={copyingSongId === song.id || isAlreadyCopied}
                               type="button"
                               onClick={() => copySongToMyLibrary(song)}
                             >
-                              {copyingSongId === song.id
-                                ? "Adding..."
-                                : "Add to My Library"}
+                              {isAlreadyCopied
+                                ? "Added to My Library"
+                                : copyingSongId === song.id
+                                  ? "Adding..."
+                                  : "Add to My Library"}
                             </button>
                           )}
                         </>

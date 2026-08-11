@@ -1,4 +1,5 @@
 import {
+  CopyObjectCommand,
   DeleteObjectCommand,
   GetObjectCommand,
   PutObjectCommand,
@@ -95,6 +96,10 @@ function isAudioFile(file: File) {
     file.type.startsWith("audio/") ||
     audioExtensions.some((extension) => lowerName.endsWith(extension))
   );
+}
+
+function encodeCopySource(bucket: string, key: string) {
+  return `${bucket}/${key.split("/").map(encodeURIComponent).join("/")}`;
 }
 
 function bytesToBase64(bytes: Uint8Array) {
@@ -408,11 +413,11 @@ Deno.serve(async (req) => {
       }
 
       await r2.send(
-        new PutObjectCommand({
-          Body: await getObjectBytes(r2, bucket, song.file_path),
+        new CopyObjectCommand({
           Bucket: bucket,
-          ContentType: "application/pdf",
+          CopySource: encodeCopySource(bucket, song.file_path),
           Key: targetFilePath,
+          MetadataDirective: "COPY",
         }),
       );
 
