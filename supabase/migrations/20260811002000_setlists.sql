@@ -12,7 +12,7 @@ create table if not exists public.setlist_folders (
 create table if not exists public.setlists (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references auth.users (id) on delete cascade,
-  folder_id uuid references public.setlist_folders (id) on delete set null,
+  folder_id uuid references public.setlist_folders (id) on delete cascade,
   title text not null,
   event_date date,
   notes text not null default '',

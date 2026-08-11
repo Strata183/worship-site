@@ -173,6 +173,8 @@ function Library() {
   const [placeholderTitle, setPlaceholderTitle] = useState("");
   const [placeholderBody, setPlaceholderBody] = useState("");
   const [savingSetlistAction, setSavingSetlistAction] = useState(false);
+  const [openSetlistFolderIds, setOpenSetlistFolderIds] = useState([]);
+  const [setlistCreateMode, setSetlistCreateMode] = useState("");
 
   // message and error display feedback below the upload form.
   const [message, setMessage] = useState("");
@@ -814,11 +816,6 @@ function Library() {
   const currentSetlistFolder = setlistFolders.find(
     (folder) => folder.id === currentSetlistFolderId
   );
-  const childSetlistFolders = setlistFolders
-    .filter((folder) => folder.parent_folder_id === currentSetlistFolderId)
-    .sort((firstFolder, secondFolder) =>
-      firstFolder.name.localeCompare(secondFolder.name)
-    );
   const currentFolderSetlists = setlists
     .filter((setlist) => setlist.folder_id === currentSetlistFolderId)
     .sort((firstSetlist, secondSetlist) => {
@@ -853,25 +850,6 @@ function Library() {
       }, {}),
     [songs]
   );
-  const setlistBreadcrumbs = useMemo(() => {
-    const folderMap = setlistFolders.reduce((folderLookup, folder) => {
-      folderLookup[folder.id] = folder;
-      return folderLookup;
-    }, {});
-    const breadcrumbs = [];
-    let nextFolder = currentSetlistFolderId
-      ? folderMap[currentSetlistFolderId]
-      : null;
-
-    while (nextFolder) {
-      breadcrumbs.unshift(nextFolder);
-      nextFolder = nextFolder.parent_folder_id
-        ? folderMap[nextFolder.parent_folder_id]
-        : null;
-    }
-
-    return breadcrumbs;
-  }, [currentSetlistFolderId, setlistFolders]);
   const setlistsCount = setlists.length;
 
   function formatSongDate(song) {
@@ -912,16 +890,34 @@ function Library() {
     setError("");
     setMessage("");
 
-    const { error: insertError } = await supabase.from("setlist_folders").insert({
-      name: folderName,
-      owner_id: user.id,
-      parent_folder_id: currentSetlistFolderId,
-    });
+    const { data, error: insertError } = await supabase
+      .from("setlist_folders")
+      .insert({
+        name: folderName,
+        owner_id: user.id,
+        parent_folder_id: currentSetlistFolderId,
+      })
+      .select("*")
+      .single();
 
     if (insertError) {
       setError(insertError.message);
     } else {
       setNewSetlistFolderName("");
+      setSetlistCreateMode("");
+      if (currentSetlistFolderId) {
+        setOpenSetlistFolderIds((currentFolderIds) =>
+          currentFolderIds.includes(currentSetlistFolderId)
+            ? currentFolderIds
+            : [...currentFolderIds, currentSetlistFolderId]
+        );
+      }
+      setCurrentSetlistFolderId(data.id);
+      setOpenSetlistFolderIds((currentFolderIds) =>
+        currentFolderIds.includes(data.id)
+          ? currentFolderIds
+          : [...currentFolderIds, data.id]
+      );
       setMessage("Folder created.");
       await loadSetlistWorkspace();
     }
@@ -960,6 +956,14 @@ function Library() {
       setNewSetlistTitle("");
       setNewSetlistDate("");
       setNewSetlistNotes("");
+      setSetlistCreateMode("");
+      if (currentSetlistFolderId) {
+        setOpenSetlistFolderIds((currentFolderIds) =>
+          currentFolderIds.includes(currentSetlistFolderId)
+            ? currentFolderIds
+            : [...currentFolderIds, currentSetlistFolderId]
+        );
+      }
       setSelectedSetlistId(data.id);
       setMessage("Setlist created.");
       await loadSetlistWorkspace();
@@ -1104,8 +1108,212 @@ function Library() {
     setSavingSetlistAction(false);
   }
 
+  async function deleteSetlistFolder(folder) {
+    const deleteConfirmed = window.confirm(
+      `Delete "${folder.name}" and everything inside it?`
+    );
+
+    if (!deleteConfirmed) {
+      return;
+    }
+
+    setSavingSetlistAction(true);
+    setError("");
+    setMessage("");
+
+    const { error: deleteError } = await supabase
+      .from("setlist_folders")
+      .delete()
+      .eq("id", folder.id);
+
+    if (deleteError) {
+      setError(deleteError.message);
+    } else {
+      setCurrentSetlistFolderId(folder.parent_folder_id || null);
+      setSelectedSetlistId(null);
+      setOpenSetlistFolderIds((currentFolderIds) =>
+        currentFolderIds.filter((folderId) => folderId !== folder.id)
+      );
+      setMessage("Folder deleted.");
+      await loadSetlistWorkspace();
+    }
+
+    setSavingSetlistAction(false);
+  }
+
+  async function deleteSetlist(setlist) {
+    const deleteConfirmed = window.confirm(`Delete "${setlist.title}"?`);
+
+    if (!deleteConfirmed) {
+      return;
+    }
+
+    setSavingSetlistAction(true);
+    setError("");
+    setMessage("");
+
+    const { error: deleteError } = await supabase
+      .from("setlists")
+      .delete()
+      .eq("id", setlist.id);
+
+    if (deleteError) {
+      setError(deleteError.message);
+    } else {
+      if (selectedSetlistId === setlist.id) {
+        setSelectedSetlistId(null);
+      }
+      setMessage("Setlist deleted.");
+      await loadSetlistWorkspace();
+    }
+
+    setSavingSetlistAction(false);
+  }
+
   function openPrintableSetlist() {
     window.print();
+  }
+
+  function toggleSetlistFolder(folderId) {
+    setOpenSetlistFolderIds((currentFolderIds) =>
+      currentFolderIds.includes(folderId)
+        ? currentFolderIds.filter((currentId) => currentId !== folderId)
+        : [...currentFolderIds, folderId]
+    );
+  }
+
+  function openSetlistFolder(folderId) {
+    setCurrentSetlistFolderId(folderId);
+    setSelectedSetlistId(null);
+    setOpenSetlistFolderIds((currentFolderIds) =>
+      currentFolderIds.includes(folderId)
+        ? currentFolderIds
+        : [...currentFolderIds, folderId]
+    );
+  }
+
+  function renderSetlistTree(parentFolderId = null, depth = 0) {
+    const nestedFolders = setlistFolders
+      .filter((folder) => folder.parent_folder_id === parentFolderId)
+      .sort((firstFolder, secondFolder) =>
+        firstFolder.name.localeCompare(secondFolder.name)
+      );
+    const nestedSetlists = setlists
+      .filter((setlist) => setlist.folder_id === parentFolderId)
+      .sort((firstSetlist, secondSetlist) => {
+        if (firstSetlist.event_date && secondSetlist.event_date) {
+          return new Date(secondSetlist.event_date) - new Date(firstSetlist.event_date);
+        }
+
+        if (firstSetlist.event_date) {
+          return -1;
+        }
+
+        if (secondSetlist.event_date) {
+          return 1;
+        }
+
+        return (firstSetlist.title || "").localeCompare(secondSetlist.title || "");
+      });
+
+    return (
+      <>
+        {nestedFolders.map((folder) => {
+          const isOpen = openSetlistFolderIds.includes(folder.id);
+          const childCount =
+            setlistFolders.filter(
+              (childFolder) => childFolder.parent_folder_id === folder.id
+            ).length +
+            setlists.filter((setlist) => setlist.folder_id === folder.id).length;
+
+          return (
+            <div className="setlist-tree-group" key={folder.id}>
+              <div
+                className={`setlist-tree-row folder-row ${
+                  currentSetlistFolderId === folder.id ? "active" : ""
+                }`}
+                style={{ "--tree-depth": depth }}
+              >
+                <button
+                  aria-label={isOpen ? "Collapse folder" : "Open folder"}
+                  className={`setlist-disclosure ${isOpen ? "open" : ""}`}
+                  type="button"
+                  onClick={() => toggleSetlistFolder(folder.id)}
+                >
+                  &gt;
+                </button>
+                <button type="button" onClick={() => openSetlistFolder(folder.id)}>
+                  <span className="setlist-folder-icon">[]</span>
+                  <span>
+                    <strong>{folder.name}</strong>
+                    <small>
+                      {childCount} {childCount === 1 ? "item" : "items"}
+                    </small>
+                  </span>
+                </button>
+                <button
+                  aria-label={`Delete ${folder.name}`}
+                  className="setlist-tree-delete"
+                  disabled={savingSetlistAction}
+                  type="button"
+                  onClick={() => deleteSetlistFolder(folder)}
+                >
+                  Delete
+                </button>
+              </div>
+              {isOpen && (
+                <div className="setlist-tree-children">
+                  {renderSetlistTree(folder.id, depth + 1)}
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {nestedSetlists.map((setlist) => {
+          const itemCount = setlistItems.filter(
+            (item) => item.setlist_id === setlist.id
+          ).length;
+
+          return (
+            <div
+              className={`setlist-tree-row setlist-row ${
+                selectedSetlist?.id === setlist.id ? "active" : ""
+              }`}
+              key={setlist.id}
+              style={{ "--tree-depth": depth }}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrentSetlistFolderId(setlist.folder_id);
+                  setSelectedSetlistId(setlist.id);
+                }}
+              >
+                <span className="setlist-row-lines">=</span>
+                <span>
+                  <strong>{setlist.title}</strong>
+                  <small>
+                    {itemCount} {itemCount === 1 ? "item" : "items"} ·{" "}
+                    {formatSetlistDate(setlist.event_date)}
+                  </small>
+                </span>
+                <span aria-hidden="true">&gt;</span>
+              </button>
+              <button
+                aria-label={`Delete ${setlist.title}`}
+                className="setlist-tree-delete"
+                disabled={savingSetlistAction}
+                type="button"
+                onClick={() => deleteSetlist(setlist)}
+              >
+                Delete
+              </button>
+            </div>
+          );
+        })}
+      </>
+    );
   }
 
   return (
@@ -1168,144 +1376,111 @@ function Library() {
               {message && <p className="form-message success">{message}</p>}
               {error && <p className="form-message error">{error}</p>}
 
-              <div className="setlist-control-grid">
-                <details className="setlist-control-card">
-                  <summary>New folder</summary>
-                  <form onSubmit={createSetlistFolder}>
-                    <label>
-                      Folder name
-                      <input
-                        onChange={(event) => setNewSetlistFolderName(event.target.value)}
-                        placeholder={
-                          currentSetlistFolder
-                            ? `Inside ${currentSetlistFolder.name}`
-                            : "Steadfast"
-                        }
-                        type="text"
-                        value={newSetlistFolderName}
-                      />
-                    </label>
-                    <button
-                      className="primary-button"
-                      disabled={savingSetlistAction}
-                      type="submit"
-                    >
-                      Create folder
-                    </button>
-                  </form>
-                </details>
-
-                <details className="setlist-control-card">
-                  <summary>New setlist</summary>
-                  <form onSubmit={createSetlist}>
-                    <label>
-                      Setlist title
-                      <input
-                        onChange={(event) => setNewSetlistTitle(event.target.value)}
-                        placeholder="Sunday Morning"
-                        type="text"
-                        value={newSetlistTitle}
-                      />
-                    </label>
-                    <label>
-                      Date
-                      <input
-                        onChange={(event) => setNewSetlistDate(event.target.value)}
-                        type="date"
-                        value={newSetlistDate}
-                      />
-                    </label>
-                    <label className="setlist-form-wide">
-                      Notes
-                      <textarea
-                        onChange={(event) => setNewSetlistNotes(event.target.value)}
-                        placeholder="Optional notes for this set"
-                        rows="2"
-                        value={newSetlistNotes}
-                      />
-                    </label>
-                    <button
-                      className="primary-button"
-                      disabled={savingSetlistAction}
-                      type="submit"
-                    >
-                      Create setlist
-                    </button>
-                  </form>
-                </details>
-              </div>
-
               <div className="setlist-browser-grid">
                 <aside className="setlist-folder-panel">
-                  <div className="setlist-breadcrumbs" aria-label="Setlist folder path">
-                    <button
-                      className={!currentSetlistFolderId ? "active" : ""}
-                      type="button"
-                      onClick={() => {
-                        setCurrentSetlistFolderId(null);
-                        setSelectedSetlistId(null);
-                      }}
-                    >
-                      Setlists
-                    </button>
-                    {setlistBreadcrumbs.map((folder) => (
+                  <div className="setlist-panel-heading">
+                    <strong>Setlists</strong>
+                    <div className="setlist-create-buttons">
                       <button
-                        className={folder.id === currentSetlistFolderId ? "active" : ""}
-                        key={folder.id}
+                        className={setlistCreateMode === "folder" ? "active" : ""}
                         type="button"
-                        onClick={() => {
-                          setCurrentSetlistFolderId(folder.id);
-                          setSelectedSetlistId(null);
-                        }}
+                        onClick={() =>
+                          setSetlistCreateMode(
+                            setlistCreateMode === "folder" ? "" : "folder"
+                          )
+                        }
                       >
-                        {folder.name}
+                        + Folder
                       </button>
-                    ))}
+                      <button
+                        className={setlistCreateMode === "setlist" ? "active" : ""}
+                        type="button"
+                        onClick={() =>
+                          setSetlistCreateMode(
+                            setlistCreateMode === "setlist" ? "" : "setlist"
+                          )
+                        }
+                      >
+                        + Setlist
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="setlist-folder-section">
-                    <h3>Folders</h3>
-                    {childSetlistFolders.length === 0 ? (
-                      <p className="song-resource-muted">No folders here yet.</p>
-                    ) : (
-                      <div className="setlist-folder-list">
-                        {childSetlistFolders.map((folder) => (
-                          <button
-                            key={folder.id}
-                            type="button"
-                            onClick={() => {
-                              setCurrentSetlistFolderId(folder.id);
-                              setSelectedSetlistId(null);
-                            }}
-                          >
-                            <span>{folder.name}</span>
-                            <strong>Open</strong>
-                          </button>
-                        ))}
-                      </div>
+                  <div className="setlist-control-grid">
+
+                    {setlistCreateMode === "folder" && (
+                      <form className="setlist-sidebar-form" onSubmit={createSetlistFolder}>
+                        <label>
+                          Folder name
+                          <input
+                            onChange={(event) =>
+                              setNewSetlistFolderName(event.target.value)
+                            }
+                            placeholder={
+                              currentSetlistFolder
+                                ? `Inside ${currentSetlistFolder.name}`
+                                : "Steadfast"
+                            }
+                            type="text"
+                            value={newSetlistFolderName}
+                          />
+                        </label>
+                        <button
+                          className="primary-button"
+                          disabled={savingSetlistAction}
+                          type="submit"
+                        >
+                          Create
+                        </button>
+                      </form>
+                    )}
+
+                    {setlistCreateMode === "setlist" && (
+                      <form className="setlist-sidebar-form" onSubmit={createSetlist}>
+                        <label>
+                          Title
+                          <input
+                            onChange={(event) =>
+                              setNewSetlistTitle(event.target.value)
+                            }
+                            placeholder="Sunday Morning"
+                            type="text"
+                            value={newSetlistTitle}
+                          />
+                        </label>
+                        <label>
+                          Date
+                          <input
+                            onChange={(event) => setNewSetlistDate(event.target.value)}
+                            type="date"
+                            value={newSetlistDate}
+                          />
+                        </label>
+                        <label className="setlist-form-wide">
+                          Notes
+                          <textarea
+                            onChange={(event) => setNewSetlistNotes(event.target.value)}
+                            placeholder="Optional notes"
+                            rows="2"
+                            value={newSetlistNotes}
+                          />
+                        </label>
+                        <button
+                          className="primary-button"
+                          disabled={savingSetlistAction}
+                          type="submit"
+                        >
+                          Create
+                        </button>
+                      </form>
                     )}
                   </div>
 
-                  <div className="setlist-folder-section">
-                    <h3>Setlists</h3>
-                    {currentFolderSetlists.length === 0 ? (
-                      <p className="song-resource-muted">No setlists in this folder yet.</p>
+                  <div className="setlist-tree" aria-label="Setlist folders and setlists">
+                    {setlistFolders.length === 0 && setlists.length === 0 ? (
+                      <p className="song-resource-muted">No setlists yet.</p>
                     ) : (
-                      <div className="setlist-picker-list">
-                        {currentFolderSetlists.map((setlist) => (
-                          <button
-                            className={
-                              selectedSetlist?.id === setlist.id ? "active" : ""
-                            }
-                            key={setlist.id}
-                            type="button"
-                            onClick={() => setSelectedSetlistId(setlist.id)}
-                          >
-                            <span>{setlist.title}</span>
-                            <small>{formatSetlistDate(setlist.event_date)}</small>
-                          </button>
-                        ))}
-                      </div>
+                      renderSetlistTree()
                     )}
                   </div>
                 </aside>
@@ -1332,11 +1507,10 @@ function Library() {
                         <p className="setlist-detail-notes">{selectedSetlist.notes}</p>
                       )}
 
-                      <div className="setlist-add-grid">
-                        <form className="setlist-add-card" onSubmit={addSongToSetlist}>
-                          <h3>Add Song</h3>
+                      <div className="setlist-item-tools">
+                        <form className="setlist-song-picker" onSubmit={addSongToSetlist}>
                           <label>
-                            Song from My Library
+                            Add song from My Library
                             <select
                               onChange={(event) => setSetlistSongId(event.target.value)}
                               value={setlistSongId}
@@ -1354,41 +1528,47 @@ function Library() {
                             disabled={savingSetlistAction || myLibrarySongs.length === 0}
                             type="submit"
                           >
-                            Add song
+                            Add
                           </button>
                         </form>
 
-                        <form
-                          className="setlist-add-card"
-                          onSubmit={addPlaceholderToSetlist}
-                        >
-                          <h3>Add Blank Page</h3>
-                          <label>
-                            Title
-                            <input
-                              onChange={(event) => setPlaceholderTitle(event.target.value)}
-                              placeholder="Prayer"
-                              type="text"
-                              value={placeholderTitle}
-                            />
-                          </label>
-                          <label>
-                            Text
-                            <textarea
-                              onChange={(event) => setPlaceholderBody(event.target.value)}
-                              placeholder="Prayer, Scripture, reading, or transition note"
-                              rows="3"
-                              value={placeholderBody}
-                            />
-                          </label>
-                          <button
-                            className="primary-button"
-                            disabled={savingSetlistAction}
-                            type="submit"
+                        <details className="setlist-add-menu">
+                          <summary>Blank / prayer page</summary>
+                          <form
+                            className="setlist-add-card"
+                            onSubmit={addPlaceholderToSetlist}
                           >
-                            Add blank page
-                          </button>
-                        </form>
+                            <label>
+                              Title
+                              <input
+                                onChange={(event) =>
+                                  setPlaceholderTitle(event.target.value)
+                                }
+                                placeholder="Prayer"
+                                type="text"
+                                value={placeholderTitle}
+                              />
+                            </label>
+                            <label>
+                              Text
+                              <textarea
+                                onChange={(event) =>
+                                  setPlaceholderBody(event.target.value)
+                                }
+                                placeholder="Prayer, Scripture, reading, or transition note"
+                                rows="3"
+                                value={placeholderBody}
+                              />
+                            </label>
+                            <button
+                              className="primary-button"
+                              disabled={savingSetlistAction}
+                              type="submit"
+                            >
+                              Add blank page
+                            </button>
+                          </form>
+                        </details>
                       </div>
 
                       <div className="setlist-print-area">

@@ -2856,18 +2856,20 @@ nav a.active:not(.site-title) {
 
 .setlist-workspace {
   display: grid;
-  gap: 1rem;
+  gap: 0.85rem;
 }
 
 .setlist-control-grid {
   align-items: start;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
+  display: grid;
+  gap: 0.5rem;
 }
 
-.setlist-control-card,
-.setlist-add-card,
+.setlist-folder-panel .setlist-control-grid {
+  display: grid;
+  justify-content: stretch;
+}
+
 .setlist-folder-panel,
 .setlist-detail-panel {
   background-color: white;
@@ -2875,48 +2877,38 @@ nav a.active:not(.site-title) {
   border-radius: 8px;
 }
 
-.setlist-control-card {
-  overflow: hidden;
+.setlist-create-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
 }
 
-.setlist-control-card summary {
+.setlist-create-buttons button {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
   color: var(--color-accent);
   cursor: pointer;
-  font-family: var(--font-heading);
+  font: inherit;
+  font-size: 0.78rem;
   font-weight: 800;
-  list-style: none;
-  padding: 0.7rem 0.9rem;
+  padding: 0.42rem 0.55rem;
 }
 
-.setlist-control-card summary::-webkit-details-marker {
-  display: none;
+.setlist-create-buttons button:hover,
+.setlist-create-buttons button:focus,
+.setlist-create-buttons button.active {
+  background-color: var(--color-accent-light);
 }
 
-.setlist-control-card summary::after {
-  content: "+";
-  display: inline-block;
-  margin-left: 0.45rem;
-}
-
-.setlist-control-card[open] summary {
-  border-bottom: 1px solid var(--color-border);
-}
-
-.setlist-control-card[open] summary::after {
-  content: "-";
-}
-
-.setlist-control-card form {
-  align-items: end;
+.setlist-sidebar-form {
+  animation: setlist-tree-open 160ms ease both;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
   display: grid;
-  gap: 0.75rem;
-  grid-template-columns: minmax(12rem, 1fr) max-content;
-  min-width: min(34rem, calc(100vw - 3rem));
-  padding: 0.85rem;
-}
-
-.setlist-control-card + .setlist-control-card form {
-  grid-template-columns: minmax(12rem, 1fr) minmax(10rem, 0.7fr) max-content;
+  gap: 0.6rem;
+  padding: 0.65rem;
 }
 
 .setlist-control-card h2,
@@ -2939,7 +2931,7 @@ nav a.active:not(.site-title) {
   text-align: left;
 }
 
-.setlist-control-card label,
+.setlist-sidebar-form label,
 .setlist-add-card label {
   color: var(--color-text);
   display: grid;
@@ -2948,8 +2940,8 @@ nav a.active:not(.site-title) {
   gap: 0.35rem;
 }
 
-.setlist-control-card input,
-.setlist-control-card textarea,
+.setlist-sidebar-form input,
+.setlist-sidebar-form textarea,
 .setlist-add-card input,
 .setlist-add-card select,
 .setlist-add-card textarea {
@@ -2961,7 +2953,7 @@ nav a.active:not(.site-title) {
   width: 100%;
 }
 
-.setlist-control-card textarea,
+.setlist-sidebar-form textarea,
 .setlist-add-card textarea {
   resize: vertical;
 }
@@ -2973,58 +2965,235 @@ nav a.active:not(.site-title) {
 .setlist-browser-grid {
   align-items: start;
   display: grid;
-  gap: 1rem;
-  grid-template-columns: minmax(210px, 260px) minmax(0, 1fr);
+  gap: 0;
+  grid-template-columns: minmax(220px, 270px) minmax(0, 1fr);
 }
 
 .setlist-folder-panel {
+  border-radius: 8px 0 0 8px;
+  border-right: 0;
   display: grid;
-  gap: 1rem;
-  padding: 1rem;
+  gap: 0.85rem;
+  padding: 0.85rem;
   position: sticky;
   top: 1rem;
 }
 
-.setlist-breadcrumbs,
-.setlist-folder-list,
-.setlist-picker-list {
-  display: grid;
-  gap: 0.45rem;
+.setlist-panel-heading {
+  align-items: center;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  padding-bottom: 0.7rem;
 }
 
-.setlist-breadcrumbs button,
-.setlist-folder-list button,
-.setlist-picker-list button {
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
+.setlist-panel-heading strong {
+  color: var(--color-text);
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.setlist-tree,
+.setlist-tree-children {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.setlist-tree-group {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.setlist-tree-children {
+  animation: setlist-tree-open 180ms ease both;
+}
+
+.setlist-tree-row {
+  --tree-indent: calc(var(--tree-depth) * 1rem);
+  align-items: center;
+  animation: setlist-row-enter 160ms ease both;
   border-radius: 7px;
   color: var(--color-text);
-  cursor: pointer;
-  font: inherit;
-  font-weight: 800;
-  padding: 0.65rem 0.75rem;
-  text-align: left;
+  min-height: 3rem;
+  padding-left: var(--tree-indent);
 }
 
-.setlist-breadcrumbs button.active,
-.setlist-breadcrumbs button:hover,
-.setlist-folder-list button:hover,
-.setlist-picker-list button.active,
-.setlist-picker-list button:hover {
+.setlist-tree-row.folder-row {
+  align-items: center;
+  display: grid;
+  gap: 0.15rem;
+  grid-template-columns: 1.5rem minmax(0, 1fr) max-content;
+}
+
+.setlist-tree-row.folder-row > button:nth-child(2) {
+  align-items: center;
+  background-color: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 0.55rem;
+  grid-template-columns: 1.3rem minmax(0, 1fr) max-content;
+  padding: 0.45rem 0.55rem;
+  text-align: left;
+  width: 100%;
+}
+
+.setlist-tree-row.folder-row > button:nth-child(2) {
+  grid-template-columns: 1.3rem minmax(0, 1fr);
+}
+
+.setlist-tree-row.setlist-row {
+  display: grid;
+  gap: 0.15rem;
+  grid-template-columns: minmax(0, 1fr) max-content;
+}
+
+.setlist-tree-row.setlist-row > button:first-child {
+  align-items: center;
+  background-color: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 0.55rem;
+  grid-template-columns: 1.3rem minmax(0, 1fr) max-content;
+  padding: 0.45rem 0.55rem;
+  text-align: left;
+  width: 100%;
+}
+
+.setlist-tree-row:hover,
+.setlist-tree-row.active {
   background-color: var(--color-accent-light);
   color: var(--color-accent);
 }
 
-.setlist-folder-list button {
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
+.setlist-tree-row strong,
+.setlist-tree-row small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.setlist-folder-list button strong,
-.setlist-picker-list button small {
+.setlist-tree-row strong {
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.setlist-tree-row small {
   color: var(--color-muted);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-top: 0.12rem;
+}
+
+.setlist-disclosure {
+  align-items: center;
+  background-color: transparent;
+  border: 0;
+  color: var(--color-muted);
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-size: 1.1rem;
+  font-weight: 800;
+  height: 1.5rem;
+  justify-content: center;
+  padding: 0;
+  transform: rotate(0deg);
+  transition: transform 160ms ease, color 160ms ease;
+  width: 1.5rem;
+}
+
+.setlist-disclosure.open {
+  color: var(--color-accent);
+  transform: rotate(90deg);
+}
+
+.setlist-folder-icon,
+.setlist-row-lines {
+  color: var(--color-accent);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.setlist-tree-delete {
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--color-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 800;
+  opacity: 0;
+  padding: 0.32rem 0.45rem;
+  transform: translateX(-0.2rem);
+  transition: opacity 160ms ease, transform 160ms ease, color 160ms ease,
+    border-color 160ms ease;
+}
+
+.setlist-tree-row:hover .setlist-tree-delete,
+.setlist-tree-row.active .setlist-tree-delete,
+.setlist-tree-delete:focus {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.setlist-tree-delete:hover,
+.setlist-tree-delete:focus {
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.setlist-tree-delete:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.setlist-row span[aria-hidden="true"] {
+  color: var(--color-muted);
+  font-style: normal;
+  font-weight: 800;
+  opacity: 0;
+  transform: translateX(-0.25rem);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.setlist-row:hover span[aria-hidden="true"],
+.setlist-row.active span[aria-hidden="true"] {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@keyframes setlist-tree-open {
+  from {
+    opacity: 0;
+    transform: translateY(-0.25rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes setlist-row-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-0.25rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .setlist-picker-list button {
@@ -3038,20 +3207,27 @@ nav a.active:not(.site-title) {
 }
 
 .setlist-folder-section h3 {
+  color: var(--color-muted);
   font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .setlist-detail-panel {
+  border-radius: 0 8px 8px 0;
   display: grid;
-  gap: 1rem;
-  padding: 1rem;
+  gap: 0.85rem;
+  min-height: 620px;
+  padding: 1.1rem;
 }
 
 .setlist-detail-heading {
   align-items: start;
+  border-bottom: 1px solid var(--color-border);
   display: flex;
   gap: 1rem;
   justify-content: space-between;
+  padding-bottom: 0.85rem;
 }
 
 .setlist-detail-heading span {
@@ -3067,7 +3243,93 @@ nav a.active:not(.site-title) {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
+.setlist-item-tools {
+  align-items: start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.setlist-song-picker {
+  align-items: end;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: minmax(14rem, 1fr) max-content;
+  max-width: 560px;
+  padding: 0.75rem;
+}
+
+.setlist-song-picker label {
+  color: var(--color-text);
+  display: grid;
+  font-size: 0.86rem;
+  font-weight: 800;
+  gap: 0.35rem;
+}
+
+.setlist-song-picker select {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  font: inherit;
+  padding: 0.65rem 0.75rem;
+  width: 100%;
+}
+
+.setlist-add-menu {
+  justify-self: start;
+}
+
+.setlist-add-menu summary {
+  background-color: var(--color-accent);
+  border-radius: 999px;
+  color: white;
+  cursor: pointer;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  list-style: none;
+  padding: 0.6rem 0.85rem;
+}
+
+.setlist-add-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.setlist-add-menu summary::after {
+  content: "+";
+  display: inline-block;
+  margin-left: 0.45rem;
+}
+
+.setlist-add-menu[open] summary {
+  border-radius: 8px 8px 0 0;
+}
+
+.setlist-add-menu[open] summary::after {
+  content: "-";
+}
+
+.setlist-add-menu .setlist-add-grid {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 0 8px 8px 8px;
+  margin-top: 0;
+  max-width: 760px;
+  padding: 0.85rem;
+}
+
+.setlist-add-menu .setlist-add-card {
+  margin-top: 0;
+  width: min(420px, calc(100vw - 3rem));
+}
+
 .setlist-add-card {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
   align-items: end;
   display: grid;
   gap: 0.75rem;
@@ -3075,8 +3337,12 @@ nav a.active:not(.site-title) {
 }
 
 .setlist-print-area {
+  background-color: #fffefb;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
   display: grid;
   gap: 0.85rem;
+  padding: 1rem;
 }
 
 .setlist-print-heading {
@@ -3094,17 +3360,18 @@ nav a.active:not(.site-title) {
 
 .setlist-item-list li {
   align-items: center;
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
+  background-color: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 0;
   display: grid;
   gap: 0.85rem;
   grid-template-columns: minmax(0, 1fr) max-content;
-  padding: 0.85rem;
+  padding: 0.75rem 0;
 }
 
 .setlist-item-list li.placeholder-item {
-  background-color: #fffbeb;
+  background-color: transparent;
 }
 
 .setlist-item-main {
@@ -3116,7 +3383,7 @@ nav a.active:not(.site-title) {
 
 .setlist-item-main > span {
   align-items: center;
-  background-color: white;
+  background-color: var(--color-background);
   border: 1px solid var(--color-border);
   border-radius: 999px;
   color: var(--color-accent);
@@ -3152,19 +3419,20 @@ nav a.active:not(.site-title) {
 }
 
 .setlist-item-actions button {
-  background-color: var(--color-accent);
-  border: 0;
-  border-radius: 6px;
-  color: white;
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-accent);
   cursor: pointer;
   font: inherit;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 800;
-  padding: 0.5rem 0.65rem;
+  padding: 0.42rem 0.6rem;
 }
 
 .setlist-item-actions button + button:not(:disabled) {
-  background-color: #374151;
+  background-color: white;
+  color: var(--color-text);
 }
 
 .setlist-item-actions button:disabled {
@@ -3617,6 +3885,7 @@ nav a.active:not(.site-title) {
   .library-toolbar,
   .setlist-add-grid,
   .setlist-control-card,
+  .setlist-song-picker,
   .upload-card-main {
     grid-template-columns: 1fr;
   }
