@@ -87,6 +87,8 @@ function createR2Client() {
     },
     endpoint: getR2Endpoint(),
     region: "auto",
+    requestChecksumCalculation: "WHEN_REQUIRED",
+    responseChecksumValidation: "WHEN_REQUIRED",
   });
 }
 
@@ -244,18 +246,25 @@ async function createPlaceholderPdfBytes(title: string, body: string, index: num
 }
 
 async function getObjectBytes(r2: S3Client, bucket: string, key: string) {
-  const object = await r2.send(
+  const signedUrl = await getSignedUrl(
+    r2,
     new GetObjectCommand({
       Bucket: bucket,
       Key: key,
     }),
+    { expiresIn: 60 },
   );
+  const response = await fetch(signedUrl);
 
-  if (!object.Body) {
-    throw new Error(`Missing file body for ${key}.`);
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+
+    throw new Error(
+      `Could not read ${key} from R2. Status ${response.status}. ${detail}`.trim(),
+    );
   }
 
-  return new Uint8Array(await object.Body.transformToByteArray());
+  return new Uint8Array(await response.arrayBuffer());
 }
 
 // Deno.serve starts the Edge Function HTTP server.
@@ -564,6 +573,7 @@ Deno.serve(async (req) => {
 
         try {
           const documents = [];
+          const normalizerWarnings: string[] = [];
 
           for (const [index, item] of orderedItems.entries()) {
             if (item.item_type === "placeholder") {
@@ -593,13 +603,29 @@ Deno.serve(async (req) => {
               );
             }
 
-            const sourceBytes = await getObjectBytes(r2, bucket, song.file_path);
-            assertPdfBytes(sourceBytes, song.title || "A setlist song");
+            const songTitle = song.title || "A setlist song";
 
-            documents.push({
-              data: bytesToBase64(sourceBytes),
-              title: song.title || "A setlist song",
-            });
+            try {
+              const sourceBytes = await getObjectBytes(r2, bucket, song.file_path);
+              assertPdfBytes(sourceBytes, songTitle);
+
+              documents.push({
+                data: bytesToBase64(sourceBytes),
+                title: songTitle,
+              });
+            } catch (error) {
+              const detail =
+                error instanceof Error ? error.message : "Unknown PDF file error.";
+
+              normalizerWarnings.push(
+                `"${songTitle}" could not be prepared for the normalizer: ${detail}`,
+              );
+              documents.push({
+                body: `This song PDF could not be prepared for the combined setlist.\n\nDetails: ${detail}`,
+                placeholder: true,
+                title: songTitle,
+              });
+            }
           }
 
           const normalizerResponse = await fetch(normalizerUrl, {
@@ -625,7 +651,10 @@ Deno.serve(async (req) => {
                   normalizerBody?.error ||
                   `PDF normalizer failed with status ${normalizerResponse.status}.`,
                 mergeEngine: "ghostscript-normalizer",
-                warnings: normalizerBody?.warnings || [],
+                warnings: [
+                  ...normalizerWarnings,
+                  ...(normalizerBody?.warnings || []),
+                ],
               },
               400,
             );
@@ -635,7 +664,10 @@ Deno.serve(async (req) => {
             data: normalizerBody.data,
             fileName: normalizerBody.fileName || `${safeDownloadName(setlist.title)}.pdf`,
             mergeEngine: "ghostscript-normalizer",
-            warnings: normalizerBody.warnings || [],
+            warnings: [
+              ...normalizerWarnings,
+              ...(normalizerBody.warnings || []),
+            ],
           });
         } catch (error) {
           return jsonResponse(

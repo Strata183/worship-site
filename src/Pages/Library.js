@@ -1222,17 +1222,13 @@ function Library() {
     );
 
     if (combineError) {
-      setError(`Combined PDF failed: ${await getFunctionErrorMessage(combineError)}`);
+      setError(`Could not build the PDF: ${await getFunctionErrorMessage(combineError)}`);
       setCombiningSetlistId(null);
       return;
     }
 
     if (!data?.data) {
-      setError(
-        `Combined PDF failed: The server did not return PDF data. Merge engine: ${
-          data?.mergeEngine || "unknown"
-        }`
-      );
+      setError("Could not build the PDF: the server did not return a file.");
       setCombiningSetlistId(null);
       return;
     }
@@ -1243,16 +1239,10 @@ function Library() {
       const warningVerb = data.warnings.length === 1 ? "was" : "were";
 
       setMessage(
-        `Combined PDF downloaded with ${data.mergeEngine || "PDF merge"}, but ${
-          data.warnings.length
-        } ${warningNoun} could not be merged and ${warningVerb} replaced with note pages.`
+        `Combined PDF downloaded. ${data.warnings.length} ${warningNoun} ${warningVerb} replaced with note pages.`
       );
     } else {
-      setMessage(
-        `Combined setlist PDF downloaded with ${
-          data.mergeEngine || "the PDF merge service"
-        }.`
-      );
+      setMessage("Combined setlist PDF downloaded.");
     }
     setCombiningSetlistId(null);
   }
@@ -1326,7 +1316,7 @@ function Library() {
                   &gt;
                 </button>
                 <button type="button" onClick={() => openSetlistFolder(folder.id)}>
-                  <span className="setlist-folder-icon">[]</span>
+                  <span className="setlist-folder-icon" aria-hidden="true"></span>
                   <span>
                     <strong>{folder.name}</strong>
                     <small>
@@ -1341,7 +1331,7 @@ function Library() {
                   type="button"
                   onClick={() => deleteSetlistFolder(folder)}
                 >
-                  Delete
+                  Remove
                 </button>
               </div>
               {isOpen && (
@@ -1373,7 +1363,7 @@ function Library() {
                   setSelectedSetlistId(setlist.id);
                 }}
               >
-                <span className="setlist-row-lines">=</span>
+                <span className="setlist-row-lines" aria-hidden="true"></span>
                 <span>
                   <strong>{setlist.title}</strong>
                   <small>
@@ -1390,7 +1380,7 @@ function Library() {
                 type="button"
                 onClick={() => deleteSetlist(setlist)}
               >
-                Delete
+                Remove
               </button>
             </div>
           );
@@ -1414,7 +1404,7 @@ function Library() {
             </h1>
             <p>
               {isSetlistsShelf
-                ? "Build nested setlist folders, add songs, and prepare a clean PDF to share."
+                ? "Organize songs into worship sets, event folders, and printable PDFs."
                 : isMyShelf
                 ? "Open your charts, organize your scores, and sort songs by title or key."
                 : "Open charts shared by your accepted friends!"}
@@ -1462,7 +1452,7 @@ function Library() {
               <div className="setlist-browser-grid">
                 <aside className="setlist-folder-panel">
                   <div className="setlist-panel-heading">
-                    <strong>Setlists</strong>
+                    <strong>Setlist Library</strong>
                     <div className="setlist-create-buttons">
                       <button
                         className={setlistCreateMode === "folder" ? "active" : ""}
@@ -1473,7 +1463,7 @@ function Library() {
                           )
                         }
                       >
-                        + Folder
+                        Folder
                       </button>
                       <button
                         className={setlistCreateMode === "setlist" ? "active" : ""}
@@ -1484,7 +1474,7 @@ function Library() {
                           )
                         }
                       >
-                        + Setlist
+                        Setlist
                       </button>
                     </div>
                   </div>
@@ -1495,8 +1485,8 @@ function Library() {
                       <form className="setlist-sidebar-form" onSubmit={createSetlistFolder}>
                         <p>
                           {currentSetlistFolder
-                            ? `Adding inside ${currentSetlistFolder.name}`
-                            : "Adding at the top level"}
+                            ? `Adding to ${currentSetlistFolder.name}`
+                            : "Adding to All setlists"}
                         </p>
                         <label>
                           Folder name
@@ -1527,8 +1517,8 @@ function Library() {
                       <form className="setlist-sidebar-form" onSubmit={createSetlist}>
                         <p>
                           {currentSetlistFolder
-                            ? `Adding inside ${currentSetlistFolder.name}`
-                            : "Adding at the top level"}
+                            ? `Adding to ${currentSetlistFolder.name}`
+                            : "Adding to All setlists"}
                         </p>
                         <label>
                           Title
@@ -1582,8 +1572,8 @@ function Library() {
                         setSelectedSetlistId(null);
                       }}
                     >
-                      <span>Top level</span>
-                      <small>Create folders and setlists here</small>
+                      <span>All setlists</span>
+                      <small>Choose a folder or add something new</small>
                     </button>
                     {setlistFolders.length === 0 && setlists.length === 0 ? (
                       <p className="song-resource-muted">No setlists yet.</p>
@@ -1598,7 +1588,7 @@ function Library() {
                     <>
                       <div className="setlist-detail-heading">
                         <div>
-                          <p className="eyebrow">Current setlist</p>
+                          <p className="eyebrow">Setlist</p>
                           <h2>{selectedSetlist.title}</h2>
                           <span>{formatSetlistDate(selectedSetlist.event_date)}</span>
                         </div>
@@ -1609,8 +1599,8 @@ function Library() {
                           onClick={() => downloadCombinedSetlistPdf(selectedSetlist)}
                         >
                           {combiningSetlistId === selectedSetlist.id
-                            ? "Combining..."
-                            : "Download combined PDF"}
+                            ? "Building PDF..."
+                            : "Download PDF"}
                         </button>
                       </div>
 
@@ -1621,7 +1611,7 @@ function Library() {
                       <div className="setlist-item-tools">
                         <form className="setlist-song-picker" onSubmit={addSongToSetlist}>
                           <label>
-                            Add song from My Library
+                            Add a song
                             <select
                               onChange={(event) => setSetlistSongId(event.target.value)}
                               value={setlistSongId}
@@ -1639,12 +1629,12 @@ function Library() {
                             disabled={savingSetlistAction || myLibrarySongs.length === 0}
                             type="submit"
                           >
-                            Add
+                            Add song
                           </button>
                         </form>
 
                         <details className="setlist-add-menu">
-                          <summary>Blank / prayer page</summary>
+                          <summary>Note page</summary>
                           <form
                             className="setlist-add-card"
                             onSubmit={addPlaceholderToSetlist}
@@ -1676,7 +1666,7 @@ function Library() {
                               disabled={savingSetlistAction}
                               type="submit"
                             >
-                              Add blank page
+                              Add page
                             </button>
                           </form>
                         </details>
@@ -1692,7 +1682,7 @@ function Library() {
                         {selectedSetlistItems.length === 0 ? (
                           <div className="library-empty-state">
                             <h3>No songs yet</h3>
-                            <p>Add songs or blank pages to build this setlist.</p>
+                            <p>Add songs or note pages to build this setlist.</p>
                           </div>
                         ) : (
                           <ol className="setlist-item-list">
@@ -1784,8 +1774,8 @@ function Library() {
                     </>
                   ) : (
                     <div className="library-empty-state">
-                      <h3>No setlist selected</h3>
-                      <p>Create a setlist or choose one from this folder.</p>
+                      <h3>Choose a setlist</h3>
+                      <p>Select one from the left, or create a new setlist to begin.</p>
                     </div>
                   )}
                 </div>
