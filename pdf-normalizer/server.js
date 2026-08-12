@@ -68,6 +68,76 @@ function pdfName(index, suffix) {
   return `${String(index + 1).padStart(3, "0")}-${suffix}.pdf`;
 }
 
+function escapePostScriptText(value) {
+  return String(value || "")
+    .replace(/\\/g, "\\\\")
+    .replace(/\(/g, "\\(")
+    .replace(/\)/g, "\\)")
+    .replace(/[\r\n\t]+/g, " ")
+    .trim();
+}
+
+function wrapText(value, maxCharacters = 78) {
+  const words = String(value || "").split(/\s+/).filter(Boolean);
+  const lines = [];
+  let currentLine = "";
+
+  for (const word of words) {
+    const nextLine = currentLine ? `${currentLine} ${word}` : word;
+
+    if (nextLine.length > maxCharacters && currentLine) {
+      lines.push(currentLine);
+      currentLine = word;
+    } else {
+      currentLine = nextLine;
+    }
+  }
+
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  return lines;
+}
+
+async function createPlaceholderPdf(document, index, outputPath) {
+  const psPath = outputPath.replace(/\.pdf$/i, ".ps");
+  const title = escapePostScriptText(document.title || "Blank page");
+  const bodyLines = wrapText(document.body || "", 84).slice(0, 26);
+  const pageNumber = escapePostScriptText(`Setlist page ${index + 1}`);
+  const bodyCommands = bodyLines
+    .map((line, lineIndex) => {
+      const y = 650 - lineIndex * 20;
+      return `72 ${y} moveto (${escapePostScriptText(line)}) show`;
+    })
+    .join("\n");
+
+  const postScript = `%!PS-Adobe-3.0
+%%Pages: 1
+<< /PageSize [612 792] >> setpagedevice
+/Helvetica-Bold findfont 24 scalefont setfont
+72 700 moveto (${title}) show
+/Helvetica findfont 11 scalefont setfont
+72 672 moveto (${pageNumber}) show
+/Helvetica findfont 13 scalefont setfont
+${bodyCommands}
+showpage
+%%EOF
+`;
+
+  await writeFile(psPath, postScript);
+  await run("gs", [
+    "-q",
+    "-dSAFER",
+    "-dBATCH",
+    "-dNOPAUSE",
+    "-sDEVICE=pdfwrite",
+    "-dCompatibilityLevel=1.4",
+    `-sOutputFile=${outputPath}`,
+    psPath,
+  ]);
+}
+
 async function normalizePdf(inputPath, outputPath) {
   await run("gs", [
     "-q",
@@ -126,6 +196,21 @@ async function handleMerge(req, res) {
       const title = document.title || `PDF ${index + 1}`;
       const inputPath = path.join(workDir, pdfName(index, "input"));
       const normalizedPath = path.join(workDir, pdfName(index, "normalized"));
+
+      if (document.placeholder) {
+        try {
+          await createPlaceholderPdf(document, index, normalizedPath);
+          normalizedPaths.push(normalizedPath);
+        } catch (error) {
+          warnings.push(
+            `"${title}" placeholder could not be created and was skipped: ${
+              error instanceof Error ? error.message : "Unknown Ghostscript error."
+            }`,
+          );
+        }
+
+        continue;
+      }
 
       if (!document.data) {
         warnings.push(`"${title}" was empty and was skipped.`);

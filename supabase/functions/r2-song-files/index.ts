@@ -562,85 +562,92 @@ Deno.serve(async (req) => {
       if (normalizerUrl) {
         console.log("Combining setlist PDF with normalizer service.");
 
-        const documents = [];
+        try {
+          const documents = [];
 
-        for (const [index, item] of orderedItems.entries()) {
-          if (item.item_type === "placeholder") {
+          for (const [index, item] of orderedItems.entries()) {
+            if (item.item_type === "placeholder") {
+              documents.push({
+                body: item.body || "",
+                placeholder: true,
+                title: item.title || "Blank page",
+              });
+              continue;
+            }
+
+            const song = Array.isArray(item.song) ? item.song[0] : item.song;
+
+            if (!song?.file_path) {
+              documents.push({
+                body: "This song PDF could not be found.",
+                placeholder: true,
+                title: item.title || "Missing song",
+              });
+              continue;
+            }
+
+            if (song.owner_id !== user.id) {
+              return jsonResponse(
+                { error: "Setlists can only combine songs from your library." },
+                403,
+              );
+            }
+
+            const sourceBytes = await getObjectBytes(r2, bucket, song.file_path);
+            assertPdfBytes(sourceBytes, song.title || "A setlist song");
+
             documents.push({
-              data: bytesToBase64(
-                await createPlaceholderPdfBytes(
-                  item.title || "Blank page",
-                  item.body || "",
-                  index,
-                ),
-              ),
-              title: item.title || "Blank page",
+              data: bytesToBase64(sourceBytes),
+              title: song.title || "A setlist song",
             });
-            continue;
           }
 
-          const song = Array.isArray(item.song) ? item.song[0] : item.song;
+          const normalizerResponse = await fetch(normalizerUrl, {
+            body: JSON.stringify({
+              documents,
+              fileName: `${safeDownloadName(setlist.title)}.pdf`,
+            }),
+            headers: {
+              "Content-Type": "application/json",
+              ...(normalizerToken
+                ? { Authorization: `Bearer ${normalizerToken}` }
+                : {}),
+            },
+            method: "POST",
+          });
 
-          if (!song?.file_path) {
-            documents.push({
-              data: bytesToBase64(
-                await createPlaceholderPdfBytes(
-                  item.title || "Missing song",
-                  "This song PDF could not be found.",
-                  index,
-                ),
-              ),
-              title: item.title || "Missing song",
-            });
-            continue;
-          }
+          const normalizerBody = await normalizerResponse.json().catch(() => null);
 
-          if (song.owner_id !== user.id) {
+          if (!normalizerResponse.ok || !normalizerBody?.data) {
             return jsonResponse(
-              { error: "Setlists can only combine songs from your library." },
-              403,
+              {
+                error:
+                  normalizerBody?.error ||
+                  `PDF normalizer failed with status ${normalizerResponse.status}.`,
+                mergeEngine: "ghostscript-normalizer",
+                warnings: normalizerBody?.warnings || [],
+              },
+              400,
             );
           }
 
-          documents.push({
-            data: bytesToBase64(await getObjectBytes(r2, bucket, song.file_path)),
-            title: song.title || "A setlist song",
+          return jsonResponse({
+            data: normalizerBody.data,
+            fileName: normalizerBody.fileName || `${safeDownloadName(setlist.title)}.pdf`,
+            mergeEngine: "ghostscript-normalizer",
+            warnings: normalizerBody.warnings || [],
           });
-        }
-
-        const normalizerResponse = await fetch(normalizerUrl, {
-          body: JSON.stringify({
-            documents,
-            fileName: `${safeDownloadName(setlist.title)}.pdf`,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-            ...(normalizerToken
-              ? { Authorization: `Bearer ${normalizerToken}` }
-              : {}),
-          },
-          method: "POST",
-        });
-
-        const normalizerBody = await normalizerResponse.json().catch(() => null);
-
-        if (!normalizerResponse.ok || !normalizerBody?.data) {
+        } catch (error) {
           return jsonResponse(
             {
-              error:
-                normalizerBody?.error ||
-                `PDF normalizer failed with status ${normalizerResponse.status}.`,
+              error: `PDF normalizer path failed before returning a combined PDF. Details: ${
+                error instanceof Error ? error.message : "Unknown normalizer error."
+              }`,
+              mergeEngine: "ghostscript-normalizer",
             },
             400,
           );
         }
-
-        return jsonResponse({
-          data: normalizerBody.data,
-          fileName: normalizerBody.fileName || `${safeDownloadName(setlist.title)}.pdf`,
-          mergeEngine: "ghostscript-normalizer",
-          warnings: normalizerBody.warnings || [],
-        });
       }
 
       if (optionalEnv("PDF_LIB_SETLIST_FALLBACK") !== "true") {
