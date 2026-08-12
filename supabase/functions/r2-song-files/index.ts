@@ -34,6 +34,10 @@ function env(name: string) {
   return value;
 }
 
+function optionalEnv(name: string) {
+  return Deno.env.get(name)?.trim() || "";
+}
+
 // Helper for returning JSON with the same CORS headers every time.
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -255,6 +259,14 @@ async function addPlaceholderPage(
     });
     y -= 20;
   }
+}
+
+async function createPlaceholderPdfBytes(title: string, body: string, index: number) {
+  const pdf = await PDFDocument.create();
+
+  await addPlaceholderPage(pdf, title, body, index);
+
+  return await pdf.save({ useObjectStreams: false });
 }
 
 async function getObjectBytes(r2: S3Client, bucket: string, key: string) {
@@ -556,7 +568,92 @@ Deno.serve(async (req) => {
         return jsonResponse({ error: "Add songs before combining the setlist." }, 400);
       }
 
+      const normalizerUrl = optionalEnv("PDF_NORMALIZER_URL");
+      const normalizerToken = optionalEnv("PDF_NORMALIZER_TOKEN");
+
+      if (normalizerUrl) {
+        const documents = [];
+
+        for (const [index, item] of orderedItems.entries()) {
+          if (item.item_type === "placeholder") {
+            documents.push({
+              data: bytesToBase64(
+                await createPlaceholderPdfBytes(
+                  item.title || "Blank page",
+                  item.body || "",
+                  index,
+                ),
+              ),
+              title: item.title || "Blank page",
+            });
+            continue;
+          }
+
+          const song = Array.isArray(item.song) ? item.song[0] : item.song;
+
+          if (!song?.file_path) {
+            documents.push({
+              data: bytesToBase64(
+                await createPlaceholderPdfBytes(
+                  item.title || "Missing song",
+                  "This song PDF could not be found.",
+                  index,
+                ),
+              ),
+              title: item.title || "Missing song",
+            });
+            continue;
+          }
+
+          if (song.owner_id !== user.id) {
+            return jsonResponse(
+              { error: "Setlists can only combine songs from your library." },
+              403,
+            );
+          }
+
+          documents.push({
+            data: bytesToBase64(await getObjectBytes(r2, bucket, song.file_path)),
+            title: song.title || "A setlist song",
+          });
+        }
+
+        const normalizerResponse = await fetch(normalizerUrl, {
+          body: JSON.stringify({
+            documents,
+            fileName: `${safeDownloadName(setlist.title)}.pdf`,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+            ...(normalizerToken
+              ? { Authorization: `Bearer ${normalizerToken}` }
+              : {}),
+          },
+          method: "POST",
+        });
+
+        const normalizerBody = await normalizerResponse.json().catch(() => null);
+
+        if (!normalizerResponse.ok || !normalizerBody?.data) {
+          return jsonResponse(
+            {
+              error:
+                normalizerBody?.error ||
+                `PDF normalizer failed with status ${normalizerResponse.status}.`,
+            },
+            400,
+          );
+        }
+
+        return jsonResponse({
+          data: normalizerBody.data,
+          fileName: normalizerBody.fileName || `${safeDownloadName(setlist.title)}.pdf`,
+          warnings: normalizerBody.warnings || [],
+        });
+      }
+
       const combinedPdf = await PDFDocument.create();
+      const mergeWarnings: string[] = [];
 
       for (const [index, item] of orderedItems.entries()) {
         if (item.item_type === "placeholder") {
@@ -607,13 +704,14 @@ Deno.serve(async (req) => {
             combinedPdf.addPage(page);
           }
         } catch (error) {
-          return jsonResponse(
-            {
-              error: `Could not merge "${songTitle}". This PDF may be corrupted, encrypted, or exported in a format pdf-lib cannot parse. Details: ${
-                error instanceof Error ? error.message : "Unknown PDF error."
-              }`,
-            },
-            400,
+          const detail = error instanceof Error ? error.message : "Unknown PDF error.";
+
+          mergeWarnings.push(`"${songTitle}" could not be merged: ${detail}`);
+          await addPlaceholderPage(
+            combinedPdf,
+            songTitle,
+            `This song PDF could not be merged automatically. Try re-exporting it with Print > Save as PDF, then upload the new version.\n\nDetails: ${detail}`,
+            index,
           );
         }
       }
@@ -640,6 +738,7 @@ Deno.serve(async (req) => {
       return jsonResponse({
         data: bytesToBase64(mergedBytes),
         fileName,
+        warnings: mergeWarnings,
       });
     }
 

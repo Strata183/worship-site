@@ -1228,7 +1228,16 @@ function Library() {
     }
 
     downloadBase64Pdf(data.data, data.fileName);
-    setMessage("Combined setlist PDF downloaded.");
+    if (data.warnings?.length) {
+      const warningNoun = data.warnings.length === 1 ? "song" : "songs";
+      const warningVerb = data.warnings.length === 1 ? "was" : "were";
+
+      setMessage(
+        `Combined PDF downloaded, but ${data.warnings.length} ${warningNoun} could not be merged and ${warningVerb} replaced with note pages.`
+      );
+    } else {
+      setMessage("Combined setlist PDF downloaded.");
+    }
     setCombiningSetlistId(null);
   }
 
