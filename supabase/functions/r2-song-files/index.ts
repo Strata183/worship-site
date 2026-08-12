@@ -155,34 +155,6 @@ function assertPdfBytes(bytes: Uint8Array, label: string) {
   );
 }
 
-async function normalizePdfBytes(bytes: Uint8Array, label: string) {
-  try {
-    assertPdfBytes(bytes, label);
-    const sourcePdf = await PDFDocument.load(bytes, {
-      ignoreEncryption: true,
-      parseSpeed: ParseSpeeds.Fastest,
-      throwOnInvalidObject: false,
-    });
-    const normalizedPdf = await PDFDocument.create();
-    const copiedPages = await normalizedPdf.copyPages(
-      sourcePdf,
-      sourcePdf.getPageIndices(),
-    );
-
-    for (const page of copiedPages) {
-      normalizedPdf.addPage(page);
-    }
-
-    return await normalizedPdf.save({ useObjectStreams: false });
-  } catch (error) {
-    throw new Error(
-      `${label} could not be prepared for setlist merging. Try opening it on your computer, choosing Print, then Save as PDF, and upload that new file. Details: ${
-        error instanceof Error ? error.message : "Unknown PDF error."
-      }`,
-    );
-  }
-}
-
 function wrapPdfText(text: string, maxCharacters = 84) {
   const words = text.split(/\s+/).filter(Boolean);
   const lines: string[] = [];
@@ -355,11 +327,12 @@ Deno.serve(async (req) => {
         return jsonResponse({ error: "Invalid file path." }, 400);
       }
 
-      const originalBytes = new Uint8Array(await file.arrayBuffer());
-      const uploadBody =
-        file.type === "application/pdf"
-          ? await normalizePdfBytes(originalBytes, file.name || "Uploaded PDF")
-          : originalBytes;
+      const uploadBody = new Uint8Array(await file.arrayBuffer());
+
+      if (file.type === "application/pdf") {
+        assertPdfBytes(uploadBody, file.name || "Uploaded PDF");
+      }
+
       const uploadContentType =
         file.type === "application/pdf"
           ? "application/pdf"
@@ -572,6 +545,8 @@ Deno.serve(async (req) => {
       const normalizerToken = optionalEnv("PDF_NORMALIZER_TOKEN");
 
       if (normalizerUrl) {
+        console.log("Combining setlist PDF with normalizer service.");
+
         const documents = [];
 
         for (const [index, item] of orderedItems.entries()) {
@@ -648,9 +623,22 @@ Deno.serve(async (req) => {
         return jsonResponse({
           data: normalizerBody.data,
           fileName: normalizerBody.fileName || `${safeDownloadName(setlist.title)}.pdf`,
+          mergeEngine: "ghostscript-normalizer",
           warnings: normalizerBody.warnings || [],
         });
       }
+
+      if (optionalEnv("PDF_LIB_SETLIST_FALLBACK") !== "true") {
+        return jsonResponse(
+          {
+            error:
+              "PDF normalizer is not configured for setlist downloads. Set PDF_NORMALIZER_URL and redeploy the r2-song-files function.",
+          },
+          400,
+        );
+      }
+
+      console.log("Combining setlist PDF with pdf-lib fallback.");
 
       const combinedPdf = await PDFDocument.create();
       const mergeWarnings: string[] = [];
@@ -738,6 +726,7 @@ Deno.serve(async (req) => {
       return jsonResponse({
         data: bytesToBase64(mergedBytes),
         fileName,
+        mergeEngine: "pdf-lib-fallback",
         warnings: mergeWarnings,
       });
     }
