@@ -22,6 +22,8 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+const functionVersion = "r2-song-files-normalizer-required-2026-08-12";
+
 // Read an environment variable from Supabase Edge Function secrets.
 // Throwing here makes missing setup obvious instead of failing silently later.
 function env(name: string) {
@@ -269,6 +271,21 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: "Method not allowed." }, 405);
   }
 
+  const contentType = req.headers.get("Content-Type") || "";
+
+  if (contentType.includes("application/json")) {
+    const diagnosticBody = await req.clone().json().catch(() => null);
+
+    if (diagnosticBody?.action === "pdf-normalizer-status") {
+      return jsonResponse({
+        fallbackEnabled: optionalEnv("PDF_LIB_SETLIST_FALLBACK") === "true",
+        hasNormalizerToken: Boolean(optionalEnv("PDF_NORMALIZER_TOKEN")),
+        hasNormalizerUrl: Boolean(optionalEnv("PDF_NORMALIZER_URL")),
+        version: functionVersion,
+      });
+    }
+  }
+
   try {
     // Set up storage, database/auth, and the signed-in user.
     const r2 = createR2Client();
@@ -294,8 +311,6 @@ Deno.serve(async (req) => {
     if (userError || !user) {
       return jsonResponse({ error: "Invalid user session." }, 401);
     }
-
-    const contentType = req.headers.get("Content-Type") || "";
 
     // Uploads arrive as multipart/form-data because they include a File object.
     if (contentType.includes("multipart/form-data")) {

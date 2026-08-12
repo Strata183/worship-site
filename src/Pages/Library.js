@@ -1222,7 +1222,17 @@ function Library() {
     );
 
     if (combineError) {
-      setError(await getFunctionErrorMessage(combineError));
+      setError(`Combined PDF failed: ${await getFunctionErrorMessage(combineError)}`);
+      setCombiningSetlistId(null);
+      return;
+    }
+
+    if (!data?.data) {
+      setError(
+        `Combined PDF failed: The server did not return PDF data. Merge engine: ${
+          data?.mergeEngine || "unknown"
+        }`
+      );
       setCombiningSetlistId(null);
       return;
     }
@@ -1233,10 +1243,16 @@ function Library() {
       const warningVerb = data.warnings.length === 1 ? "was" : "were";
 
       setMessage(
-        `Combined PDF downloaded, but ${data.warnings.length} ${warningNoun} could not be merged and ${warningVerb} replaced with note pages.`
+        `Combined PDF downloaded with ${data.mergeEngine || "PDF merge"}, but ${
+          data.warnings.length
+        } ${warningNoun} could not be merged and ${warningVerb} replaced with note pages.`
       );
     } else {
-      setMessage("Combined setlist PDF downloaded.");
+      setMessage(
+        `Combined setlist PDF downloaded with ${
+          data.mergeEngine || "the PDF merge service"
+        }.`
+      );
     }
     setCombiningSetlistId(null);
   }
