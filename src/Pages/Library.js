@@ -39,7 +39,21 @@ async function getFunctionErrorMessage(error) {
   return error?.message || "Unexpected Edge Function error.";
 }
 
-function downloadBase64Pdf(base64Data, fileName) {
+function prefersPdfViewerWindow() {
+  const userAgent = navigator.userAgent || "";
+
+  return /Android|iPhone|iPad|iPod/i.test(userAgent);
+}
+
+function openPdfDownloadWindow() {
+  if (!prefersPdfViewerWindow()) {
+    return null;
+  }
+
+  return window.open("", "_blank");
+}
+
+function downloadBase64Pdf(base64Data, fileName, viewerWindow = null) {
   const binary = atob(base64Data);
   const bytes = new Uint8Array(binary.length);
 
@@ -49,6 +63,13 @@ function downloadBase64Pdf(base64Data, fileName) {
 
   const blob = new Blob([bytes], { type: "application/pdf" });
   const url = URL.createObjectURL(blob);
+
+  if (viewerWindow && !viewerWindow.closed) {
+    viewerWindow.location.href = url;
+    window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+    return;
+  }
+
   const link = document.createElement("a");
 
   link.href = url;
@@ -56,7 +77,7 @@ function downloadBase64Pdf(base64Data, fileName) {
   document.body.appendChild(link);
   link.click();
   link.remove();
-  URL.revokeObjectURL(url);
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 const songKeyOptions = [
@@ -1207,6 +1228,8 @@ function Library() {
   }
 
   async function downloadCombinedSetlistPdf(setlist) {
+    const viewerWindow = openPdfDownloadWindow();
+
     setCombiningSetlistId(setlist.id);
     setError("");
     setMessage("");
@@ -1222,18 +1245,20 @@ function Library() {
     );
 
     if (combineError) {
+      viewerWindow?.close();
       setError(`Could not build the PDF: ${await getFunctionErrorMessage(combineError)}`);
       setCombiningSetlistId(null);
       return;
     }
 
     if (!data?.data) {
+      viewerWindow?.close();
       setError("Could not build the PDF: the server did not return a file.");
       setCombiningSetlistId(null);
       return;
     }
 
-    downloadBase64Pdf(data.data, data.fileName);
+    downloadBase64Pdf(data.data, data.fileName, viewerWindow);
     if (data.warnings?.length) {
       const warningNoun = data.warnings.length === 1 ? "song" : "songs";
       const warningVerb = data.warnings.length === 1 ? "was" : "were";
