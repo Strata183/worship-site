@@ -165,6 +165,7 @@ function PspWorshipTeam() {
   });
   const [savingSetId, setSavingSetId] = useState("");
   const [deletingSetId, setDeletingSetId] = useState("");
+  const [removingSetSongId, setRemovingSetSongId] = useState("");
   const [removingAnnotatedSetId, setRemovingAnnotatedSetId] = useState("");
   const [uploadingChartId, setUploadingChartId] = useState("");
   const [uploadingExtraChartId, setUploadingExtraChartId] = useState("");
@@ -495,6 +496,57 @@ function PspWorshipTeam() {
 
     setSetSongForm({ note: "", song_id: "" });
     setMessage(`"${song.title}" added to this Friday set.`);
+    await loadPspWorkspace();
+  }
+
+  async function removeSongFromSelectedSet(setSong) {
+    const shouldRemove = window.confirm(
+      `Remove "${setSong.title}" from this week's set?`
+    );
+
+    if (!shouldRemove) {
+      return;
+    }
+
+    setError("");
+    setMessage("");
+
+    if (!isAdmin) {
+      setError("Only PSP admins can remove songs from weeks.");
+      return;
+    }
+
+    setRemovingSetSongId(setSong.id);
+
+    const { error: deleteError } = await supabase
+      .from("psp_worship_team_set_songs")
+      .delete()
+      .eq("id", setSong.id);
+
+    if (deleteError) {
+      setError(deleteError.message);
+      setRemovingSetSongId("");
+      return;
+    }
+
+    const remainingSongs = selectedSetSongs.filter((song) => song.id !== setSong.id);
+    const positionUpdates = remainingSongs.map((song, index) =>
+      supabase
+        .from("psp_worship_team_set_songs")
+        .update({ position: index })
+        .eq("id", song.id)
+    );
+    const updateResults = await Promise.all(positionUpdates);
+    const failedUpdate = updateResults.find((result) => result.error);
+
+    if (failedUpdate?.error) {
+      setError(failedUpdate.error.message);
+      setRemovingSetSongId("");
+      return;
+    }
+
+    setRemovingSetSongId("");
+    setMessage(`"${setSong.title}" removed from this week.`);
     await loadPspWorkspace();
   }
 
@@ -1336,6 +1388,18 @@ function PspWorshipTeam() {
                         <p>{song.note || "No song note."}</p>
                       </div>
                       <em>{song.song_key || "Key?"}</em>
+                      {canManage && (
+                        <div className="friday-set-song-actions">
+                          <button
+                            className="subtle-danger-button"
+                            disabled={removingSetSongId === song.id}
+                            type="button"
+                            onClick={() => removeSongFromSelectedSet(song)}
+                          >
+                            {removingSetSongId === song.id ? "Removing..." : "Remove"}
+                          </button>
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ol>
@@ -1718,60 +1782,22 @@ function PspWorshipTeam() {
                   </div>
                 )}
                 {canManage && (
-                  <div className="friday-chart-upload">
-                    <button
-                      className="secondary-button"
-                      type="button"
-                      onClick={() => startEditingSong(song)}
-                    >
-                      Edit details
-                    </button>
-                    <label>
-                      Chart PDF
-                      <input
-                        accept="application/pdf"
-                        onChange={(event) =>
-                          setChartFiles((currentFiles) => ({
-                            ...currentFiles,
-                            [song.id]: event.target.files?.[0] || null,
-                          }))
-                        }
-                        type="file"
-                      />
-                    </label>
-                    <button
-                      className="secondary-button"
-                      disabled={!chartFiles[song.id] || uploadingChartId === song.id}
-                      type="button"
-                      onClick={() => uploadChart(song)}
-                    >
-                      {uploadingChartId === song.id
-                        ? "Uploading..."
-                        : song.file_path
-                          ? "Replace PDF"
-                          : "Upload PDF"}
-                    </button>
-                    <div className="friday-extra-chart-upload">
+                  <details className="friday-admin-drawer friday-chart-tools">
+                    <summary>Song tools</summary>
+                    <div className="friday-chart-upload">
+                      <button
+                        className="secondary-button"
+                        type="button"
+                        onClick={() => startEditingSong(song)}
+                      >
+                        Edit details
+                      </button>
                       <label>
-                        Extra chart name
-                        <input
-                          onChange={(event) =>
-                            setExtraChartTitles((currentTitles) => ({
-                              ...currentTitles,
-                              [song.id]: event.target.value,
-                            }))
-                          }
-                          placeholder="Capo chart, alternate key..."
-                          type="text"
-                          value={extraChartTitles[song.id] || ""}
-                        />
-                      </label>
-                      <label>
-                        Extra chart PDF
+                        Main chart PDF
                         <input
                           accept="application/pdf"
                           onChange={(event) =>
-                            setExtraChartFiles((currentFiles) => ({
+                            setChartFiles((currentFiles) => ({
                               ...currentFiles,
                               [song.id]: event.target.files?.[0] || null,
                             }))
@@ -1781,18 +1807,59 @@ function PspWorshipTeam() {
                       </label>
                       <button
                         className="secondary-button"
-                        disabled={
-                          !extraChartFiles[song.id] || uploadingExtraChartId === song.id
-                        }
+                        disabled={!chartFiles[song.id] || uploadingChartId === song.id}
                         type="button"
-                        onClick={() => uploadExtraChart(song)}
+                        onClick={() => uploadChart(song)}
                       >
-                        {uploadingExtraChartId === song.id
+                        {uploadingChartId === song.id
                           ? "Uploading..."
-                          : "Add extra chart"}
+                          : song.file_path
+                            ? "Replace main PDF"
+                            : "Upload main PDF"}
                       </button>
+                      <div className="friday-extra-chart-upload">
+                        <label>
+                          Extra chart name
+                          <input
+                            onChange={(event) =>
+                              setExtraChartTitles((currentTitles) => ({
+                                ...currentTitles,
+                                [song.id]: event.target.value,
+                              }))
+                            }
+                            placeholder="Capo chart, alternate key..."
+                            type="text"
+                            value={extraChartTitles[song.id] || ""}
+                          />
+                        </label>
+                        <label>
+                          Extra chart PDF
+                          <input
+                            accept="application/pdf"
+                            onChange={(event) =>
+                              setExtraChartFiles((currentFiles) => ({
+                                ...currentFiles,
+                                [song.id]: event.target.files?.[0] || null,
+                              }))
+                            }
+                            type="file"
+                          />
+                        </label>
+                        <button
+                          className="secondary-button"
+                          disabled={
+                            !extraChartFiles[song.id] || uploadingExtraChartId === song.id
+                          }
+                          type="button"
+                          onClick={() => uploadExtraChart(song)}
+                        >
+                          {uploadingExtraChartId === song.id
+                            ? "Uploading..."
+                            : "Add extra chart"}
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  </details>
                 )}
               </article>
               );

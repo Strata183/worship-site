@@ -812,7 +812,7 @@ nav a.active:not(.site-title) {
   border-bottom: 1px solid var(--color-border);
   display: grid;
   gap: 0.8rem;
-  grid-template-columns: 2rem minmax(0, 1fr) max-content;
+  grid-template-columns: 2rem minmax(0, 1fr) max-content max-content;
   padding: 0.85rem 0;
 }
 
@@ -858,6 +858,34 @@ nav a.active:not(.site-title) {
   min-width: 3rem;
   padding: 0.35rem 0.7rem;
   text-align: center;
+}
+
+.friday-set-song-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.friday-set-song-actions .subtle-danger-button {
+  background-color: transparent;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #991b1b;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  min-height: auto;
+  padding: 0.38rem 0.62rem;
+}
+
+.friday-set-song-actions .subtle-danger-button:hover,
+.friday-set-song-actions .subtle-danger-button:focus {
+  background-color: #fef2f2;
+}
+
+.friday-set-song-actions .subtle-danger-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .friday-chart-library {
@@ -1166,10 +1194,19 @@ nav a.active:not(.site-title) {
 }
 
 .friday-chart-upload {
-  border-top: 1px solid var(--color-border);
   display: grid;
   gap: 0.65rem;
-  padding-top: 0.85rem;
+  padding: 0.85rem;
+}
+
+.friday-chart-tools {
+  background-color: var(--color-background);
+  margin-top: 0.1rem;
+}
+
+.friday-chart-tools summary {
+  font-size: 0.9rem;
+  padding: 0.62rem 0.75rem;
 }
 
 .friday-chart-upload label {
@@ -4664,6 +4701,10 @@ nav a.active:not(.site-title) {
 
   .friday-set-list em {
     justify-self: start;
+  }
+
+  .friday-set-song-actions {
+    justify-content: flex-start;
   }
 
   .friday-chart-grid {
