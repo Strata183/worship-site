@@ -140,6 +140,14 @@ function PspWorshipTeam() {
     title: "",
   });
   const [savingSongId, setSavingSongId] = useState("");
+  const [editingSetId, setEditingSetId] = useState("");
+  const [editSet, setEditSet] = useState({
+    leader: "",
+    notes: "",
+    service_date: "",
+  });
+  const [savingSetId, setSavingSetId] = useState("");
+  const [deletingSetId, setDeletingSetId] = useState("");
   const [uploadingChartId, setUploadingChartId] = useState("");
   const [downloadingSetId, setDownloadingSetId] = useState("");
   const [newSong, setNewSong] = useState({
@@ -427,6 +435,101 @@ function PspWorshipTeam() {
     await loadPspWorkspace();
   }
 
+  function startEditingSet(set) {
+    setEditingSetId(set.id);
+    setEditSet({
+      leader: set.leader || "",
+      notes: set.notes || "",
+      service_date: set.service_date || "",
+    });
+    setError("");
+    setMessage("");
+  }
+
+  function cancelEditingSet() {
+    setEditingSetId("");
+    setEditSet({ leader: "", notes: "", service_date: "" });
+  }
+
+  async function saveSetEdits(event, set) {
+    event.preventDefault();
+    setError("");
+    setMessage("");
+
+    if (!isAdmin) {
+      setError("Only PSP admins can edit weeks.");
+      return;
+    }
+
+    if (!editSet.service_date) {
+      setError("Choose a date for this week.");
+      return;
+    }
+
+    setSavingSetId(set.id);
+
+    const { error: updateError } = await supabase
+      .from("psp_worship_team_sets")
+      .update({
+        leader: editSet.leader.trim(),
+        notes: editSet.notes.trim(),
+        service_date: editSet.service_date,
+      })
+      .eq("id", set.id);
+
+    if (updateError) {
+      setError(updateError.message);
+      setSavingSetId("");
+      return;
+    }
+
+    setEditingSetId("");
+    setEditSet({ leader: "", notes: "", service_date: "" });
+    setSavingSetId("");
+    setMessage("Week updated.");
+    await loadPspWorkspace();
+  }
+
+  async function deleteWeeklySet(set) {
+    setError("");
+    setMessage("");
+
+    if (!isAdmin) {
+      setError("Only PSP admins can delete weeks.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Delete the PSP week for ${formatTeamDate(
+        set.service_date
+      )}? This will also remove the songs from that week.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingSetId(set.id);
+
+    const { error: deleteError } = await supabase
+      .from("psp_worship_team_sets")
+      .delete()
+      .eq("id", set.id);
+
+    if (deleteError) {
+      setError(deleteError.message);
+      setDeletingSetId("");
+      return;
+    }
+
+    setDeletingSetId("");
+    setEditingSetId("");
+    setEditSet({ leader: "", notes: "", service_date: "" });
+    setSelectedSetId("");
+    setMessage("Week deleted.");
+    await loadPspWorkspace();
+  }
+
   async function openChart(song) {
     if (!song.file_path) {
       setError("This chart does not have a PDF uploaded yet.");
@@ -688,6 +791,7 @@ function PspWorshipTeam() {
                 >
                   <strong>{formatTeamDate(set.service_date)}</strong>
                   <span>
+                    {set.leader ? `Lead: ${set.leader} · ` : ""}
                     {weeklySetSongs.filter((song) => song.set_id === set.id).length} songs
                   </span>
                 </button>
@@ -696,53 +800,55 @@ function PspWorshipTeam() {
           </div>
 
           {canManage && (
-            <form className="friday-admin-form" onSubmit={addWeeklySet}>
-              <strong>New week</strong>
-              <label>
-                Date
-                <input
-                  onChange={(event) =>
-                    setNewSet((currentSet) => ({
-                      ...currentSet,
-                      service_date: event.target.value,
-                    }))
-                  }
-                  type="date"
-                  value={newSet.service_date}
-                />
-              </label>
-              <label>
-                Leader
-                <input
-                  onChange={(event) =>
-                    setNewSet((currentSet) => ({
-                      ...currentSet,
-                      leader: event.target.value,
-                    }))
-                  }
-                  placeholder="Team lead"
-                  type="text"
-                  value={newSet.leader}
-                />
-              </label>
-              <label>
-                Notes
-                <textarea
-                  onChange={(event) =>
-                    setNewSet((currentSet) => ({
-                      ...currentSet,
-                      notes: event.target.value,
-                    }))
-                  }
-                  placeholder="Weekly notes"
-                  rows="3"
-                  value={newSet.notes}
-                />
-              </label>
-              <button className="primary-button" type="submit">
-                Create week
-              </button>
-            </form>
+            <details className="friday-admin-drawer">
+              <summary>New week</summary>
+              <form className="friday-admin-form" onSubmit={addWeeklySet}>
+                <label>
+                  Date
+                  <input
+                    onChange={(event) =>
+                      setNewSet((currentSet) => ({
+                        ...currentSet,
+                        service_date: event.target.value,
+                      }))
+                    }
+                    type="date"
+                    value={newSet.service_date}
+                  />
+                </label>
+                <label>
+                  Leader
+                  <input
+                    onChange={(event) =>
+                      setNewSet((currentSet) => ({
+                        ...currentSet,
+                        leader: event.target.value,
+                      }))
+                    }
+                    placeholder="Team lead"
+                    type="text"
+                    value={newSet.leader}
+                  />
+                </label>
+                <label>
+                  Notes
+                  <textarea
+                    onChange={(event) =>
+                      setNewSet((currentSet) => ({
+                        ...currentSet,
+                        notes: event.target.value,
+                      }))
+                    }
+                    placeholder="Weekly notes"
+                    rows="3"
+                    value={newSet.notes}
+                  />
+                </label>
+                <button className="primary-button" type="submit">
+                  Create week
+                </button>
+              </form>
+            </details>
           )}
         </aside>
 
@@ -750,19 +856,113 @@ function PspWorshipTeam() {
           {selectedSet ? (
             <>
               <div className="friday-set-heading">
-                <div>
-                  <p className="eyebrow">This week</p>
-                  <h2>{formatTeamDate(selectedSet.service_date)}</h2>
-                  <p>{selectedSet.notes || "No notes for this week yet."}</p>
-                </div>
-                <button
-                  className="primary-button"
-                  disabled={selectedSetSongs.length === 0 || downloadingSetId === selectedSet.id}
-                  type="button"
-                  onClick={() => downloadWeeklySetPdf(selectedSet)}
-                >
-                  {downloadingSetId === selectedSet.id ? "Building PDF..." : "Open weekly PDF"}
-                </button>
+                {editingSetId === selectedSet.id ? (
+                  <form
+                    className="friday-set-edit-form"
+                    onSubmit={(event) => saveSetEdits(event, selectedSet)}
+                  >
+                    <strong>Edit week</strong>
+                    <label>
+                      Date
+                      <input
+                        onChange={(event) =>
+                          setEditSet((currentSet) => ({
+                            ...currentSet,
+                            service_date: event.target.value,
+                          }))
+                        }
+                        type="date"
+                        value={editSet.service_date}
+                      />
+                    </label>
+                    <label>
+                      Lead
+                      <input
+                        onChange={(event) =>
+                          setEditSet((currentSet) => ({
+                            ...currentSet,
+                            leader: event.target.value,
+                          }))
+                        }
+                        placeholder="Team lead"
+                        type="text"
+                        value={editSet.leader}
+                      />
+                    </label>
+                    <label>
+                      Notes
+                      <textarea
+                        onChange={(event) =>
+                          setEditSet((currentSet) => ({
+                            ...currentSet,
+                            notes: event.target.value,
+                          }))
+                        }
+                        rows="3"
+                        value={editSet.notes}
+                      />
+                    </label>
+                    <div className="friday-set-actions">
+                      <button
+                        className="primary-button"
+                        disabled={savingSetId === selectedSet.id}
+                        type="submit"
+                      >
+                        {savingSetId === selectedSet.id ? "Saving..." : "Save week"}
+                      </button>
+                      <button
+                        className="secondary-button"
+                        type="button"
+                        onClick={cancelEditingSet}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    <div>
+                      <p className="eyebrow">This week</p>
+                      <h2>{formatTeamDate(selectedSet.service_date)}</h2>
+                      <p className="friday-set-lead">
+                        Lead: {selectedSet.leader || "TBD"}
+                      </p>
+                      <p>{selectedSet.notes || "No notes for this week yet."}</p>
+                    </div>
+                    <div className="friday-set-actions">
+                      <button
+                        className="primary-button"
+                        disabled={
+                          selectedSetSongs.length === 0 ||
+                          downloadingSetId === selectedSet.id
+                        }
+                        type="button"
+                        onClick={() => downloadWeeklySetPdf(selectedSet)}
+                      >
+                        {downloadingSetId === selectedSet.id ? "Building PDF..." : "Open weekly PDF"}
+                      </button>
+                      {canManage && (
+                        <>
+                          <button
+                            className="secondary-button"
+                            type="button"
+                            onClick={() => startEditingSet(selectedSet)}
+                          >
+                            Edit week
+                          </button>
+                          <button
+                            className="subtle-danger-button"
+                            disabled={deletingSetId === selectedSet.id}
+                            type="button"
+                            onClick={() => deleteWeeklySet(selectedSet)}
+                          >
+                            {deletingSetId === selectedSet.id ? "Deleting..." : "Delete week"}
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
 
               {selectedSetSongs.length === 0 ? (
@@ -786,45 +986,47 @@ function PspWorshipTeam() {
               )}
 
               {canManage && (
-                <form className="friday-admin-form friday-set-song-form" onSubmit={addSongToSelectedSet}>
-                  <strong>Add song to this set</strong>
-                  <label>
-                    Song
-                    <select
-                      onChange={(event) =>
-                        setSetSongForm((currentForm) => ({
-                          ...currentForm,
-                          song_id: event.target.value,
-                        }))
-                      }
-                      value={setSongForm.song_id}
-                    >
-                      <option value="">Choose song</option>
-                      {songs.map((song) => (
-                        <option key={song.id} value={song.id}>
-                          {song.title} ({song.song_key || "No key"})
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    Note
-                    <input
-                      onChange={(event) =>
-                        setSetSongForm((currentForm) => ({
-                          ...currentForm,
-                          note: event.target.value,
-                        }))
-                      }
-                      placeholder="Intro, transition, capo, or band note"
-                      type="text"
-                      value={setSongForm.note}
-                    />
-                  </label>
-                  <button className="primary-button" type="submit">
-                    Add to set
-                  </button>
-                </form>
+                <details className="friday-admin-drawer friday-main-drawer">
+                  <summary>Add song to this week</summary>
+                  <form className="friday-admin-form friday-set-song-form" onSubmit={addSongToSelectedSet}>
+                    <label>
+                      Song
+                      <select
+                        onChange={(event) =>
+                          setSetSongForm((currentForm) => ({
+                            ...currentForm,
+                            song_id: event.target.value,
+                          }))
+                        }
+                        value={setSongForm.song_id}
+                      >
+                        <option value="">Choose song</option>
+                        {songs.map((song) => (
+                          <option key={song.id} value={song.id}>
+                            {song.title} ({song.song_key || "No key"})
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      Note
+                      <input
+                        onChange={(event) =>
+                          setSetSongForm((currentForm) => ({
+                            ...currentForm,
+                            note: event.target.value,
+                          }))
+                        }
+                        placeholder="Intro, transition, capo, or band note"
+                        type="text"
+                        value={setSongForm.note}
+                      />
+                    </label>
+                    <button className="primary-button" type="submit">
+                      Add to set
+                    </button>
+                  </form>
+                </details>
               )}
             </>
           ) : (
@@ -841,8 +1043,8 @@ function PspWorshipTeam() {
           <p className="eyebrow">Shared library</p>
           <h2>Team Charts</h2>
           <p>
-            Search the reusable chart pool. This will become the team’s real
-            50-song library as charts are added.
+            Search the reusable chart pool, open PDFs, and build weekly sets
+            from the songs the team already knows.
           </p>
         </div>
 
@@ -862,80 +1064,82 @@ function PspWorshipTeam() {
         </div>
 
         {canManage && (
-          <form
-            className="friday-admin-form friday-song-form"
-            key={newSongFormVersion}
-            onSubmit={addTeamSong}
-          >
-            <strong>Add song</strong>
-            <label>
-              Title
-              <input
-                onChange={(event) =>
-                  setNewSong((currentSong) => ({
-                    ...currentSong,
-                    title: event.target.value,
-                  }))
-                }
-                placeholder="Come Thou Fount"
-                type="text"
-                value={newSong.title}
-              />
-            </label>
-            <label>
-              Key
-              <input
-                onChange={(event) =>
-                  setNewSong((currentSong) => ({
-                    ...currentSong,
-                    song_key: event.target.value,
-                  }))
-                }
-                placeholder="D"
-                type="text"
-                value={newSong.song_key}
-              />
-            </label>
-            <label>
-              Tags
-              <input
-                onChange={(event) =>
-                  setNewSong((currentSong) => ({
-                    ...currentSong,
-                    tags: event.target.value,
-                  }))
-                }
-                placeholder="Hymn, Opening"
-                type="text"
-                value={newSong.tags}
-              />
-            </label>
-            <label>
-              Chart PDF
-              <input
-                accept="application/pdf"
-                onChange={(event) => setNewSongChartFile(event.target.files?.[0] || null)}
-                type="file"
-              />
-            </label>
-            <label>
-              Notes
-              <textarea
-                onChange={(event) =>
-                  setNewSong((currentSong) => ({
-                    ...currentSong,
-                    notes: event.target.value,
-                  }))
-                }
-                placeholder="Optional chart note"
-                rows="3"
-                value={newSong.notes}
-              />
-            </label>
-            <button className="primary-button" disabled={addingSong} type="submit">
-              {addingSong ? "Adding..." : "Add song"}
-            </button>
-          </form>
+          <details className="friday-admin-drawer friday-main-drawer">
+            <summary>Add chart to library</summary>
+            <form
+              className="friday-admin-form friday-song-form"
+              key={newSongFormVersion}
+              onSubmit={addTeamSong}
+            >
+              <label>
+                Title
+                <input
+                  onChange={(event) =>
+                    setNewSong((currentSong) => ({
+                      ...currentSong,
+                      title: event.target.value,
+                    }))
+                  }
+                  placeholder="Come Thou Fount"
+                  type="text"
+                  value={newSong.title}
+                />
+              </label>
+              <label>
+                Key
+                <input
+                  onChange={(event) =>
+                    setNewSong((currentSong) => ({
+                      ...currentSong,
+                      song_key: event.target.value,
+                    }))
+                  }
+                  placeholder="D"
+                  type="text"
+                  value={newSong.song_key}
+                />
+              </label>
+              <label>
+                Tags
+                <input
+                  onChange={(event) =>
+                    setNewSong((currentSong) => ({
+                      ...currentSong,
+                      tags: event.target.value,
+                    }))
+                  }
+                  placeholder="Hymn, Opening"
+                  type="text"
+                  value={newSong.tags}
+                />
+              </label>
+              <label>
+                Chart PDF
+                <input
+                  accept="application/pdf"
+                  onChange={(event) => setNewSongChartFile(event.target.files?.[0] || null)}
+                  type="file"
+                />
+              </label>
+              <label>
+                Notes
+                <textarea
+                  onChange={(event) =>
+                    setNewSong((currentSong) => ({
+                      ...currentSong,
+                      notes: event.target.value,
+                    }))
+                  }
+                  placeholder="Optional chart note"
+                  rows="3"
+                  value={newSong.notes}
+                />
+              </label>
+              <button className="primary-button" disabled={addingSong} type="submit">
+                {addingSong ? "Adding..." : "Add song"}
+              </button>
+            </form>
+          </details>
         )}
 
         {filteredSongs.length === 0 ? (
@@ -1028,6 +1232,9 @@ function PspWorshipTeam() {
                     <div>
                       <h3>{song.title}</h3>
                       <p>Key: {song.song_key || "No key yet"}</p>
+                      <p className={song.file_path ? "friday-chart-status ready" : "friday-chart-status"}>
+                        {song.file_path ? "PDF ready" : "PDF needed"}
+                      </p>
                       {song.notes && <p>{song.notes}</p>}
                     </div>
                     <div className="friday-chart-tags">
