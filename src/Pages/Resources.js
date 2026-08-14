@@ -46,6 +46,11 @@ const resourceGroups = [
         description: "Charts and practice resources for the Kinder music team.",
         path: "/vbs-2026-kinder-music",
       },
+      {
+        title: "PSP Worship Team",
+        description: "A private weekly setlist and chart workspace for PSP.",
+        path: "/psp-worship-team",
+      },
     ],
   },
   {

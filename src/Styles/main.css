@@ -553,6 +553,372 @@ nav a.active:not(.site-title) {
 }
 
 /* ==========================================================================
+   Pages/PspWorshipTeam.js
+   ========================================================================== */
+
+.friday-team-page {
+  max-width: 1280px;
+  text-align: left;
+}
+
+.friday-team-hero {
+  align-items: stretch;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  margin-bottom: 1.5rem;
+}
+
+.friday-team-hero > div:first-child,
+.friday-team-share-card,
+.friday-team-sidebar,
+.friday-team-main,
+.friday-chart-library {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.friday-team-hero > div:first-child {
+  padding: 1.5rem;
+}
+
+.friday-team-hero h1,
+.friday-team-hero p,
+.friday-section-heading p {
+  text-align: left;
+}
+
+.friday-team-hero h1,
+.friday-team-share-card h2,
+.friday-team-sidebar-heading h2,
+.friday-set-heading h2,
+.friday-section-heading h2,
+.friday-chart-card h3 {
+  font-family: var(--font-heading);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.friday-team-hero p,
+.friday-team-share-card p,
+.friday-team-sidebar-heading p,
+.friday-set-heading p,
+.friday-section-heading p,
+.friday-chart-card p {
+  color: var(--color-muted);
+  margin: 0.45rem 0 0;
+  max-width: none;
+}
+
+.friday-team-share-card {
+  align-content: start;
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.25rem;
+}
+
+.friday-team-share-card .secondary-button {
+  justify-self: start;
+}
+
+.friday-team-shell {
+  align-items: start;
+  display: grid;
+  gap: 0;
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  margin-bottom: 1.5rem;
+}
+
+.friday-team-sidebar {
+  border-radius: 8px 0 0 8px;
+  border-right: 0;
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.friday-team-sidebar-heading {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.75rem;
+}
+
+.friday-week-list {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.friday-week-list button {
+  background-color: transparent;
+  border: 0;
+  border-radius: 7px;
+  color: var(--color-text);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 0.18rem;
+  padding: 0.7rem;
+  text-align: left;
+}
+
+.friday-week-list button:hover,
+.friday-week-list button:focus,
+.friday-week-list button.active {
+  background-color: var(--color-accent-light);
+  color: var(--color-accent);
+}
+
+.friday-week-list strong,
+.friday-week-list span {
+  display: block;
+}
+
+.friday-week-list strong {
+  font-family: var(--font-heading);
+  line-height: 1.2;
+}
+
+.friday-week-list span {
+  color: var(--color-muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.friday-team-main {
+  border-radius: 0 8px 8px 0;
+  display: grid;
+  gap: 1rem;
+  min-height: 430px;
+  padding: 1.15rem;
+}
+
+.friday-set-heading {
+  align-items: start;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding-bottom: 1rem;
+}
+
+.friday-set-list {
+  display: grid;
+  gap: 0.65rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.friday-set-list li {
+  align-items: start;
+  border-bottom: 1px solid var(--color-border);
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: 2rem minmax(0, 1fr) max-content;
+  padding: 0.85rem 0;
+}
+
+.friday-set-list li:last-child {
+  border-bottom: 0;
+}
+
+.friday-set-list li > span {
+  align-items: center;
+  background-color: var(--color-accent-light);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-accent);
+  display: flex;
+  font-weight: 800;
+  height: 2rem;
+  justify-content: center;
+  width: 2rem;
+}
+
+.friday-set-list strong {
+  display: block;
+  font-family: var(--font-heading);
+  line-height: 1.25;
+}
+
+.friday-set-list p {
+  color: var(--color-muted);
+  font-size: 0.94rem;
+  line-height: 1.45;
+  margin: 0.25rem 0 0;
+  max-width: none;
+  text-align: left;
+}
+
+.friday-set-list em {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-accent);
+  font-style: normal;
+  font-weight: 800;
+  min-width: 3rem;
+  padding: 0.35rem 0.7rem;
+  text-align: center;
+}
+
+.friday-chart-library {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.friday-section-heading {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.85rem;
+}
+
+.friday-library-toolbar {
+  align-items: end;
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: minmax(0, 1fr) max-content;
+}
+
+.friday-library-toolbar label,
+.friday-admin-form label {
+  color: var(--color-text);
+  display: grid;
+  font-size: 0.86rem;
+  font-weight: 800;
+  gap: 0.35rem;
+}
+
+.friday-library-toolbar input,
+.friday-admin-form input,
+.friday-admin-form select,
+.friday-admin-form textarea {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  font: inherit;
+  padding: 0.72rem 0.85rem;
+  width: 100%;
+}
+
+.friday-admin-form textarea {
+  resize: vertical;
+}
+
+.friday-library-toolbar span {
+  background-color: var(--color-accent-light);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-accent);
+  font-weight: 800;
+  padding: 0.55rem 0.85rem;
+  white-space: nowrap;
+}
+
+.friday-admin-form {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.85rem;
+}
+
+.friday-admin-form > strong {
+  color: var(--color-accent);
+  font-family: var(--font-heading);
+  line-height: 1.2;
+}
+
+.friday-song-form {
+  align-items: end;
+  grid-template-columns: minmax(13rem, 1.1fr) minmax(6rem, 0.4fr) minmax(11rem, 0.9fr);
+}
+
+.friday-song-form label:nth-of-type(4),
+.friday-song-form > strong {
+  grid-column: 1 / -1;
+}
+
+.friday-song-form button {
+  justify-self: start;
+}
+
+.friday-set-song-form {
+  align-items: end;
+  grid-template-columns: minmax(13rem, 1fr) minmax(14rem, 1fr) max-content;
+}
+
+.friday-set-song-form > strong {
+  grid-column: 1 / -1;
+}
+
+.friday-chart-grid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.friday-chart-card {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+}
+
+.friday-chart-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.friday-chart-tags span {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-accent);
+  font-size: 0.74rem;
+  font-weight: 800;
+  padding: 0.28rem 0.5rem;
+}
+
+.friday-chart-card .secondary-button {
+  justify-self: start;
+}
+
+.friday-chart-upload {
+  border-top: 1px solid var(--color-border);
+  display: grid;
+  gap: 0.65rem;
+  padding-top: 0.85rem;
+}
+
+.friday-chart-upload label {
+  color: var(--color-text);
+  display: grid;
+  font-size: 0.82rem;
+  font-weight: 800;
+  gap: 0.35rem;
+}
+
+.friday-chart-upload input {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-muted);
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 0.55rem;
+}
+
+.friday-chart-upload .secondary-button {
+  font-size: 0.9rem;
+  min-height: auto;
+  padding: 0.55rem 0.75rem;
+}
+
+/* ==========================================================================
    Pages/MastersBibleStudy.js
    ========================================================================== */
 
@@ -3885,6 +4251,29 @@ nav a.active:not(.site-title) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .friday-team-hero,
+  .friday-team-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .friday-team-sidebar,
+  .friday-team-main {
+    border-radius: 8px;
+    border-right: 1px solid var(--color-border);
+  }
+
+  .friday-chart-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .friday-song-form {
+    grid-template-columns: 1fr;
+  }
+
+  .friday-set-song-form {
+    grid-template-columns: 1fr;
+  }
+
   .masters-shell {
     grid-template-columns: 1fr;
   }
@@ -3969,6 +4358,39 @@ nav a.active:not(.site-title) {
 
   .resources-link-grid {
     grid-template-columns: 1fr;
+  }
+
+  .friday-team-hero > div:first-child,
+  .friday-team-share-card,
+  .friday-team-main,
+  .friday-chart-library {
+    padding: 1rem;
+  }
+
+  .friday-set-heading {
+    align-items: stretch;
+    display: grid;
+  }
+
+  .friday-set-list li {
+    grid-template-columns: 2rem minmax(0, 1fr);
+  }
+
+  .friday-set-list em {
+    justify-self: start;
+  }
+
+  .friday-chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .friday-library-toolbar {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .friday-library-toolbar span {
+    justify-self: start;
   }
 
   .resource-card {

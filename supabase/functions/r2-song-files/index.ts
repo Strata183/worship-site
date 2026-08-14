@@ -436,6 +436,22 @@ Deno.serve(async (req) => {
         return jsonResponse({ error: "Invalid file path." }, 400);
       }
 
+      if (filePath.includes("/psp-worship-team/")) {
+        const { data: isPspAdmin, error: pspAdminError } = await supabase.rpc(
+          "is_psp_worship_team_admin",
+          {
+            user_id: user.id,
+          },
+        );
+
+        if (pspAdminError || !isPspAdmin) {
+          return jsonResponse(
+            { error: "Only PSP admins can upload PSP team files." },
+            403,
+          );
+        }
+      }
+
       const uploadBody = new Uint8Array(await file.arrayBuffer());
 
       if (file.type === "application/pdf") {
@@ -610,6 +626,183 @@ Deno.serve(async (req) => {
       );
 
       return jsonResponse({ signedUrl });
+    }
+
+    if (body.action === "psp-worship-team-chart-signed-url") {
+      const songId = String(body.songId || "");
+
+      const { data: song, error: songError } = await supabase
+        .from("psp_worship_team_songs")
+        .select("file_path")
+        .eq("id", songId)
+        .single();
+
+      if (songError || !song?.file_path) {
+        return jsonResponse(
+          { error: "Chart not found or not shared with you." },
+          404,
+        );
+      }
+
+      const signedUrl = await getSignedUrl(
+        r2,
+        new GetObjectCommand({
+          Bucket: bucket,
+          Key: song.file_path,
+        }),
+        { expiresIn: 300 },
+      );
+
+      return jsonResponse({ signedUrl });
+    }
+
+    if (body.action === "psp-worship-team-set-pdf") {
+      const setId = String(body.setId || "");
+      const preferSignedUrl = Boolean(body.preferSignedUrl);
+
+      const { data: weeklySet, error: setError } = await supabase
+        .from("psp_worship_team_sets")
+        .select("id, service_date, leader, notes")
+        .eq("id", setId)
+        .single();
+
+      if (setError || !weeklySet) {
+        return jsonResponse(
+          { error: "Weekly set not found or not shared with you." },
+          404,
+        );
+      }
+
+      const { data: setSongs, error: setSongsError } = await supabase
+        .from("psp_worship_team_set_songs")
+        .select(
+          "id, title, song_key, note, position, song:psp_worship_team_songs(title, song_key, file_path)",
+        )
+        .eq("set_id", setId)
+        .order("position", { ascending: true });
+
+      if (setSongsError) {
+        return jsonResponse({ error: setSongsError.message }, 400);
+      }
+
+      const orderedSongs = setSongs || [];
+
+      if (orderedSongs.length === 0) {
+        return jsonResponse({ error: "Add songs before building the weekly PDF." }, 400);
+      }
+
+      const normalizerUrl = optionalEnv("PDF_NORMALIZER_URL");
+      const normalizerToken = optionalEnv("PDF_NORMALIZER_TOKEN");
+
+      if (!normalizerUrl) {
+        return jsonResponse(
+          {
+            error:
+              "PDF downloads are not configured yet. Set PDF_NORMALIZER_URL and redeploy the r2-song-files function.",
+          },
+          400,
+        );
+      }
+
+      try {
+        const documents: Array<Record<string, unknown>> = [];
+        const normalizerWarnings: string[] = [];
+
+        for (const item of orderedSongs) {
+          const song = Array.isArray(item.song) ? item.song[0] : item.song;
+          const songTitle = item.title || song?.title || "PSP song";
+
+          if (!song?.file_path) {
+            normalizerWarnings.push(`"${songTitle}" does not have a chart PDF yet.`);
+            documents.push({
+              body:
+                item.note ||
+                "This song does not have a chart PDF uploaded yet.",
+              placeholder: true,
+              title: songTitle,
+            });
+            continue;
+          }
+
+          try {
+            const sourceBytes = await getObjectBytes(r2, bucket, song.file_path);
+            assertPdfBytes(sourceBytes, songTitle);
+
+            documents.push({
+              data: bytesToBase64(sourceBytes),
+              title: songTitle,
+            });
+          } catch (error) {
+            const detail =
+              error instanceof Error ? error.message : "Unknown PDF file error.";
+
+            normalizerWarnings.push(`"${songTitle}" could not be prepared: ${detail}`);
+            documents.push({
+              body: `This chart PDF could not be prepared for the weekly set.\n\nDetails: ${detail}`,
+              placeholder: true,
+              title: songTitle,
+            });
+          }
+        }
+
+        const fileName = `psp-worship-team-${safeDownloadName(
+          weeklySet.service_date || "weekly-set",
+        )}.pdf`;
+
+        const normalizerResponse = await fetch(normalizerUrl, {
+          body: JSON.stringify({
+            documents,
+            fileName,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+            ...(normalizerToken
+              ? { Authorization: `Bearer ${normalizerToken}` }
+              : {}),
+          },
+          method: "POST",
+        });
+
+        const normalizerBody = await normalizerResponse.json().catch(() => null);
+
+        if (!normalizerResponse.ok || !normalizerBody?.data) {
+          return jsonResponse(
+            {
+              error:
+                normalizerBody?.error ||
+                `PDF builder failed with status ${normalizerResponse.status}.`,
+              warnings: [
+                ...normalizerWarnings,
+                ...(normalizerBody?.warnings || []),
+              ],
+            },
+            400,
+          );
+        }
+
+        return await setlistPdfResponse({
+          base64Data: normalizerBody.data,
+          bucket,
+          fileName: normalizerBody.fileName || fileName,
+          mergeEngine: "pdf-builder",
+          preferSignedUrl,
+          r2,
+          userId: user.id,
+          warnings: [
+            ...normalizerWarnings,
+            ...(normalizerBody.warnings || []),
+          ],
+        });
+      } catch (error) {
+        return jsonResponse(
+          {
+            error: `PDF builder failed before returning a weekly PDF. Details: ${
+              error instanceof Error ? error.message : "Unknown PDF builder error."
+            }`,
+          },
+          400,
+        );
+      }
     }
 
     if (body.action === "combined-setlist-pdf") {

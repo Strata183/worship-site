@@ -20,6 +20,7 @@ import Login from "./Pages/Login";
 import Prayer from "./Pages/Prayer";
 import Resources from "./Pages/Resources";
 import MastersBibleStudy from "./Pages/MastersBibleStudy";
+import PspWorshipTeam from "./Pages/PspWorshipTeam";
 
 // App is the main "layout" component for the whole website.
 // It decides which page appears for each URL.
@@ -84,6 +85,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <VbsKinderMusic />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/psp-worship-team"
+            element={
+              <ProtectedRoute>
+                <PspWorshipTeam />
               </ProtectedRoute>
             }
           />
