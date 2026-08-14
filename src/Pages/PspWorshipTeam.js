@@ -129,6 +129,7 @@ function PspWorshipTeam() {
   const [adminMode, setAdminMode] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [chartFiles, setChartFiles] = useState({});
+  const [annotatedChartFiles, setAnnotatedChartFiles] = useState({});
   const [newSongChartFile, setNewSongChartFile] = useState(null);
   const [newSongFormVersion, setNewSongFormVersion] = useState(0);
   const [addingSong, setAddingSong] = useState(false);
@@ -149,6 +150,7 @@ function PspWorshipTeam() {
   const [savingSetId, setSavingSetId] = useState("");
   const [deletingSetId, setDeletingSetId] = useState("");
   const [uploadingChartId, setUploadingChartId] = useState("");
+  const [uploadingAnnotatedChartId, setUploadingAnnotatedChartId] = useState("");
   const [downloadingSetId, setDownloadingSetId] = useState("");
   const [newSong, setNewSong] = useState({
     notes: "",
@@ -222,7 +224,7 @@ function PspWorshipTeam() {
         .maybeSingle(),
       supabase
         .from("psp_worship_team_songs")
-        .select("id, title, song_key, tags, file_path, notes, created_at")
+        .select("id, title, song_key, tags, file_path, annotated_file_path, notes, created_at")
         .order("title", { ascending: true }),
       supabase
         .from("psp_worship_team_sets")
@@ -556,6 +558,32 @@ function PspWorshipTeam() {
     window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   }
 
+  async function openAnnotatedChart(song) {
+    if (!song.annotated_file_path) {
+      setError("This chart does not have an annotated PDF uploaded yet.");
+      return;
+    }
+
+    setError("");
+
+    const { data, error: signedUrlError } = await supabase.functions.invoke(
+      "r2-song-files",
+      {
+        body: {
+          action: "psp-worship-team-annotated-chart-signed-url",
+          songId: song.id,
+        },
+      }
+    );
+
+    if (signedUrlError) {
+      setError(await getFunctionErrorMessage(signedUrlError));
+      return;
+    }
+
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  }
+
   async function uploadChart(song) {
     const file = chartFiles[song.id];
 
@@ -619,6 +647,72 @@ function PspWorshipTeam() {
     });
     setUploadingChartId("");
     setMessage(`Chart uploaded for "${song.title}".`);
+    await loadPspWorkspace();
+  }
+
+  async function uploadAnnotatedChart(song) {
+    const file = annotatedChartFiles[song.id];
+
+    setError("");
+    setMessage("");
+
+    if (!isAdmin) {
+      setError("Only PSP admins can upload annotated charts.");
+      return;
+    }
+
+    if (!file) {
+      setError("Choose an annotated PDF before uploading.");
+      return;
+    }
+
+    if (file.type !== "application/pdf") {
+      setError("Please choose a PDF file.");
+      return;
+    }
+
+    setUploadingAnnotatedChartId(song.id);
+
+    const formData = new FormData();
+    const filePath = `${user.id}/psp-worship-team/annotated-charts/${song.id}-${cleanFileName(
+      file.name
+    )}.pdf`;
+
+    formData.append("action", "upload");
+    formData.append("filePath", filePath);
+    formData.append("file", file);
+
+    const { data: uploadData, error: uploadError } = await supabase.functions.invoke(
+      "r2-song-files",
+      {
+        body: formData,
+      }
+    );
+
+    if (uploadError) {
+      setError(await getFunctionErrorMessage(uploadError));
+      setUploadingAnnotatedChartId("");
+      return;
+    }
+
+    const { error: updateError } = await supabase
+      .from("psp_worship_team_songs")
+      .update({ annotated_file_path: uploadData.filePath })
+      .eq("id", song.id);
+
+    if (updateError) {
+      setError(updateError.message);
+      setUploadingAnnotatedChartId("");
+      return;
+    }
+
+    setAnnotatedChartFiles((currentFiles) => {
+      const nextFiles = { ...currentFiles };
+      delete nextFiles[song.id];
+      return nextFiles;
+    });
+    setUploadingAnnotatedChartId("");
+    setMessage(`Annotated chart uploaded for "${song.title}".`);
     await loadPspWorkspace();
   }
 
@@ -1235,6 +1329,11 @@ function PspWorshipTeam() {
                       <p className={song.file_path ? "friday-chart-status ready" : "friday-chart-status"}>
                         {song.file_path ? "PDF ready" : "PDF needed"}
                       </p>
+                      {song.annotated_file_path && (
+                        <p className="friday-chart-status ready">
+                          Annotated PDF available
+                        </p>
+                      )}
                       {song.notes && <p>{song.notes}</p>}
                     </div>
                     <div className="friday-chart-tags">
@@ -1252,6 +1351,15 @@ function PspWorshipTeam() {
                 >
                   {song.file_path ? "Open chart" : "Chart coming soon"}
                 </button>
+                {song.annotated_file_path && (
+                  <button
+                    className="secondary-button"
+                    type="button"
+                    onClick={() => openAnnotatedChart(song)}
+                  >
+                    Open annotated
+                  </button>
+                )}
                 {canManage && (
                   <div className="friday-chart-upload">
                     <button
@@ -1285,6 +1393,34 @@ function PspWorshipTeam() {
                         : song.file_path
                           ? "Replace PDF"
                           : "Upload PDF"}
+                    </button>
+                    <label>
+                      Annotated PDF
+                      <input
+                        accept="application/pdf"
+                        onChange={(event) =>
+                          setAnnotatedChartFiles((currentFiles) => ({
+                            ...currentFiles,
+                            [song.id]: event.target.files?.[0] || null,
+                          }))
+                        }
+                        type="file"
+                      />
+                    </label>
+                    <button
+                      className="secondary-button"
+                      disabled={
+                        !annotatedChartFiles[song.id] ||
+                        uploadingAnnotatedChartId === song.id
+                      }
+                      type="button"
+                      onClick={() => uploadAnnotatedChart(song)}
+                    >
+                      {uploadingAnnotatedChartId === song.id
+                        ? "Uploading..."
+                        : song.annotated_file_path
+                          ? "Replace annotated"
+                          : "Upload annotated"}
                     </button>
                   </div>
                 )}

@@ -656,6 +656,34 @@ Deno.serve(async (req) => {
       return jsonResponse({ signedUrl });
     }
 
+    if (body.action === "psp-worship-team-annotated-chart-signed-url") {
+      const songId = String(body.songId || "");
+
+      const { data: song, error: songError } = await supabase
+        .from("psp_worship_team_songs")
+        .select("annotated_file_path")
+        .eq("id", songId)
+        .single();
+
+      if (songError || !song?.annotated_file_path) {
+        return jsonResponse(
+          { error: "Annotated chart not found or not shared with you." },
+          404,
+        );
+      }
+
+      const signedUrl = await getSignedUrl(
+        r2,
+        new GetObjectCommand({
+          Bucket: bucket,
+          Key: song.annotated_file_path,
+        }),
+        { expiresIn: 300 },
+      );
+
+      return jsonResponse({ signedUrl });
+    }
+
     if (body.action === "psp-worship-team-set-pdf") {
       const setId = String(body.setId || "");
       const preferSignedUrl = Boolean(body.preferSignedUrl);
