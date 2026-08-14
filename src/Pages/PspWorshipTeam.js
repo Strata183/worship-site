@@ -133,6 +133,7 @@ function PspWorshipTeam() {
   const [sets, setSets] = useState(sampleSets);
   const [weeklySetSongs, setWeeklySetSongs] = useState(sampleSetSongs);
   const [selectedSetId, setSelectedSetId] = useState(sampleSets[0].id);
+  const [showAllWeeks, setShowAllWeeks] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [copiedInvite, setCopiedInvite] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -239,6 +240,8 @@ function PspWorshipTeam() {
     "Here is this week's PSP Worship Team page: https://worthyforworship.com/psp-worship-team";
 
   const canManage = isAdmin && adminMode;
+  const visibleSets = showAllWeeks ? sets : sets.slice(0, 4);
+  const hiddenSetCount = Math.max(sets.length - visibleSets.length, 0);
 
   useEffect(() => {
     if (user) {
@@ -1243,7 +1246,7 @@ function PspWorshipTeam() {
             {sets.length === 0 ? (
               <p className="song-resource-muted">No weekly sets yet.</p>
             ) : (
-              sets.map((set) => (
+              visibleSets.map((set) => (
                 <button
                   className={selectedSet?.id === set.id ? "active" : ""}
                   key={set.id}
@@ -1259,6 +1262,17 @@ function PspWorshipTeam() {
               ))
             )}
           </div>
+          {sets.length > 4 && (
+            <button
+              className="week-list-expand-button"
+              type="button"
+              onClick={() => setShowAllWeeks((currentValue) => !currentValue)}
+            >
+              {showAllWeeks
+                ? "Show fewer weeks"
+                : `Show ${hiddenSetCount} older ${hiddenSetCount === 1 ? "week" : "weeks"}`}
+            </button>
+          )}
 
           {canManage && (
             <details className="friday-admin-drawer">

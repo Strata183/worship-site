@@ -142,12 +142,20 @@ function MastersBibleStudy() {
   const [loadingRequests, setLoadingRequests] = useState(false);
   const [songSheets, setSongSheets] = useState({});
   const [selectedSongSheetFile, setSelectedSongSheetFile] = useState(null);
+  const [showAllWeeks, setShowAllWeeks] = useState(false);
   const [uploadingSongSheet, setUploadingSongSheet] = useState(false);
   const newestWeek = sortedStudyWeeks[0];
   const selectedWeek = weekSlug
     ? sortedStudyWeeks.find((week) => week.date === weekSlug)
     : newestWeek;
   const selectedSongSheet = selectedWeek ? songSheets[selectedWeek.date] : null;
+  const visibleStudyWeeks = showAllWeeks
+    ? sortedStudyWeeks
+    : sortedStudyWeeks.slice(0, 4);
+  const hiddenStudyWeekCount = Math.max(
+    sortedStudyWeeks.length - visibleStudyWeeks.length,
+    0
+  );
 
   const loadAccessRequests = useCallback(async () => {
     setLoadingRequests(true);
@@ -494,7 +502,7 @@ function MastersBibleStudy() {
         <aside className="masters-date-nav" aria-label="Bible study dates">
           <h2>Dates</h2>
           <ol>
-            {sortedStudyWeeks.map((week, weekIndex) => (
+            {visibleStudyWeeks.map((week, weekIndex) => (
               <li key={week.date}>
                 <Link
                   className={week.date === selectedWeek.date ? "active" : ""}
@@ -506,6 +514,19 @@ function MastersBibleStudy() {
               </li>
             ))}
           </ol>
+          {sortedStudyWeeks.length > 4 && (
+            <button
+              className="week-list-expand-button"
+              type="button"
+              onClick={() => setShowAllWeeks((currentValue) => !currentValue)}
+            >
+              {showAllWeeks
+                ? "Show fewer dates"
+                : `Show ${hiddenStudyWeekCount} older ${
+                    hiddenStudyWeekCount === 1 ? "date" : "dates"
+                  }`}
+            </button>
+          )}
         </aside>
 
         <section className="masters-week-view">
