@@ -38,6 +38,22 @@ const sampleSetSongs = [
   { id: "sample-set-6", set_id: "sample-2026-08-14", title: "In Christ Alone", song_key: "D", note: "Strong ending.", position: 2 },
 ];
 
+const songKeyOptions = [
+  "C",
+  "C#/Db",
+  "D",
+  "Eb",
+  "E",
+  "F",
+  "F#/Gb",
+  "G",
+  "Ab",
+  "A",
+  "Bb",
+  "B",
+];
+const customKeyValue = "__custom_key__";
+
 function cleanFileName(name) {
   return (
     name
@@ -107,6 +123,10 @@ function normalizeTags(value) {
     .filter(Boolean);
 }
 
+function isPresetSongKey(songKey) {
+  return songKeyOptions.includes(songKey);
+}
+
 function PspWorshipTeam() {
   const { user } = useAuth();
   const [songs, setSongs] = useState(sampleSongs);
@@ -121,6 +141,9 @@ function PspWorshipTeam() {
   const [adminMode, setAdminMode] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [chartFiles, setChartFiles] = useState({});
+  const [extraCharts, setExtraCharts] = useState([]);
+  const [extraChartFiles, setExtraChartFiles] = useState({});
+  const [extraChartTitles, setExtraChartTitles] = useState({});
   const [annotatedSetFile, setAnnotatedSetFile] = useState(null);
   const [annotatedSetFormVersion, setAnnotatedSetFormVersion] = useState(0);
   const [newSongChartFile, setNewSongChartFile] = useState(null);
@@ -144,6 +167,8 @@ function PspWorshipTeam() {
   const [deletingSetId, setDeletingSetId] = useState("");
   const [removingAnnotatedSetId, setRemovingAnnotatedSetId] = useState("");
   const [uploadingChartId, setUploadingChartId] = useState("");
+  const [uploadingExtraChartId, setUploadingExtraChartId] = useState("");
+  const [deletingExtraChartId, setDeletingExtraChartId] = useState("");
   const [uploadingAnnotatedSetId, setUploadingAnnotatedSetId] = useState("");
   const [downloadingSetId, setDownloadingSetId] = useState("");
   const [newSong, setNewSong] = useState({
@@ -152,6 +177,8 @@ function PspWorshipTeam() {
     tags: "",
     title: "",
   });
+  const [customNewSongKey, setCustomNewSongKey] = useState("");
+  const [customEditSongKey, setCustomEditSongKey] = useState("");
   const [newSet, setNewSet] = useState({
     leader: "",
     notes: "",
@@ -192,6 +219,19 @@ function PspWorshipTeam() {
     });
   }, [searchTerm, songs]);
 
+  const extraChartsBySongId = useMemo(
+    () =>
+      extraCharts.reduce((chartsBySong, chart) => {
+        const songCharts = chartsBySong[chart.song_id] || [];
+
+        return {
+          ...chartsBySong,
+          [chart.song_id]: [...songCharts, chart],
+        };
+      }, {}),
+    [extraCharts]
+  );
+
   const inviteText =
     "Here is this week's PSP Worship Team page: https://worthyforworship.com/psp-worship-team";
 
@@ -210,7 +250,13 @@ function PspWorshipTeam() {
     setLoading(true);
     setError("");
 
-    const [memberResult, songsResult, setsResult, setSongsResult] = await Promise.all([
+    const [
+      memberResult,
+      songsResult,
+      extraChartsResult,
+      setsResult,
+      setSongsResult,
+    ] = await Promise.all([
       supabase
         .from("psp_worship_team_members")
         .select("role")
@@ -221,6 +267,10 @@ function PspWorshipTeam() {
         .select("id, title, song_key, tags, file_path, notes, created_at")
         .order("title", { ascending: true }),
       supabase
+        .from("psp_worship_team_song_charts")
+        .select("id, song_id, title, file_path, created_at")
+        .order("created_at", { ascending: true }),
+      supabase
         .from("psp_worship_team_sets")
         .select("id, service_date, leader, annotated_file_path, notes, created_at")
         .order("service_date", { ascending: false }),
@@ -230,7 +280,12 @@ function PspWorshipTeam() {
         .order("position", { ascending: true }),
     ]);
 
-    if (memberResult.error || songsResult.error || setsResult.error || setSongsResult.error) {
+    if (
+      memberResult.error ||
+      songsResult.error ||
+      setsResult.error ||
+      setSongsResult.error
+    ) {
       setError(
         "Showing starter content until the PSP Supabase tables are applied and your account has team access."
       );
@@ -243,10 +298,13 @@ function PspWorshipTeam() {
 
     if (!memberRole) {
       setError("Your account is signed in, but it has not been added to PSP yet.");
+    } else if (extraChartsResult.error) {
+      setError("Extra charts will show after the latest PSP migration is applied.");
     }
 
     setIsAdmin(memberRole === "admin");
     setSongs(songsResult.data || []);
+    setExtraCharts(extraChartsResult.error ? [] : extraChartsResult.data || []);
     setSets(loadedSets);
     setWeeklySetSongs(setSongsResult.data || []);
     setSelectedSetId((currentSetId) =>
@@ -289,13 +347,21 @@ function PspWorshipTeam() {
       return;
     }
 
+    const savedSongKey =
+      newSong.song_key === customKeyValue ? customNewSongKey.trim() : newSong.song_key;
+
+    if (!savedSongKey) {
+      setError("Choose a key for the song.");
+      return;
+    }
+
     setAddingSong(true);
 
     const { data: insertedSong, error: insertError } = await supabase
       .from("psp_worship_team_songs")
       .insert({
         notes: newSong.notes.trim(),
-        song_key: newSong.song_key.trim(),
+        song_key: savedSongKey,
         tags: normalizeTags(newSong.tags),
         title,
       })
@@ -350,6 +416,7 @@ function PspWorshipTeam() {
     }
 
     setNewSong({ notes: "", song_key: "", tags: "", title: "" });
+    setCustomNewSongKey("");
     setNewSongChartFile(null);
     setNewSongFormVersion((currentVersion) => currentVersion + 1);
     setAddingSong(false);
@@ -648,6 +715,138 @@ function PspWorshipTeam() {
     await loadPspWorkspace();
   }
 
+  async function openExtraChart(chart) {
+    const viewerWindow = window.open("", "_blank");
+
+    setError("");
+
+    const { data, error: signedUrlError } = await supabase.functions.invoke(
+      "r2-song-files",
+      {
+        body: {
+          action: "psp-worship-team-extra-chart-signed-url",
+          chartId: chart.id,
+        },
+      }
+    );
+
+    if (signedUrlError) {
+      viewerWindow?.close();
+      setError(await getFunctionErrorMessage(signedUrlError));
+      return;
+    }
+
+    openPdfUrl(data.signedUrl, viewerWindow);
+  }
+
+  async function uploadExtraChart(song) {
+    const file = extraChartFiles[song.id];
+    const title =
+      extraChartTitles[song.id]?.trim() ||
+      file?.name?.replace(/\.pdf$/i, "").trim() ||
+      "Additional chart";
+
+    setError("");
+    setMessage("");
+
+    if (!isAdmin) {
+      setError("Only PSP admins can upload extra charts.");
+      return;
+    }
+
+    if (!file) {
+      setError("Choose an extra chart PDF before uploading.");
+      return;
+    }
+
+    if (file.type !== "application/pdf") {
+      setError("Please choose a PDF file.");
+      return;
+    }
+
+    setUploadingExtraChartId(song.id);
+
+    const formData = new FormData();
+    const filePath = `${user.id}/psp-worship-team/extra-charts/${
+      song.id
+    }-${crypto.randomUUID()}-${cleanFileName(file.name)}.pdf`;
+
+    formData.append("action", "upload");
+    formData.append("filePath", filePath);
+    formData.append("file", file);
+
+    const { data: uploadData, error: uploadError } = await supabase.functions.invoke(
+      "r2-song-files",
+      {
+        body: formData,
+      }
+    );
+
+    if (uploadError) {
+      setError(await getFunctionErrorMessage(uploadError));
+      setUploadingExtraChartId("");
+      return;
+    }
+
+    const { error: insertError } = await supabase
+      .from("psp_worship_team_song_charts")
+      .insert({
+        file_path: uploadData.filePath,
+        song_id: song.id,
+        title,
+      });
+
+    if (insertError) {
+      setError(insertError.message);
+      setUploadingExtraChartId("");
+      return;
+    }
+
+    setExtraChartFiles((currentFiles) => {
+      const nextFiles = { ...currentFiles };
+      delete nextFiles[song.id];
+      return nextFiles;
+    });
+    setExtraChartTitles((currentTitles) => ({
+      ...currentTitles,
+      [song.id]: "",
+    }));
+    setUploadingExtraChartId("");
+    setMessage(`Extra chart added for "${song.title}".`);
+    await loadPspWorkspace();
+  }
+
+  async function deleteExtraChart(chart) {
+    const shouldDelete = window.confirm(
+      `Remove "${chart.title || "this extra chart"}"?`
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    setError("");
+    setMessage("");
+    setDeletingExtraChartId(chart.id);
+
+    const { error: deleteError } = await supabase.functions.invoke("r2-song-files", {
+      body: {
+        action: "delete-psp-extra-chart-file",
+        chartId: chart.id,
+      },
+    });
+
+    if (deleteError) {
+      setError(await getFunctionErrorMessage(deleteError));
+      setDeletingExtraChartId("");
+      return;
+    }
+
+    setDeletingExtraChartId("");
+    setMessage("Extra chart removed.");
+    await loadPspWorkspace();
+  }
+
   async function uploadAnnotatedSet(set) {
     const file = annotatedSetFile;
 
@@ -759,13 +958,16 @@ function PspWorshipTeam() {
   }
 
   function startEditingSong(song) {
+    const isPresetKey = isPresetSongKey(song.song_key);
+
     setEditingSongId(song.id);
     setEditSong({
       notes: song.notes || "",
-      song_key: song.song_key || "",
+      song_key: isPresetKey ? song.song_key : customKeyValue,
       tags: Array.isArray(song.tags) ? song.tags.join(", ") : "",
       title: song.title || "",
     });
+    setCustomEditSongKey(isPresetKey ? "" : song.song_key || "");
     setError("");
     setMessage("");
   }
@@ -773,6 +975,7 @@ function PspWorshipTeam() {
   function cancelEditingSong() {
     setEditingSongId("");
     setEditSong({ notes: "", song_key: "", tags: "", title: "" });
+    setCustomEditSongKey("");
   }
 
   async function saveSongEdits(event, song) {
@@ -792,13 +995,21 @@ function PspWorshipTeam() {
       return;
     }
 
+    const savedEditSongKey =
+      editSong.song_key === customKeyValue ? customEditSongKey.trim() : editSong.song_key;
+
+    if (!savedEditSongKey) {
+      setError("Choose a key for the song.");
+      return;
+    }
+
     setSavingSongId(song.id);
 
     const { error: updateError } = await supabase
       .from("psp_worship_team_songs")
       .update({
         notes: editSong.notes.trim(),
-        song_key: editSong.song_key.trim(),
+        song_key: savedEditSongKey,
         tags: normalizeTags(editSong.tags),
         title,
       })
@@ -812,6 +1023,7 @@ function PspWorshipTeam() {
 
     setEditingSongId("");
     setEditSong({ notes: "", song_key: "", tags: "", title: "" });
+    setCustomEditSongKey("");
     setSavingSongId("");
     setMessage(`"${title}" updated.`);
     await loadPspWorkspace();
@@ -1277,18 +1489,35 @@ function PspWorshipTeam() {
               </label>
               <label>
                 Key
-                <input
+                <select
                   onChange={(event) =>
                     setNewSong((currentSong) => ({
                       ...currentSong,
                       song_key: event.target.value,
                     }))
                   }
-                  placeholder="D"
-                  type="text"
                   value={newSong.song_key}
-                />
+                >
+                  <option value="">Choose key</option>
+                  {songKeyOptions.map((keyName) => (
+                    <option key={keyName} value={keyName}>
+                      {keyName}
+                    </option>
+                  ))}
+                  <option value={customKeyValue}>Custom key</option>
+                </select>
               </label>
+              {newSong.song_key === customKeyValue && (
+                <label>
+                  Custom key
+                  <input
+                    onChange={(event) => setCustomNewSongKey(event.target.value)}
+                    placeholder="C-D"
+                    type="text"
+                    value={customNewSongKey}
+                  />
+                </label>
+              )}
               <label>
                 Tags
                 <input
@@ -1311,7 +1540,7 @@ function PspWorshipTeam() {
                   type="file"
                 />
               </label>
-              <label>
+              <label className="friday-notes-field">
                 Notes
                 <textarea
                   onChange={(event) =>
@@ -1339,7 +1568,10 @@ function PspWorshipTeam() {
           </div>
         ) : (
           <div className="friday-chart-grid">
-            {filteredSongs.map((song) => (
+            {filteredSongs.map((song) => {
+              const songExtraCharts = extraChartsBySongId[song.id] || [];
+
+              return (
               <article className="friday-chart-card" key={song.id}>
                 {editingSongId === song.id ? (
                   <form
@@ -1361,18 +1593,35 @@ function PspWorshipTeam() {
                     </label>
                     <label>
                       Key
-                      <input
+                      <select
                         onChange={(event) =>
                           setEditSong((currentSong) => ({
                             ...currentSong,
                             song_key: event.target.value,
                           }))
                         }
-                        placeholder="C, D, C-D..."
-                        type="text"
                         value={editSong.song_key}
-                      />
+                      >
+                        <option value="">Choose key</option>
+                        {songKeyOptions.map((keyName) => (
+                          <option key={keyName} value={keyName}>
+                            {keyName}
+                          </option>
+                        ))}
+                        <option value={customKeyValue}>Custom key</option>
+                      </select>
                     </label>
+                    {editSong.song_key === customKeyValue && (
+                      <label>
+                        Custom key
+                        <input
+                          onChange={(event) => setCustomEditSongKey(event.target.value)}
+                          placeholder="C-D"
+                          type="text"
+                          value={customEditSongKey}
+                        />
+                      </label>
+                    )}
                     <label>
                       Tags
                       <input
@@ -1442,6 +1691,32 @@ function PspWorshipTeam() {
                 >
                   {song.file_path ? "Open chart" : "Chart coming soon"}
                 </button>
+                {songExtraCharts.length > 0 && (
+                  <div className="friday-extra-charts">
+                    <p>Additional charts</p>
+                    {songExtraCharts.map((chart) => (
+                      <div className="friday-extra-chart-row" key={chart.id}>
+                        <button
+                          className="secondary-button"
+                          type="button"
+                          onClick={() => openExtraChart(chart)}
+                        >
+                          {chart.title || "Extra chart"}
+                        </button>
+                        {canManage && (
+                          <button
+                            className="subtle-danger-button"
+                            disabled={deletingExtraChartId === chart.id}
+                            type="button"
+                            onClick={() => deleteExtraChart(chart)}
+                          >
+                            {deletingExtraChartId === chart.id ? "Removing..." : "Remove"}
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
                 {canManage && (
                   <div className="friday-chart-upload">
                     <button
@@ -1476,10 +1751,52 @@ function PspWorshipTeam() {
                           ? "Replace PDF"
                           : "Upload PDF"}
                     </button>
+                    <div className="friday-extra-chart-upload">
+                      <label>
+                        Extra chart name
+                        <input
+                          onChange={(event) =>
+                            setExtraChartTitles((currentTitles) => ({
+                              ...currentTitles,
+                              [song.id]: event.target.value,
+                            }))
+                          }
+                          placeholder="Capo chart, alternate key..."
+                          type="text"
+                          value={extraChartTitles[song.id] || ""}
+                        />
+                      </label>
+                      <label>
+                        Extra chart PDF
+                        <input
+                          accept="application/pdf"
+                          onChange={(event) =>
+                            setExtraChartFiles((currentFiles) => ({
+                              ...currentFiles,
+                              [song.id]: event.target.files?.[0] || null,
+                            }))
+                          }
+                          type="file"
+                        />
+                      </label>
+                      <button
+                        className="secondary-button"
+                        disabled={
+                          !extraChartFiles[song.id] || uploadingExtraChartId === song.id
+                        }
+                        type="button"
+                        onClick={() => uploadExtraChart(song)}
+                      >
+                        {uploadingExtraChartId === song.id
+                          ? "Uploading..."
+                          : "Add extra chart"}
+                      </button>
+                    </div>
                   </div>
                 )}
               </article>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>

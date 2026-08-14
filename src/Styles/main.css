@@ -981,7 +981,7 @@ nav a.active:not(.site-title) {
   grid-template-columns: minmax(13rem, 1.1fr) minmax(6rem, 0.4fr) minmax(11rem, 0.9fr);
 }
 
-.friday-song-form label:nth-of-type(5),
+.friday-song-form .friday-notes-field,
 .friday-song-form > strong {
   grid-column: 1 / -1;
 }
@@ -1075,6 +1075,56 @@ nav a.active:not(.site-title) {
   justify-self: start;
 }
 
+.friday-extra-charts {
+  border-top: 1px solid var(--color-border);
+  display: grid;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+}
+
+.friday-extra-charts p {
+  color: var(--color-accent);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.friday-extra-chart-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.friday-extra-chart-row .secondary-button,
+.friday-extra-chart-row .subtle-danger-button {
+  font-size: 0.82rem;
+  min-height: auto;
+  padding: 0.42rem 0.65rem;
+}
+
+.friday-extra-chart-row .subtle-danger-button {
+  background-color: white;
+  border: 1px solid #f3c6c6;
+  border-radius: 6px;
+  color: #991b1b;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+}
+
+.friday-extra-chart-row .subtle-danger-button:hover,
+.friday-extra-chart-row .subtle-danger-button:focus {
+  background-color: #fff5f5;
+}
+
+.friday-extra-chart-row .subtle-danger-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .friday-chart-edit-form {
   display: grid;
   gap: 0.65rem;
@@ -1143,6 +1193,14 @@ nav a.active:not(.site-title) {
   font-size: 0.9rem;
   min-height: auto;
   padding: 0.55rem 0.75rem;
+}
+
+.friday-extra-chart-upload {
+  border-top: 1px solid var(--color-border);
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.25rem;
+  padding-top: 0.75rem;
 }
 
 /* ==========================================================================

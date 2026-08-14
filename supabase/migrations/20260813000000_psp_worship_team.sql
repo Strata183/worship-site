@@ -18,6 +18,14 @@ create table if not exists public.psp_worship_team_songs (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.psp_worship_team_song_charts (
+  id uuid primary key default gen_random_uuid(),
+  song_id uuid not null references public.psp_worship_team_songs (id) on delete cascade,
+  title text not null default '',
+  file_path text not null,
+  created_at timestamptz not null default now()
+);
+
 create table if not exists public.psp_worship_team_sets (
   id uuid primary key default gen_random_uuid(),
   service_date date not null,
@@ -43,11 +51,13 @@ create table if not exists public.psp_worship_team_set_songs (
 
 alter table public.psp_worship_team_members enable row level security;
 alter table public.psp_worship_team_songs enable row level security;
+alter table public.psp_worship_team_song_charts enable row level security;
 alter table public.psp_worship_team_sets enable row level security;
 alter table public.psp_worship_team_set_songs enable row level security;
 
 grant select, insert, update, delete on public.psp_worship_team_members to authenticated;
 grant select, insert, update, delete on public.psp_worship_team_songs to authenticated;
+grant select, insert, update, delete on public.psp_worship_team_song_charts to authenticated;
 grant select, insert, update, delete on public.psp_worship_team_sets to authenticated;
 grant select, insert, update, delete on public.psp_worship_team_set_songs to authenticated;
 
@@ -96,6 +106,12 @@ on public.psp_worship_team_songs;
 drop policy if exists "PSP admins can manage songs"
 on public.psp_worship_team_songs;
 
+drop policy if exists "PSP members can read song charts"
+on public.psp_worship_team_song_charts;
+
+drop policy if exists "PSP admins can manage song charts"
+on public.psp_worship_team_song_charts;
+
 drop policy if exists "PSP members can read sets"
 on public.psp_worship_team_sets;
 
@@ -134,6 +150,19 @@ to authenticated
 using (public.is_psp_worship_team_admin(auth.uid()))
 with check (public.is_psp_worship_team_admin(auth.uid()));
 
+create policy "PSP members can read song charts"
+on public.psp_worship_team_song_charts
+for select
+to authenticated
+using (public.is_psp_worship_team_member(auth.uid()));
+
+create policy "PSP admins can manage song charts"
+on public.psp_worship_team_song_charts
+for all
+to authenticated
+using (public.is_psp_worship_team_admin(auth.uid()))
+with check (public.is_psp_worship_team_admin(auth.uid()));
+
 create policy "PSP members can read sets"
 on public.psp_worship_team_sets
 for select
@@ -162,6 +191,9 @@ with check (public.is_psp_worship_team_admin(auth.uid()));
 
 create index if not exists psp_worship_team_songs_title_idx
 on public.psp_worship_team_songs (lower(title));
+
+create index if not exists psp_worship_team_song_charts_song_idx
+on public.psp_worship_team_song_charts (song_id, created_at);
 
 create index if not exists psp_worship_team_sets_date_idx
 on public.psp_worship_team_sets (service_date desc);

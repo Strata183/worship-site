@@ -684,6 +684,85 @@ Deno.serve(async (req) => {
       return jsonResponse({ signedUrl });
     }
 
+    if (body.action === "psp-worship-team-extra-chart-signed-url") {
+      const chartId = String(body.chartId || "");
+
+      const { data: chart, error: chartError } = await supabase
+        .from("psp_worship_team_song_charts")
+        .select("file_path")
+        .eq("id", chartId)
+        .single();
+
+      if (chartError || !chart?.file_path) {
+        return jsonResponse(
+          { error: "Extra chart not found or not shared with you." },
+          404,
+        );
+      }
+
+      const signedUrl = await getSignedUrl(
+        r2,
+        new GetObjectCommand({
+          Bucket: bucket,
+          Key: chart.file_path,
+        }),
+        { expiresIn: 300 },
+      );
+
+      return jsonResponse({ signedUrl });
+    }
+
+    if (body.action === "delete-psp-extra-chart-file") {
+      const chartId = String(body.chartId || "");
+
+      const { data: isPspAdmin, error: pspAdminError } = await supabase.rpc(
+        "is_psp_worship_team_admin",
+        {
+          user_id: user.id,
+        },
+      );
+
+      if (pspAdminError || !isPspAdmin) {
+        return jsonResponse(
+          { error: "Only PSP admins can remove extra charts." },
+          403,
+        );
+      }
+
+      const { data: chart, error: chartError } = await supabase
+        .from("psp_worship_team_song_charts")
+        .select("file_path")
+        .eq("id", chartId)
+        .single();
+
+      if (chartError || !chart) {
+        return jsonResponse(
+          { error: "Extra chart not found or not shared with you." },
+          404,
+        );
+      }
+
+      if (chart.file_path) {
+        await r2.send(
+          new DeleteObjectCommand({
+            Bucket: bucket,
+            Key: chart.file_path,
+          }),
+        );
+      }
+
+      const { error: deleteError } = await supabase
+        .from("psp_worship_team_song_charts")
+        .delete()
+        .eq("id", chartId);
+
+      if (deleteError) {
+        return jsonResponse({ error: deleteError.message }, 400);
+      }
+
+      return jsonResponse({ ok: true });
+    }
+
     if (body.action === "delete-psp-annotated-set-file") {
       const setId = String(body.setId || "");
 
