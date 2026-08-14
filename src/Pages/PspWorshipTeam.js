@@ -126,8 +126,20 @@ function PspWorshipTeam() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [adminMode, setAdminMode] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [chartFiles, setChartFiles] = useState({});
+  const [newSongChartFile, setNewSongChartFile] = useState(null);
+  const [newSongFormVersion, setNewSongFormVersion] = useState(0);
+  const [addingSong, setAddingSong] = useState(false);
+  const [editingSongId, setEditingSongId] = useState("");
+  const [editSong, setEditSong] = useState({
+    notes: "",
+    song_key: "",
+    tags: "",
+    title: "",
+  });
+  const [savingSongId, setSavingSongId] = useState("");
   const [uploadingChartId, setUploadingChartId] = useState("");
   const [downloadingSetId, setDownloadingSetId] = useState("");
   const [newSong, setNewSong] = useState({
@@ -178,6 +190,8 @@ function PspWorshipTeam() {
 
   const inviteText =
     "Here is this week's PSP Worship Team page: https://worthyforworship.com/psp-worship-team";
+
+  const canManage = isAdmin && adminMode;
 
   useEffect(() => {
     if (user) {
@@ -254,6 +268,11 @@ function PspWorshipTeam() {
     setError("");
     setMessage("");
 
+    if (!isAdmin) {
+      setError("Only PSP admins can add songs.");
+      return;
+    }
+
     const title = newSong.title.trim();
 
     if (!title) {
@@ -261,22 +280,80 @@ function PspWorshipTeam() {
       return;
     }
 
-    const { error: insertError } = await supabase
+    if (newSongChartFile && newSongChartFile.type !== "application/pdf") {
+      setError("Please choose a PDF file.");
+      return;
+    }
+
+    setAddingSong(true);
+
+    const { data: insertedSong, error: insertError } = await supabase
       .from("psp_worship_team_songs")
       .insert({
         notes: newSong.notes.trim(),
         song_key: newSong.song_key.trim(),
         tags: normalizeTags(newSong.tags),
         title,
-      });
+      })
+      .select("id, title")
+      .single();
 
     if (insertError) {
       setError(insertError.message);
+      setAddingSong(false);
       return;
     }
 
+    if (newSongChartFile) {
+      const formData = new FormData();
+      const filePath = `${user.id}/psp-worship-team/charts/${insertedSong.id}-${cleanFileName(
+        newSongChartFile.name
+      )}.pdf`;
+
+      formData.append("action", "upload");
+      formData.append("filePath", filePath);
+      formData.append("file", newSongChartFile);
+
+      const { data: uploadData, error: uploadError } = await supabase.functions.invoke(
+        "r2-song-files",
+        {
+          body: formData,
+        }
+      );
+
+      if (uploadError) {
+        setError(
+          `Song was added, but the chart PDF did not upload: ${await getFunctionErrorMessage(
+            uploadError
+          )}`
+        );
+        setAddingSong(false);
+        await loadPspWorkspace();
+        return;
+      }
+
+      const { error: updateError } = await supabase
+        .from("psp_worship_team_songs")
+        .update({ file_path: uploadData.filePath })
+        .eq("id", insertedSong.id);
+
+      if (updateError) {
+        setError(`Song was added, but the chart PDF was not saved: ${updateError.message}`);
+        setAddingSong(false);
+        await loadPspWorkspace();
+        return;
+      }
+    }
+
     setNewSong({ notes: "", song_key: "", tags: "", title: "" });
-    setMessage("Song added to the PSP library.");
+    setNewSongChartFile(null);
+    setNewSongFormVersion((currentVersion) => currentVersion + 1);
+    setAddingSong(false);
+    setMessage(
+      newSongChartFile
+        ? "Song and chart added to the PSP library."
+        : "Song added to the PSP library."
+    );
     await loadPspWorkspace();
   }
 
@@ -442,6 +519,65 @@ function PspWorshipTeam() {
     await loadPspWorkspace();
   }
 
+  function startEditingSong(song) {
+    setEditingSongId(song.id);
+    setEditSong({
+      notes: song.notes || "",
+      song_key: song.song_key || "",
+      tags: Array.isArray(song.tags) ? song.tags.join(", ") : "",
+      title: song.title || "",
+    });
+    setError("");
+    setMessage("");
+  }
+
+  function cancelEditingSong() {
+    setEditingSongId("");
+    setEditSong({ notes: "", song_key: "", tags: "", title: "" });
+  }
+
+  async function saveSongEdits(event, song) {
+    event.preventDefault();
+    setError("");
+    setMessage("");
+
+    if (!isAdmin) {
+      setError("Only PSP admins can edit songs.");
+      return;
+    }
+
+    const title = editSong.title.trim();
+
+    if (!title) {
+      setError("Song title cannot be blank.");
+      return;
+    }
+
+    setSavingSongId(song.id);
+
+    const { error: updateError } = await supabase
+      .from("psp_worship_team_songs")
+      .update({
+        notes: editSong.notes.trim(),
+        song_key: editSong.song_key.trim(),
+        tags: normalizeTags(editSong.tags),
+        title,
+      })
+      .eq("id", song.id);
+
+    if (updateError) {
+      setError(updateError.message);
+      setSavingSongId("");
+      return;
+    }
+
+    setEditingSongId("");
+    setEditSong({ notes: "", song_key: "", tags: "", title: "" });
+    setSavingSongId("");
+    setMessage(`"${title}" updated.`);
+    await loadPspWorkspace();
+  }
+
   async function downloadWeeklySetPdf(set) {
     const viewerWindow = openPdfDownloadWindow();
 
@@ -515,6 +651,23 @@ function PspWorshipTeam() {
       {error && <p className="form-message error">{error}</p>}
       {loading && <p className="form-message">Loading PSP workspace...</p>}
 
+      {isAdmin && (
+        <section className="admin-mode-toggle">
+          <div>
+            <p className="eyebrow">Admin</p>
+            <h2>Admin Mode</h2>
+          </div>
+          <label>
+            <input
+              checked={adminMode}
+              onChange={(event) => setAdminMode(event.target.checked)}
+              type="checkbox"
+            />
+            <span>{adminMode ? "On" : "Off"}</span>
+          </label>
+        </section>
+      )}
+
       <section className="friday-team-shell" aria-label="PSP worship team tools">
         <aside className="friday-team-sidebar">
           <div className="friday-team-sidebar-heading">
@@ -542,7 +695,7 @@ function PspWorshipTeam() {
             )}
           </div>
 
-          {isAdmin && (
+          {canManage && (
             <form className="friday-admin-form" onSubmit={addWeeklySet}>
               <strong>New week</strong>
               <label>
@@ -632,7 +785,7 @@ function PspWorshipTeam() {
                 </ol>
               )}
 
-              {isAdmin && (
+              {canManage && (
                 <form className="friday-admin-form friday-set-song-form" onSubmit={addSongToSelectedSet}>
                   <strong>Add song to this set</strong>
                   <label>
@@ -708,8 +861,12 @@ function PspWorshipTeam() {
           </span>
         </div>
 
-        {isAdmin && (
-          <form className="friday-admin-form friday-song-form" onSubmit={addTeamSong}>
+        {canManage && (
+          <form
+            className="friday-admin-form friday-song-form"
+            key={newSongFormVersion}
+            onSubmit={addTeamSong}
+          >
             <strong>Add song</strong>
             <label>
               Title
@@ -754,6 +911,14 @@ function PspWorshipTeam() {
               />
             </label>
             <label>
+              Chart PDF
+              <input
+                accept="application/pdf"
+                onChange={(event) => setNewSongChartFile(event.target.files?.[0] || null)}
+                type="file"
+              />
+            </label>
+            <label>
               Notes
               <textarea
                 onChange={(event) =>
@@ -767,8 +932,8 @@ function PspWorshipTeam() {
                 value={newSong.notes}
               />
             </label>
-            <button className="primary-button" type="submit">
-              Add song
+            <button className="primary-button" disabled={addingSong} type="submit">
+              {addingSong ? "Adding..." : "Add song"}
             </button>
           </form>
         )}
@@ -782,16 +947,96 @@ function PspWorshipTeam() {
           <div className="friday-chart-grid">
             {filteredSongs.map((song) => (
               <article className="friday-chart-card" key={song.id}>
-                <div>
-                  <h3>{song.title}</h3>
-                  <p>Key: {song.song_key || "No key yet"}</p>
-                  {song.notes && <p>{song.notes}</p>}
-                </div>
-                <div className="friday-chart-tags">
-                  {(Array.isArray(song.tags) ? song.tags : []).map((tag) => (
-                    <span key={tag}>{tag}</span>
-                  ))}
-                </div>
+                {editingSongId === song.id ? (
+                  <form
+                    className="friday-chart-edit-form"
+                    onSubmit={(event) => saveSongEdits(event, song)}
+                  >
+                    <label>
+                      Title
+                      <input
+                        onChange={(event) =>
+                          setEditSong((currentSong) => ({
+                            ...currentSong,
+                            title: event.target.value,
+                          }))
+                        }
+                        type="text"
+                        value={editSong.title}
+                      />
+                    </label>
+                    <label>
+                      Key
+                      <input
+                        onChange={(event) =>
+                          setEditSong((currentSong) => ({
+                            ...currentSong,
+                            song_key: event.target.value,
+                          }))
+                        }
+                        placeholder="C, D, C-D..."
+                        type="text"
+                        value={editSong.song_key}
+                      />
+                    </label>
+                    <label>
+                      Tags
+                      <input
+                        onChange={(event) =>
+                          setEditSong((currentSong) => ({
+                            ...currentSong,
+                            tags: event.target.value,
+                          }))
+                        }
+                        placeholder="Hymn, Opening"
+                        type="text"
+                        value={editSong.tags}
+                      />
+                    </label>
+                    <label>
+                      Notes
+                      <textarea
+                        onChange={(event) =>
+                          setEditSong((currentSong) => ({
+                            ...currentSong,
+                            notes: event.target.value,
+                          }))
+                        }
+                        rows="3"
+                        value={editSong.notes}
+                      />
+                    </label>
+                    <div className="friday-chart-edit-actions">
+                      <button
+                        className="primary-button"
+                        disabled={savingSongId === song.id}
+                        type="submit"
+                      >
+                        {savingSongId === song.id ? "Saving..." : "Save"}
+                      </button>
+                      <button
+                        className="secondary-button"
+                        type="button"
+                        onClick={cancelEditingSong}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    <div>
+                      <h3>{song.title}</h3>
+                      <p>Key: {song.song_key || "No key yet"}</p>
+                      {song.notes && <p>{song.notes}</p>}
+                    </div>
+                    <div className="friday-chart-tags">
+                      {(Array.isArray(song.tags) ? song.tags : []).map((tag) => (
+                        <span key={tag}>{tag}</span>
+                      ))}
+                    </div>
+                  </>
+                )}
                 <button
                   className="secondary-button"
                   disabled={!song.file_path}
@@ -800,8 +1045,15 @@ function PspWorshipTeam() {
                 >
                   {song.file_path ? "Open chart" : "Chart coming soon"}
                 </button>
-                {isAdmin && (
+                {canManage && (
                   <div className="friday-chart-upload">
+                    <button
+                      className="secondary-button"
+                      type="button"
+                      onClick={() => startEditingSong(song)}
+                    >
+                      Edit details
+                    </button>
                     <label>
                       Chart PDF
                       <input
