@@ -139,6 +139,12 @@ function PspWorshipTeam() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [accessCode, setAccessCode] = useState("");
+  const [checkingAccess, setCheckingAccess] = useState(true);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [requestStatus, setRequestStatus] = useState("");
+  const [accessRequests, setAccessRequests] = useState([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
   const [adminMode, setAdminMode] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [chartFiles, setChartFiles] = useState({});
@@ -244,13 +250,89 @@ function PspWorshipTeam() {
   const hiddenSetCount = Math.max(sets.length - visibleSets.length, 0);
 
   useEffect(() => {
-    if (user) {
-      loadPspWorkspace();
+    let ignore = false;
+
+    async function checkAccess() {
+      const accessState = await loadPspAccessState();
+
+      if (ignore) {
+        setCheckingAccess(false);
+        return;
+      }
+
+      if (accessState.unlocked) {
+        await loadPspWorkspace();
+      } else {
+        setLoading(false);
+      }
     }
-    // loadPspWorkspace is a local async loader that reads the current user id.
-    // Re-run it only when the signed-in user changes.
+
+    checkAccess();
+
+    return () => {
+      ignore = true;
+    };
+    // loadPspAccessState and loadPspWorkspace are local async loaders that read
+    // the current user id. Re-run them only when the signed-in user changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  async function loadPspAccessRequests() {
+    setLoadingRequests(true);
+
+    const { data, error: requestError } = await supabase.rpc(
+      "list_psp_worship_team_access_requests"
+    );
+
+    if (requestError) {
+      setError(requestError.message);
+      setAccessRequests([]);
+    } else {
+      setAccessRequests(data || []);
+    }
+
+    setLoadingRequests(false);
+  }
+
+  async function loadPspAccessState() {
+    if (!user) {
+      setCheckingAccess(false);
+      return { error: "", unlocked: false };
+    }
+
+    setCheckingAccess(true);
+
+    const [accessResult, adminResult, requestResult] = await Promise.all([
+      supabase.rpc("has_psp_worship_team_access"),
+      supabase.rpc("is_psp_worship_team_admin", {
+        user_id: user.id,
+      }),
+      supabase.rpc("get_psp_worship_team_access_request_status"),
+    ]);
+
+    const accessStateError =
+      accessResult.error || adminResult.error || requestResult.error;
+
+    if (accessStateError) {
+      setError(accessStateError.message);
+      setCheckingAccess(false);
+      return { error: accessStateError.message, unlocked: false };
+    }
+
+    const nextIsAdmin = Boolean(adminResult.data);
+    const nextIsUnlocked = Boolean(accessResult.data);
+
+    setIsAdmin(nextIsAdmin);
+    setIsUnlocked(nextIsUnlocked);
+    setRequestStatus(requestResult.data || "");
+    setCheckingAccess(false);
+
+    if (nextIsAdmin) {
+      loadPspAccessRequests();
+    }
+
+    return { error: "", unlocked: nextIsUnlocked };
+  }
 
   async function loadPspWorkspace() {
     setLoading(true);
@@ -329,6 +411,83 @@ function PspWorshipTeam() {
     } catch {
       setCopiedInvite(false);
     }
+  }
+
+  async function handleAccessSubmit(event) {
+    event.preventDefault();
+    setError("");
+    setMessage("");
+
+    const { data, error: claimError } = await supabase.rpc(
+      "claim_psp_worship_team_access",
+      {
+        access_code: accessCode,
+      }
+    );
+
+    if (claimError) {
+      setError(claimError.message);
+      return;
+    }
+
+    setAccessCode("");
+
+    if (data) {
+      setIsUnlocked(true);
+      setMessage("Access unlocked.");
+      await loadPspAccessState();
+      await loadPspWorkspace();
+      return;
+    }
+
+    const accessState = await loadPspAccessState();
+
+    if (accessState.unlocked) {
+      setMessage("Access unlocked.");
+      await loadPspWorkspace();
+    } else if (!accessState.error) {
+      setError(
+        "The password worked, but saved access was not found. Check that the latest Supabase migration has been applied."
+      );
+    }
+  }
+
+  async function requestAccess() {
+    setError("");
+    setMessage("");
+
+    const { error: requestError } = await supabase.rpc(
+      "request_psp_worship_team_access"
+    );
+
+    if (requestError) {
+      setError(requestError.message);
+      return;
+    }
+
+    setRequestStatus("pending");
+    setMessage("Access request sent.");
+  }
+
+  async function reviewAccessRequest(requestId, nextStatus) {
+    setError("");
+    setMessage("");
+
+    const { error: reviewError } = await supabase.rpc(
+      "review_psp_worship_team_access_request",
+      {
+        request_id: requestId,
+        next_status: nextStatus,
+      }
+    );
+
+    if (reviewError) {
+      setError(reviewError.message);
+      return;
+    }
+
+    setMessage(`Request ${nextStatus}.`);
+    loadPspAccessRequests();
   }
 
   async function addTeamSong(event) {
@@ -1193,6 +1352,63 @@ function PspWorshipTeam() {
     setDownloadingSetId("");
   }
 
+  if (checkingAccess) {
+    return (
+      <main className="page friday-team-page">
+        <p>Checking PSP Worship Team access...</p>
+      </main>
+    );
+  }
+
+  if (!isUnlocked) {
+    return (
+      <main className="page friday-team-page">
+        <section className="friday-team-hero">
+          <div>
+            <p className="eyebrow">Team workspace</p>
+            <h1>PSP Worship Team</h1>
+            <p>Enter the PSP password or request access for your account.</p>
+          </div>
+        </section>
+
+        <section className="masters-access-panel">
+          <form className="form-stack" onSubmit={handleAccessSubmit}>
+            <label htmlFor="psp-access-code">Password</label>
+            <input
+              id="psp-access-code"
+              onChange={(event) => setAccessCode(event.target.value)}
+              type="password"
+              value={accessCode}
+            />
+
+            <button className="primary-button" type="submit">
+              Unlock PSP Worship Team
+            </button>
+          </form>
+
+          <div className="masters-request-access">
+            <h2>Need access?</h2>
+            <p>
+              Send a request and a PSP admin can unlock this page for your
+              account.
+            </p>
+            <button
+              className="secondary-button"
+              disabled={requestStatus === "pending"}
+              onClick={requestAccess}
+              type="button"
+            >
+              {requestStatus === "pending" ? "Request pending" : "Request access"}
+            </button>
+          </div>
+
+          {error && <p className="form-message error">{error}</p>}
+          {message && <p className="form-message success">{message}</p>}
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="page friday-team-page">
       <section className="friday-team-hero">
@@ -1989,6 +2205,67 @@ function PspWorshipTeam() {
           </div>
         )}
       </section>
+
+      {isAdmin && adminMode && (
+        <section className="masters-admin-panel">
+          <details>
+            <summary>
+              <span>
+                <small>Admin</small>
+                <strong>Access Requests</strong>
+              </span>
+              <em>
+                {accessRequests.filter((request) => request.status === "pending").length}{" "}
+                pending
+              </em>
+            </summary>
+
+            <div className="masters-admin-content">
+              {loadingRequests ? (
+                <p className="empty-state">Loading access requests...</p>
+              ) : accessRequests.length === 0 ? (
+                <p className="empty-state">No access requests yet.</p>
+              ) : (
+                <ul className="masters-access-request-list">
+                  {accessRequests.map((request) => (
+                    <li key={request.id}>
+                      <div>
+                        <strong>
+                          {request.display_name || request.email || "Unknown user"}
+                        </strong>
+                        {request.email && <span>{request.email}</span>}
+                        <small>Status: {request.status}</small>
+                      </div>
+
+                      {request.status === "pending" && (
+                        <div className="row-actions">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              reviewAccessRequest(request.id, "approved")
+                            }
+                          >
+                            Approve
+                          </button>
+                          <button
+                            className="subtle-danger-button"
+                            type="button"
+                            onClick={() =>
+                              reviewAccessRequest(request.id, "rejected")
+                            }
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </details>
+        </section>
+      )}
     </main>
   );
 }
