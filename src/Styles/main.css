@@ -622,6 +622,12 @@ nav a.active:not(.site-title) {
   justify-self: start;
 }
 
+.friday-team-lock-hero {
+  display: block;
+  margin: 0 auto 1.5rem;
+  max-width: 680px;
+}
+
 .friday-team-shell {
   align-items: start;
   display: grid;

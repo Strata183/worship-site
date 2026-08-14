@@ -1363,7 +1363,7 @@ function PspWorshipTeam() {
   if (!isUnlocked) {
     return (
       <main className="page friday-team-page">
-        <section className="friday-team-hero">
+        <section className="friday-team-hero friday-team-lock-hero">
           <div>
             <p className="eyebrow">Team workspace</p>
             <h1>PSP Worship Team</h1>
