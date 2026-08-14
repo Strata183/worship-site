@@ -14,21 +14,21 @@ create table if not exists public.psp_worship_team_songs (
   song_key text not null default '',
   tags text[] not null default '{}',
   file_path text not null default '',
-  annotated_file_path text not null default '',
   notes text not null default '',
   created_at timestamptz not null default now()
 );
-
-alter table public.psp_worship_team_songs
-add column if not exists annotated_file_path text not null default '';
 
 create table if not exists public.psp_worship_team_sets (
   id uuid primary key default gen_random_uuid(),
   service_date date not null,
   leader text not null default '',
+  annotated_file_path text not null default '',
   notes text not null default '',
   created_at timestamptz not null default now()
 );
+
+alter table public.psp_worship_team_sets
+add column if not exists annotated_file_path text not null default '';
 
 create table if not exists public.psp_worship_team_set_songs (
   id uuid primary key default gen_random_uuid(),

@@ -969,13 +969,19 @@ nav a.active:not(.site-title) {
   justify-self: start;
 }
 
-.friday-set-song-form {
+.friday-set-song-form,
+.friday-annotated-set-form {
   align-items: end;
   grid-template-columns: minmax(13rem, 1fr) minmax(14rem, 1fr) max-content;
 }
 
-.friday-set-song-form > strong {
+.friday-set-song-form > strong,
+.friday-annotated-set-form > strong {
   grid-column: 1 / -1;
+}
+
+.friday-annotated-set-form {
+  grid-template-columns: minmax(14rem, 1fr) max-content;
 }
 
 .friday-chart-grid {
@@ -4446,7 +4452,8 @@ nav a.active:not(.site-title) {
     grid-template-columns: 1fr;
   }
 
-  .friday-set-song-form {
+  .friday-set-song-form,
+  .friday-annotated-set-form {
     grid-template-columns: 1fr;
   }
 

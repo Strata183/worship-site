@@ -129,7 +129,8 @@ function PspWorshipTeam() {
   const [adminMode, setAdminMode] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [chartFiles, setChartFiles] = useState({});
-  const [annotatedChartFiles, setAnnotatedChartFiles] = useState({});
+  const [annotatedSetFile, setAnnotatedSetFile] = useState(null);
+  const [annotatedSetFormVersion, setAnnotatedSetFormVersion] = useState(0);
   const [newSongChartFile, setNewSongChartFile] = useState(null);
   const [newSongFormVersion, setNewSongFormVersion] = useState(0);
   const [addingSong, setAddingSong] = useState(false);
@@ -150,7 +151,7 @@ function PspWorshipTeam() {
   const [savingSetId, setSavingSetId] = useState("");
   const [deletingSetId, setDeletingSetId] = useState("");
   const [uploadingChartId, setUploadingChartId] = useState("");
-  const [uploadingAnnotatedChartId, setUploadingAnnotatedChartId] = useState("");
+  const [uploadingAnnotatedSetId, setUploadingAnnotatedSetId] = useState("");
   const [downloadingSetId, setDownloadingSetId] = useState("");
   const [newSong, setNewSong] = useState({
     notes: "",
@@ -224,11 +225,11 @@ function PspWorshipTeam() {
         .maybeSingle(),
       supabase
         .from("psp_worship_team_songs")
-        .select("id, title, song_key, tags, file_path, annotated_file_path, notes, created_at")
+        .select("id, title, song_key, tags, file_path, notes, created_at")
         .order("title", { ascending: true }),
       supabase
         .from("psp_worship_team_sets")
-        .select("id, service_date, leader, notes, created_at")
+        .select("id, service_date, leader, annotated_file_path, notes, created_at")
         .order("service_date", { ascending: false }),
       supabase
         .from("psp_worship_team_set_songs")
@@ -558,9 +559,9 @@ function PspWorshipTeam() {
     window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   }
 
-  async function openAnnotatedChart(song) {
-    if (!song.annotated_file_path) {
-      setError("This chart does not have an annotated PDF uploaded yet.");
+  async function openAnnotatedSet(set) {
+    if (!set.annotated_file_path) {
+      setError("This week does not have an annotated PDF uploaded yet.");
       return;
     }
 
@@ -570,8 +571,8 @@ function PspWorshipTeam() {
       "r2-song-files",
       {
         body: {
-          action: "psp-worship-team-annotated-chart-signed-url",
-          songId: song.id,
+          action: "psp-worship-team-annotated-set-signed-url",
+          setId: set.id,
         },
       }
     );
@@ -650,14 +651,14 @@ function PspWorshipTeam() {
     await loadPspWorkspace();
   }
 
-  async function uploadAnnotatedChart(song) {
-    const file = annotatedChartFiles[song.id];
+  async function uploadAnnotatedSet(set) {
+    const file = annotatedSetFile;
 
     setError("");
     setMessage("");
 
     if (!isAdmin) {
-      setError("Only PSP admins can upload annotated charts.");
+      setError("Only PSP admins can upload annotated weekly PDFs.");
       return;
     }
 
@@ -671,10 +672,10 @@ function PspWorshipTeam() {
       return;
     }
 
-    setUploadingAnnotatedChartId(song.id);
+    setUploadingAnnotatedSetId(set.id);
 
     const formData = new FormData();
-    const filePath = `${user.id}/psp-worship-team/annotated-charts/${song.id}-${cleanFileName(
+    const filePath = `${user.id}/psp-worship-team/annotated-weeks/${set.id}-${cleanFileName(
       file.name
     )}.pdf`;
 
@@ -691,28 +692,25 @@ function PspWorshipTeam() {
 
     if (uploadError) {
       setError(await getFunctionErrorMessage(uploadError));
-      setUploadingAnnotatedChartId("");
+      setUploadingAnnotatedSetId("");
       return;
     }
 
     const { error: updateError } = await supabase
-      .from("psp_worship_team_songs")
+      .from("psp_worship_team_sets")
       .update({ annotated_file_path: uploadData.filePath })
-      .eq("id", song.id);
+      .eq("id", set.id);
 
     if (updateError) {
       setError(updateError.message);
-      setUploadingAnnotatedChartId("");
+      setUploadingAnnotatedSetId("");
       return;
     }
 
-    setAnnotatedChartFiles((currentFiles) => {
-      const nextFiles = { ...currentFiles };
-      delete nextFiles[song.id];
-      return nextFiles;
-    });
-    setUploadingAnnotatedChartId("");
-    setMessage(`Annotated chart uploaded for "${song.title}".`);
+    setAnnotatedSetFile(null);
+    setAnnotatedSetFormVersion((currentVersion) => currentVersion + 1);
+    setUploadingAnnotatedSetId("");
+    setMessage(`Annotated PDF uploaded for ${formatTeamDate(set.service_date)}.`);
     await loadPspWorkspace();
   }
 
@@ -1035,6 +1033,15 @@ function PspWorshipTeam() {
                       >
                         {downloadingSetId === selectedSet.id ? "Building PDF..." : "Open weekly PDF"}
                       </button>
+                      {selectedSet.annotated_file_path && (
+                        <button
+                          className="secondary-button"
+                          type="button"
+                          onClick={() => openAnnotatedSet(selectedSet)}
+                        >
+                          Open annotated PDF
+                        </button>
+                      )}
                       {canManage && (
                         <>
                           <button
@@ -1118,6 +1125,40 @@ function PspWorshipTeam() {
                     </label>
                     <button className="primary-button" type="submit">
                       Add to set
+                    </button>
+                  </form>
+                </details>
+              )}
+
+              {canManage && (
+                <details className="friday-admin-drawer friday-main-drawer">
+                  <summary>Annotated PDF for this week</summary>
+                  <form
+                    className="friday-admin-form friday-annotated-set-form"
+                    key={annotatedSetFormVersion}
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      uploadAnnotatedSet(selectedSet);
+                    }}
+                  >
+                    <label>
+                      Annotated PDF
+                      <input
+                        accept="application/pdf"
+                        onChange={(event) => setAnnotatedSetFile(event.target.files?.[0] || null)}
+                        type="file"
+                      />
+                    </label>
+                    <button
+                      className="primary-button"
+                      disabled={!annotatedSetFile || uploadingAnnotatedSetId === selectedSet.id}
+                      type="submit"
+                    >
+                      {uploadingAnnotatedSetId === selectedSet.id
+                        ? "Uploading..."
+                        : selectedSet.annotated_file_path
+                          ? "Replace annotated PDF"
+                          : "Upload annotated PDF"}
                     </button>
                   </form>
                 </details>
@@ -1329,11 +1370,6 @@ function PspWorshipTeam() {
                       <p className={song.file_path ? "friday-chart-status ready" : "friday-chart-status"}>
                         {song.file_path ? "PDF ready" : "PDF needed"}
                       </p>
-                      {song.annotated_file_path && (
-                        <p className="friday-chart-status ready">
-                          Annotated PDF available
-                        </p>
-                      )}
                       {song.notes && <p>{song.notes}</p>}
                     </div>
                     <div className="friday-chart-tags">
@@ -1351,15 +1387,6 @@ function PspWorshipTeam() {
                 >
                   {song.file_path ? "Open chart" : "Chart coming soon"}
                 </button>
-                {song.annotated_file_path && (
-                  <button
-                    className="secondary-button"
-                    type="button"
-                    onClick={() => openAnnotatedChart(song)}
-                  >
-                    Open annotated
-                  </button>
-                )}
                 {canManage && (
                   <div className="friday-chart-upload">
                     <button
@@ -1393,34 +1420,6 @@ function PspWorshipTeam() {
                         : song.file_path
                           ? "Replace PDF"
                           : "Upload PDF"}
-                    </button>
-                    <label>
-                      Annotated PDF
-                      <input
-                        accept="application/pdf"
-                        onChange={(event) =>
-                          setAnnotatedChartFiles((currentFiles) => ({
-                            ...currentFiles,
-                            [song.id]: event.target.files?.[0] || null,
-                          }))
-                        }
-                        type="file"
-                      />
-                    </label>
-                    <button
-                      className="secondary-button"
-                      disabled={
-                        !annotatedChartFiles[song.id] ||
-                        uploadingAnnotatedChartId === song.id
-                      }
-                      type="button"
-                      onClick={() => uploadAnnotatedChart(song)}
-                    >
-                      {uploadingAnnotatedChartId === song.id
-                        ? "Uploading..."
-                        : song.annotated_file_path
-                          ? "Replace annotated"
-                          : "Upload annotated"}
                     </button>
                   </div>
                 )}

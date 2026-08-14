@@ -656,18 +656,18 @@ Deno.serve(async (req) => {
       return jsonResponse({ signedUrl });
     }
 
-    if (body.action === "psp-worship-team-annotated-chart-signed-url") {
-      const songId = String(body.songId || "");
+    if (body.action === "psp-worship-team-annotated-set-signed-url") {
+      const setId = String(body.setId || "");
 
-      const { data: song, error: songError } = await supabase
-        .from("psp_worship_team_songs")
+      const { data: weeklySet, error: setError } = await supabase
+        .from("psp_worship_team_sets")
         .select("annotated_file_path")
-        .eq("id", songId)
+        .eq("id", setId)
         .single();
 
-      if (songError || !song?.annotated_file_path) {
+      if (setError || !weeklySet?.annotated_file_path) {
         return jsonResponse(
-          { error: "Annotated chart not found or not shared with you." },
+          { error: "Annotated weekly PDF not found or not shared with you." },
           404,
         );
       }
@@ -676,7 +676,7 @@ Deno.serve(async (req) => {
         r2,
         new GetObjectCommand({
           Bucket: bucket,
-          Key: song.annotated_file_path,
+          Key: weeklySet.annotated_file_path,
         }),
         { expiresIn: 300 },
       );
