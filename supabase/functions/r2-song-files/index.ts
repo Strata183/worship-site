@@ -684,6 +684,57 @@ Deno.serve(async (req) => {
       return jsonResponse({ signedUrl });
     }
 
+    if (body.action === "delete-psp-annotated-set-file") {
+      const setId = String(body.setId || "");
+
+      const { data: isPspAdmin, error: pspAdminError } = await supabase.rpc(
+        "is_psp_worship_team_admin",
+        {
+          user_id: user.id,
+        },
+      );
+
+      if (pspAdminError || !isPspAdmin) {
+        return jsonResponse(
+          { error: "Only PSP admins can remove annotated weekly PDFs." },
+          403,
+        );
+      }
+
+      const { data: weeklySet, error: setError } = await supabase
+        .from("psp_worship_team_sets")
+        .select("annotated_file_path")
+        .eq("id", setId)
+        .single();
+
+      if (setError || !weeklySet) {
+        return jsonResponse(
+          { error: "Weekly set not found or not shared with you." },
+          404,
+        );
+      }
+
+      if (weeklySet.annotated_file_path) {
+        await r2.send(
+          new DeleteObjectCommand({
+            Bucket: bucket,
+            Key: weeklySet.annotated_file_path,
+          }),
+        );
+      }
+
+      const { error: updateError } = await supabase
+        .from("psp_worship_team_sets")
+        .update({ annotated_file_path: "" })
+        .eq("id", setId);
+
+      if (updateError) {
+        return jsonResponse({ error: updateError.message }, 400);
+      }
+
+      return jsonResponse({ ok: true });
+    }
+
     if (body.action === "psp-worship-team-set-pdf") {
       const setId = String(body.setId || "");
       const preferSignedUrl = Boolean(body.preferSignedUrl);

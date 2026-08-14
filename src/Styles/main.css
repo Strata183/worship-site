@@ -1005,6 +1005,30 @@ nav a.active:not(.site-title) {
   grid-template-columns: minmax(14rem, 1fr) max-content;
 }
 
+.friday-annotated-set-form .subtle-danger-button {
+  align-self: end;
+  background-color: transparent;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #991b1b;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+  min-height: auto;
+  padding: 0.58rem 0.85rem;
+}
+
+.friday-annotated-set-form .subtle-danger-button:hover,
+.friday-annotated-set-form .subtle-danger-button:focus {
+  background-color: #fef2f2;
+}
+
+.friday-annotated-set-form .subtle-danger-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .friday-chart-grid {
   display: grid;
   gap: 0.85rem;

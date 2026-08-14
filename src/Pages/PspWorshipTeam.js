@@ -54,14 +54,6 @@ function prefersPdfViewerWindow() {
   return /Android|iPhone|iPad|iPod/i.test(userAgent);
 }
 
-function openPdfDownloadWindow() {
-  if (!prefersPdfViewerWindow()) {
-    return null;
-  }
-
-  return window.open("", "_blank");
-}
-
 function openPdfUrl(url, viewerWindow = null) {
   if (viewerWindow && !viewerWindow.closed) {
     viewerWindow.location.href = url;
@@ -150,6 +142,7 @@ function PspWorshipTeam() {
   });
   const [savingSetId, setSavingSetId] = useState("");
   const [deletingSetId, setDeletingSetId] = useState("");
+  const [removingAnnotatedSetId, setRemovingAnnotatedSetId] = useState("");
   const [uploadingChartId, setUploadingChartId] = useState("");
   const [uploadingAnnotatedSetId, setUploadingAnnotatedSetId] = useState("");
   const [downloadingSetId, setDownloadingSetId] = useState("");
@@ -560,7 +553,10 @@ function PspWorshipTeam() {
   }
 
   async function openAnnotatedSet(set) {
+    const viewerWindow = window.open("", "_blank");
+
     if (!set.annotated_file_path) {
+      viewerWindow?.close();
       setError("This week does not have an annotated PDF uploaded yet.");
       return;
     }
@@ -578,11 +574,12 @@ function PspWorshipTeam() {
     );
 
     if (signedUrlError) {
+      viewerWindow?.close();
       setError(await getFunctionErrorMessage(signedUrlError));
       return;
     }
 
-    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+    openPdfUrl(data.signedUrl, viewerWindow);
   }
 
   async function uploadChart(song) {
@@ -714,6 +711,53 @@ function PspWorshipTeam() {
     await loadPspWorkspace();
   }
 
+  async function removeAnnotatedSet(set) {
+    setError("");
+    setMessage("");
+
+    if (!isAdmin) {
+      setError("Only PSP admins can remove annotated weekly PDFs.");
+      return;
+    }
+
+    if (!set.annotated_file_path) {
+      setError("This week does not have an annotated PDF to remove.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Remove the annotated PDF for ${formatTeamDate(set.service_date)}?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setRemovingAnnotatedSetId(set.id);
+
+    const { error: removeError } = await supabase.functions.invoke(
+      "r2-song-files",
+      {
+        body: {
+          action: "delete-psp-annotated-set-file",
+          setId: set.id,
+        },
+      }
+    );
+
+    if (removeError) {
+      setError(await getFunctionErrorMessage(removeError));
+      setRemovingAnnotatedSetId("");
+      return;
+    }
+
+    setAnnotatedSetFile(null);
+    setAnnotatedSetFormVersion((currentVersion) => currentVersion + 1);
+    setRemovingAnnotatedSetId("");
+    setMessage("Annotated PDF removed from this week.");
+    await loadPspWorkspace();
+  }
+
   function startEditingSong(song) {
     setEditingSongId(song.id);
     setEditSong({
@@ -774,7 +818,7 @@ function PspWorshipTeam() {
   }
 
   async function downloadWeeklySetPdf(set) {
-    const viewerWindow = openPdfDownloadWindow();
+    const viewerWindow = window.open("", "_blank");
 
     setDownloadingSetId(set.id);
     setError("");
@@ -1025,10 +1069,7 @@ function PspWorshipTeam() {
                       <div className="friday-set-download-actions">
                         <button
                           className="primary-button"
-                          disabled={
-                            selectedSetSongs.length === 0 ||
-                            downloadingSetId === selectedSet.id
-                          }
+                          disabled={downloadingSetId === selectedSet.id}
                           type="button"
                           onClick={() => downloadWeeklySetPdf(selectedSet)}
                         >
@@ -1162,6 +1203,18 @@ function PspWorshipTeam() {
                           ? "Replace annotated PDF"
                           : "Upload annotated PDF"}
                     </button>
+                    {selectedSet.annotated_file_path && (
+                      <button
+                        className="subtle-danger-button"
+                        disabled={removingAnnotatedSetId === selectedSet.id}
+                        type="button"
+                        onClick={() => removeAnnotatedSet(selectedSet)}
+                      >
+                        {removingAnnotatedSetId === selectedSet.id
+                          ? "Removing..."
+                          : "Remove annotated PDF"}
+                      </button>
+                    )}
                   </form>
                 </details>
               )}
