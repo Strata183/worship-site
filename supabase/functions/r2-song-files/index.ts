@@ -128,6 +128,17 @@ function bytesToBase64(bytes: Uint8Array) {
   return btoa(binary);
 }
 
+function base64ToBytes(base64Data: string) {
+  const binary = atob(base64Data);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  return bytes;
+}
+
 function safeDownloadName(name: string) {
   return (
     name
@@ -265,6 +276,80 @@ async function getObjectBytes(r2: S3Client, bucket: string, key: string) {
   }
 
   return new Uint8Array(await response.arrayBuffer());
+}
+
+async function createTemporaryPdfUrl(
+  r2: S3Client,
+  bucket: string,
+  userId: string,
+  fileName: string,
+  pdfBytes: Uint8Array,
+) {
+  const safeName = safeDownloadName(fileName.replace(/\.pdf$/i, ""));
+  const key = `${userId}/setlist-downloads/${crypto.randomUUID()}-${safeName}.pdf`;
+
+  await r2.send(
+    new PutObjectCommand({
+      Body: pdfBytes,
+      Bucket: bucket,
+      ContentDisposition: `inline; filename="${safeName}.pdf"`,
+      ContentType: "application/pdf",
+      Key: key,
+    }),
+  );
+
+  return getSignedUrl(
+    r2,
+    new GetObjectCommand({
+      Bucket: bucket,
+      Key: key,
+    }),
+    { expiresIn: 600 },
+  );
+}
+
+async function setlistPdfResponse({
+  base64Data,
+  bucket,
+  fileName,
+  mergeEngine,
+  preferSignedUrl,
+  r2,
+  userId,
+  warnings,
+}: {
+  base64Data: string;
+  bucket: string;
+  fileName: string;
+  mergeEngine: string;
+  preferSignedUrl: boolean;
+  r2: S3Client;
+  userId: string;
+  warnings: string[];
+}) {
+  if (preferSignedUrl) {
+    const signedUrl = await createTemporaryPdfUrl(
+      r2,
+      bucket,
+      userId,
+      fileName,
+      base64ToBytes(base64Data),
+    );
+
+    return jsonResponse({
+      fileName,
+      mergeEngine,
+      signedUrl,
+      warnings,
+    });
+  }
+
+  return jsonResponse({
+    data: base64Data,
+    fileName,
+    mergeEngine,
+    warnings,
+  });
 }
 
 // Deno.serve starts the Edge Function HTTP server.
@@ -529,6 +614,7 @@ Deno.serve(async (req) => {
 
     if (body.action === "combined-setlist-pdf") {
       const setlistId = String(body.setlistId || "");
+      const preferSignedUrl = Boolean(body.preferSignedUrl);
 
       const { data: setlist, error: setlistError } = await supabase
         .from("setlists")
@@ -660,10 +746,17 @@ Deno.serve(async (req) => {
             );
           }
 
-          return jsonResponse({
-            data: normalizerBody.data,
-            fileName: normalizerBody.fileName || `${safeDownloadName(setlist.title)}.pdf`,
+          const fileName =
+            normalizerBody.fileName || `${safeDownloadName(setlist.title)}.pdf`;
+
+          return await setlistPdfResponse({
+            base64Data: normalizerBody.data,
+            bucket,
+            fileName,
             mergeEngine: "ghostscript-normalizer",
+            preferSignedUrl,
+            r2,
+            userId: user.id,
             warnings: [
               ...normalizerWarnings,
               ...(normalizerBody.warnings || []),
@@ -776,11 +869,16 @@ Deno.serve(async (req) => {
       }
 
       const fileName = `${safeDownloadName(setlist.title)}.pdf`;
+      const base64Data = bytesToBase64(mergedBytes);
 
-      return jsonResponse({
-        data: bytesToBase64(mergedBytes),
+      return await setlistPdfResponse({
+        base64Data,
+        bucket,
         fileName,
         mergeEngine: "pdf-lib-fallback",
+        preferSignedUrl,
+        r2,
+        userId: user.id,
         warnings: mergeWarnings,
       });
     }

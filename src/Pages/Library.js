@@ -53,6 +53,20 @@ function openPdfDownloadWindow() {
   return window.open("", "_blank");
 }
 
+function openPdfUrl(url, viewerWindow = null) {
+  if (viewerWindow && !viewerWindow.closed) {
+    viewerWindow.location.href = url;
+    return;
+  }
+
+  if (prefersPdfViewerWindow()) {
+    window.location.href = url;
+    return;
+  }
+
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+
 function downloadBase64Pdf(base64Data, fileName, viewerWindow = null) {
   const binary = atob(base64Data);
   const bytes = new Uint8Array(binary.length);
@@ -1228,6 +1242,7 @@ function Library() {
   }
 
   async function downloadCombinedSetlistPdf(setlist) {
+    const shouldUseSignedUrl = prefersPdfViewerWindow();
     const viewerWindow = openPdfDownloadWindow();
 
     setCombiningSetlistId(setlist.id);
@@ -1239,6 +1254,7 @@ function Library() {
       {
         body: {
           action: "combined-setlist-pdf",
+          preferSignedUrl: shouldUseSignedUrl,
           setlistId: setlist.id,
         },
       }
@@ -1252,6 +1268,22 @@ function Library() {
     }
 
     if (!data?.data) {
+      if (data?.signedUrl) {
+        openPdfUrl(data.signedUrl, viewerWindow);
+        if (data.warnings?.length) {
+          const warningNoun = data.warnings.length === 1 ? "song" : "songs";
+          const warningVerb = data.warnings.length === 1 ? "was" : "were";
+
+          setMessage(
+            `Combined PDF opened. ${data.warnings.length} ${warningNoun} ${warningVerb} replaced with note pages.`
+          );
+        } else {
+          setMessage("Combined setlist PDF opened.");
+        }
+        setCombiningSetlistId(null);
+        return;
+      }
+
       viewerWindow?.close();
       setError("Could not build the PDF: the server did not return a file.");
       setCombiningSetlistId(null);
