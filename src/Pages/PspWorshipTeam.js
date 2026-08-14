@@ -1021,45 +1021,47 @@ function PspWorshipTeam() {
                       </p>
                       <p>{selectedSet.notes || "No notes for this week yet."}</p>
                     </div>
-                    <div className="friday-set-actions">
-                      <button
-                        className="primary-button"
-                        disabled={
-                          selectedSetSongs.length === 0 ||
-                          downloadingSetId === selectedSet.id
-                        }
-                        type="button"
-                        onClick={() => downloadWeeklySetPdf(selectedSet)}
-                      >
-                        {downloadingSetId === selectedSet.id ? "Building PDF..." : "Open weekly PDF"}
-                      </button>
-                      {selectedSet.annotated_file_path && (
+                    <div className="friday-set-action-panel">
+                      <div className="friday-set-download-actions">
                         <button
-                          className="secondary-button"
+                          className="primary-button"
+                          disabled={
+                            selectedSetSongs.length === 0 ||
+                            downloadingSetId === selectedSet.id
+                          }
                           type="button"
-                          onClick={() => openAnnotatedSet(selectedSet)}
+                          onClick={() => downloadWeeklySetPdf(selectedSet)}
                         >
-                          Open annotated PDF
+                          {downloadingSetId === selectedSet.id ? "Building PDF..." : "Open weekly PDF"}
                         </button>
-                      )}
-                      {canManage && (
-                        <>
+                        {selectedSet.annotated_file_path && (
                           <button
                             className="secondary-button"
                             type="button"
-                            onClick={() => startEditingSet(selectedSet)}
+                            onClick={() => openAnnotatedSet(selectedSet)}
                           >
-                            Edit week
+                            Open annotated PDF
                           </button>
-                          <button
-                            className="subtle-danger-button"
-                            disabled={deletingSetId === selectedSet.id}
-                            type="button"
-                            onClick={() => deleteWeeklySet(selectedSet)}
-                          >
-                            {deletingSetId === selectedSet.id ? "Deleting..." : "Delete week"}
-                          </button>
-                        </>
+                        )}
+                      </div>
+                      {canManage && (
+                        <div className="friday-set-actions">
+                        <button
+                          className="secondary-button"
+                          type="button"
+                          onClick={() => startEditingSet(selectedSet)}
+                        >
+                          Edit week
+                        </button>
+                        <button
+                          className="subtle-danger-button"
+                          disabled={deletingSetId === selectedSet.id}
+                          type="button"
+                          onClick={() => deleteWeeklySet(selectedSet)}
+                        >
+                          {deletingSetId === selectedSet.id ? "Deleting..." : "Delete week"}
+                        </button>
+                        </div>
                       )}
                     </div>
                   </>

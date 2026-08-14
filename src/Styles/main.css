@@ -708,6 +708,27 @@ nav a.active:not(.site-title) {
   margin-top: 0.35rem;
 }
 
+.friday-set-action-panel {
+  align-items: flex-end;
+  display: grid;
+  gap: 0.65rem;
+  justify-items: end;
+}
+
+.friday-set-download-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.friday-set-download-actions .primary-button,
+.friday-set-download-actions .secondary-button {
+  font-size: 0.95rem;
+  min-height: auto;
+  padding: 0.62rem 0.9rem;
+}
+
 .friday-set-actions {
   align-items: center;
   display: flex;
