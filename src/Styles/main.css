@@ -812,8 +812,25 @@ nav a.active:not(.site-title) {
   border-bottom: 1px solid var(--color-border);
   display: grid;
   gap: 0.8rem;
-  grid-template-columns: 2rem minmax(0, 1fr) max-content max-content;
+  grid-template-columns: 2rem minmax(0, 1fr) max-content;
   padding: 0.85rem 0;
+  transition: background-color 160ms ease, opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.friday-set-list li.can-reorder {
+  cursor: grab;
+  grid-template-columns: 2rem 1.5rem minmax(0, 1fr) max-content max-content;
+}
+
+.friday-set-list li.can-reorder:active {
+  cursor: grabbing;
+}
+
+.friday-set-list li.dragging {
+  background-color: var(--color-accent-light);
+  opacity: 0.65;
+  transform: scale(0.995);
 }
 
 .friday-set-list li:last-child {
@@ -858,6 +875,29 @@ nav a.active:not(.site-title) {
   min-width: 3rem;
   padding: 0.35rem 0.7rem;
   text-align: center;
+}
+
+.friday-set-drag-handle {
+  align-items: center;
+  cursor: grab;
+  display: grid;
+  gap: 0.16rem;
+  height: 2rem;
+  justify-content: center;
+  width: 1.5rem;
+}
+
+.friday-set-drag-handle i {
+  background-color: var(--color-muted);
+  border-radius: 999px;
+  display: block;
+  height: 0.14rem;
+  width: 1rem;
+}
+
+.friday-set-list li.can-reorder:hover .friday-set-drag-handle i,
+.friday-set-list li.dragging .friday-set-drag-handle i {
+  background-color: var(--color-accent);
 }
 
 .friday-set-song-actions {
@@ -4697,6 +4737,10 @@ nav a.active:not(.site-title) {
 
   .friday-set-list li {
     grid-template-columns: 2rem minmax(0, 1fr);
+  }
+
+  .friday-set-list li.can-reorder {
+    grid-template-columns: 2rem 1.5rem minmax(0, 1fr);
   }
 
   .friday-set-list em {

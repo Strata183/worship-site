@@ -165,6 +165,8 @@ function PspWorshipTeam() {
   });
   const [savingSetId, setSavingSetId] = useState("");
   const [deletingSetId, setDeletingSetId] = useState("");
+  const [draggingSetSongId, setDraggingSetSongId] = useState("");
+  const [savingSetSongOrder, setSavingSetSongOrder] = useState(false);
   const [removingSetSongId, setRemovingSetSongId] = useState("");
   const [removingAnnotatedSetId, setRemovingAnnotatedSetId] = useState("");
   const [uploadingChartId, setUploadingChartId] = useState("");
@@ -548,6 +550,65 @@ function PspWorshipTeam() {
     setRemovingSetSongId("");
     setMessage(`"${setSong.title}" removed from this week.`);
     await loadPspWorkspace();
+  }
+
+  async function reorderSelectedSetSongs(draggedSongId, targetSongId) {
+    if (!draggedSongId || draggedSongId === targetSongId) {
+      return;
+    }
+
+    if (!isAdmin) {
+      setError("Only PSP admins can reorder songs.");
+      return;
+    }
+
+    const draggedIndex = selectedSetSongs.findIndex((song) => song.id === draggedSongId);
+    const targetIndex = selectedSetSongs.findIndex((song) => song.id === targetSongId);
+
+    if (draggedIndex === -1 || targetIndex === -1) {
+      return;
+    }
+
+    const reorderedSongs = [...selectedSetSongs];
+    const [draggedSong] = reorderedSongs.splice(draggedIndex, 1);
+
+    reorderedSongs.splice(targetIndex, 0, draggedSong);
+    setSavingSetSongOrder(true);
+    setError("");
+    setMessage("");
+
+    const updates = await Promise.all(
+      reorderedSongs.map((song, index) =>
+        supabase
+          .from("psp_worship_team_set_songs")
+          .update({ position: index })
+          .eq("id", song.id)
+      )
+    );
+    const updateError = updates.find((update) => update.error)?.error;
+
+    if (updateError) {
+      setError(updateError.message);
+    } else {
+      setWeeklySetSongs((currentSongs) => {
+        const reorderedSongIds = new Set(reorderedSongs.map((song) => song.id));
+        const untouchedSongs = currentSongs.filter(
+          (song) => !reorderedSongIds.has(song.id)
+        );
+
+        return [
+          ...untouchedSongs,
+          ...reorderedSongs.map((song, index) => ({
+            ...song,
+            position: index,
+          })),
+        ];
+      });
+      setMessage("Song order updated.");
+      await loadPspWorkspace();
+    }
+
+    setSavingSetSongOrder(false);
   }
 
   function startEditingSet(set) {
@@ -1381,8 +1442,55 @@ function PspWorshipTeam() {
               ) : (
                 <ol className="friday-set-list">
                   {selectedSetSongs.map((song, index) => (
-                    <li key={song.id}>
+                    <li
+                      className={`${canManage ? "can-reorder" : ""} ${
+                        draggingSetSongId === song.id ? "dragging" : ""
+                      }`}
+                      draggable={canManage && !savingSetSongOrder}
+                      key={song.id}
+                      onDragStart={(event) => {
+                        if (!canManage) {
+                          return;
+                        }
+
+                        setDraggingSetSongId(song.id);
+                        event.dataTransfer.effectAllowed = "move";
+                        event.dataTransfer.setData("text/plain", song.id);
+                      }}
+                      onDragOver={(event) => {
+                        if (!canManage) {
+                          return;
+                        }
+
+                        event.preventDefault();
+                        event.dataTransfer.dropEffect = "move";
+                      }}
+                      onDrop={(event) => {
+                        if (!canManage) {
+                          return;
+                        }
+
+                        event.preventDefault();
+                        const draggedSongId =
+                          event.dataTransfer.getData("text/plain") || draggingSetSongId;
+
+                        setDraggingSetSongId("");
+                        reorderSelectedSetSongs(draggedSongId, song.id);
+                      }}
+                      onDragEnd={() => setDraggingSetSongId("")}
+                    >
                       <span>{index + 1}</span>
+                      {canManage && (
+                        <span
+                          aria-label="Drag to reorder"
+                          className="friday-set-drag-handle"
+                          title="Drag to reorder"
+                        >
+                          <i></i>
+                          <i></i>
+                          <i></i>
+                        </span>
+                      )}
                       <div>
                         <strong>{song.title}</strong>
                         <p>{song.note || "No song note."}</p>
