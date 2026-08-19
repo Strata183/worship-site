@@ -156,6 +156,7 @@ function PspWorshipTeam() {
   const [newSongChartFile, setNewSongChartFile] = useState(null);
   const [newSongFormVersion, setNewSongFormVersion] = useState(0);
   const [addingSong, setAddingSong] = useState(false);
+  const [expandedSongNotes, setExpandedSongNotes] = useState({});
   const [editingSongId, setEditingSongId] = useState("");
   const [editSong, setEditSong] = useState({
     notes: "",
@@ -1972,6 +1973,12 @@ function PspWorshipTeam() {
           <div className="friday-chart-grid">
             {filteredSongs.map((song) => {
               const songExtraCharts = extraChartsBySongId[song.id] || [];
+              const noteIsExpanded = Boolean(expandedSongNotes[song.id]);
+              const noteNeedsToggle = (song.notes || "").length > 85;
+              const visibleNote =
+                noteIsExpanded || !noteNeedsToggle
+                  ? song.notes
+                  : `${song.notes.slice(0, 85).trim()}...`;
 
               return (
               <article className="friday-chart-card" key={song.id}>
@@ -2070,13 +2077,30 @@ function PspWorshipTeam() {
                   </form>
                 ) : (
                   <>
-                    <div>
+                    <div className="friday-chart-copy">
                       <h3>{song.title}</h3>
                       <p>Key: {song.song_key || "No key yet"}</p>
                       <p className={song.file_path ? "friday-chart-status ready" : "friday-chart-status"}>
                         {song.file_path ? "PDF ready" : "PDF needed"}
                       </p>
-                      {song.notes && <p>{song.notes}</p>}
+                      {song.notes && (
+                        <div className="friday-chart-note">
+                          <p>{visibleNote}</p>
+                          {noteNeedsToggle && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setExpandedSongNotes((currentNotes) => ({
+                                  ...currentNotes,
+                                  [song.id]: !currentNotes[song.id],
+                                }))
+                              }
+                            >
+                              {noteIsExpanded ? "Show less" : "Show note"}
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div className="friday-chart-tags">
                       {(Array.isArray(song.tags) ? song.tags : []).map((tag) => (
@@ -2086,7 +2110,7 @@ function PspWorshipTeam() {
                   </>
                 )}
                 <button
-                  className="secondary-button"
+                  className="secondary-button friday-chart-open-button"
                   disabled={!song.file_path}
                   type="button"
                   onClick={() => openChart(song)}

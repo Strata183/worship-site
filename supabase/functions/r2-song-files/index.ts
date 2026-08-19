@@ -883,6 +883,9 @@ Deno.serve(async (req) => {
           }
 
           try {
+            // PSP extra charts live in psp_worship_team_song_charts and are only
+            // opened individually. The combined weekly PDF intentionally uses
+            // the song's main chart file_path only.
             const sourceBytes = await getObjectBytes(r2, bucket, song.file_path);
             assertPdfBytes(sourceBytes, songTitle);
 

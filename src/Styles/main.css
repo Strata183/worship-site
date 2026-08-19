@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Chewy&family=Inter:wght@400;500;600;700;800&display=swap");
 
 /* ==========================================================================
    Global foundation used by every file
@@ -315,43 +315,88 @@ nav a.active:not(.site-title) {
    ========================================================================== */
 
 /* Home page hero area. */
+.page-home {
+  padding-top: 0;
+}
+
 .home-hero {
+  align-content: center;
+  display: grid;
   isolation: isolate;
-  margin: 0 auto;
-  max-width: 1040px;
-  overflow: visible;
-  padding: 2.5rem 1.5rem;
+  margin: 0 calc(50% - 50vw);
+  max-width: none;
+  min-height: calc(100vh - 72px);
+  overflow: hidden;
+  padding: clamp(2.5rem, 7vh, 5rem) 1.5rem 2.5rem;
   position: relative;
+  width: 100vw;
+}
+
+.home-hero::before {
+  background: linear-gradient(rgba(15, 24, 18, 0.22), rgba(15, 24, 18, 0.16));
+  content: "";
+  inset: 0;
+  position: absolute;
+  z-index: -1;
 }
 
 .home-hero-image {
   display: block;
-  height: auto;
-  max-width: 520px;
-  opacity: 0.16;
+  height: 100%;
+  inset: 0;
+  margin: 0;
+  max-width: none;
+  object-fit: cover;
+  opacity: 1;
   pointer-events: none;
   position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: min(44vw, 520px);
-  z-index: -1;
+  width: 100%;
+  z-index: -2;
 }
 
-.home-hero h1,
-.home-hero-statement,
-.home-hero p {
+.home-hero-content {
+  display: grid;
+  gap: 1rem;
+  margin: 0 auto;
+  max-width: 56rem;
   position: relative;
+  z-index: 1;
+}
+
+.home-hero-title {
+  color: var(--color-accent) !important;
+  font-family: "Chewy", "Arial Rounded MT Bold", sans-serif !important;
+  font-size: clamp(1.2rem, 7.6vw, 6.1rem) !important;
+  justify-self: center;
+  left: 50%;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+  margin: 0 auto 1.5rem !important;
+  max-width: max-content;
+  padding: 0;
+  position: absolute;
+  top: clamp(2.5rem, 7vh, 5rem);
+  transform: translateX(-50%);
+  -webkit-text-stroke: 0.11em white;
+  paint-order: stroke fill;
+  text-shadow: 0 0.07em 0 var(--color-accent-light);
+  text-transform: none;
+  white-space: nowrap;
+  z-index: 1;
 }
 
 .home-hero-statement {
+  background-color: rgba(255, 255, 255, 0.94);
+  border-radius: 20px;
+  box-shadow: 0 10px 24px rgba(15, 24, 18, 0.26);
   color: var(--color-accent);
   font-family: var(--font-heading);
   font-size: 1.35rem;
   font-weight: 600;
   line-height: 1.45;
-  margin: 0.5rem auto 1.15rem;
-  max-width: 52rem;
+  margin: 0 auto;
+  max-width: 40rem;
+  padding: 1rem 1.25rem;
   text-wrap: balance;
 }
 
@@ -363,6 +408,18 @@ nav a.active:not(.site-title) {
   height: 1px;
   margin: 1rem auto;
   width: min(8rem, 34vw);
+}
+
+/* The welcome copy sits in a soft card inside the framed hero panel. */
+.home-hero-intro {
+  background-color: white;
+  border: 2px solid var(--color-accent);
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(45, 67, 48, 0.1);
+  margin-top: 0 !important;
+  max-width: 42rem;
+  padding: 1rem 1.25rem;
+  text-wrap: balance;
 }
 
 .eyebrow {
@@ -380,6 +437,12 @@ nav a.active:not(.site-title) {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: 2.5rem;
   text-align: left;
+}
+
+.page-home .resource-grid {
+  margin-top: -5.5rem;
+  position: relative;
+  z-index: 2;
 }
 
 .resource-card {
@@ -1125,7 +1188,7 @@ nav a.active:not(.site-title) {
 
 .friday-chart-grid {
   display: grid;
-  gap: 0.85rem;
+  gap: 0.7rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -1134,15 +1197,57 @@ nav a.active:not(.site-title) {
   border: 1px solid var(--color-border);
   border-radius: 8px;
   display: grid;
-  gap: 0.85rem;
-  grid-template-rows: auto auto 1fr auto;
-  padding: 1rem;
+  gap: 0.65rem 1rem;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  padding: 0.78rem 0.9rem;
+}
+
+.friday-chart-card .friday-chart-edit-form,
+.friday-chart-card .friday-extra-charts,
+.friday-chart-card .friday-chart-tools {
+  grid-column: 1 / -1;
+}
+
+.friday-chart-copy {
+  min-width: 0;
+}
+
+.friday-chart-note {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+
+.friday-chart-note p {
+  margin: 0;
+}
+
+.friday-chart-note button {
+  background-color: transparent;
+  border: 0;
+  color: var(--color-accent);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 900;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 0.18rem;
+}
+
+.friday-chart-note button:hover,
+.friday-chart-note button:focus {
+  color: var(--color-text);
 }
 
 .friday-chart-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
+  grid-column: 1;
+  min-width: 0;
 }
 
 .friday-chart-card .friday-chart-status {
@@ -1165,8 +1270,16 @@ nav a.active:not(.site-title) {
   padding: 0.28rem 0.5rem;
 }
 
-.friday-chart-card .secondary-button {
-  justify-self: start;
+.friday-chart-card p,
+.friday-chart-card h3 {
+  overflow-wrap: anywhere;
+}
+
+.friday-chart-open-button {
+  align-self: start;
+  justify-self: end;
+  min-width: 8.5rem;
+  white-space: nowrap;
 }
 
 .friday-extra-charts {
@@ -4612,9 +4725,14 @@ nav a.active:not(.site-title) {
     font-size: 2.25rem;
   }
 
+  .home-hero-title {
+    font-size: 1.2rem !important;
+  }
+
   .home-hero {
-    padding-left: 0;
-    padding-right: 0;
+    min-height: calc(100svh - 72px);
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 
   .home-hero-statement {
@@ -4779,6 +4897,18 @@ nav a.active:not(.site-title) {
 
   .friday-chart-grid {
     grid-template-columns: 1fr;
+  }
+
+  .friday-chart-card {
+    grid-template-columns: 1fr;
+  }
+
+  .friday-chart-tags {
+    grid-column: 1;
+  }
+
+  .friday-chart-open-button {
+    justify-self: start;
   }
 
   .friday-library-toolbar {

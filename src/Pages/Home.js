@@ -80,19 +80,21 @@ function Home() {
       <section className="home-hero">
         <img
           className="home-hero-image"
-          src="/newguitar.png"
-          alt="Black acoustic guitar"
+          src="/worship-service.png"
+          alt="Worship service musicians leading from the stage"
         />
-        <h1>Welcome to Worthy for Worship</h1>
-        <h2 className="home-hero-statement">
-          Worship is that which is distinctly and only for God, and which,
-          while capturing the most profound of our emotions, does so by the
-          most profound divine truth
-        </h2>
-        <p>
-          My name is Derek Smith and this is my personal website! I hope to provide a place to find chord charts, tutorials, articles, and practical help for
-          serving the local church in worship ministry
-        </p>
+        <h1 className="home-hero-title">Worthy For Worship</h1>
+        <div className="home-hero-content">
+          <h2 className="home-hero-statement">
+            Worship is that which is distinctly and only for God, and which,
+            while capturing the most profound of our emotions, does so by the
+            most profound divine truth
+          </h2>
+          <p className="home-hero-intro">
+            My name is Derek Smith and this is my personal website! I hope to provide a place to find chord charts, tutorials, articles, and practical help for
+            serving the local church in worship ministry
+          </p>
+        </div>
       </section>
 
       {/* The cards are created by looping over homeSections with map(). */}
