@@ -26,11 +26,11 @@ const mastersBibleStudyWeeks = [
     notes: [
       {
         title: "Main Passage",
-        body: "Ecclesiastes",
+        body: "Devotion from Zef",
       },
       {
         title: "Big Idea",
-        body: "Introduction to Ecclesiastes",
+        body: "Bible Study Kickoff",
       },
       {
         title: "Announcements",
