@@ -15,9 +15,6 @@ const mastersBibleStudyWeeks = [
         key: "Key: C",
       },
       {
-        title: "Grace Alone",
-        key: "Key: D",
-      },{
         title: "Jesus, I my cross have taken",
         key: "Key: E",
       },
