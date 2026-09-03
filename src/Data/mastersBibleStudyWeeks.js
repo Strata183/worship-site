@@ -3,12 +3,27 @@ const mastersBibleStudyWeeks = [
     date: "2026-09-03",
     songs: [
       {
-        title: "Song Title One",
-        key: "Key: ?",
+        title: "His Mercy is More",
+        key: "Key: D",
       },
       {
-        title: "Song Title Two",
-        key: "Key: ?",
+        title: "There is One Gospel",
+        key: "Key: C",
+      },
+      {
+        title: "Man of Sorrows",
+        key: "Key: C",
+      },
+      {
+        title: "Grace Alone",
+        key: "Key: D",
+      },{
+        title: "Jesus, I my cross have taken",
+        key: "Key: E",
+      },
+      {
+        title: "All Glory be to Christ",
+        key: "Key: D",
       },
     ],
     notes: [
@@ -22,7 +37,7 @@ const mastersBibleStudyWeeks = [
       },
       {
         title: "Announcements",
-        body: "",
+        body: "Meeting at Dixon fire pit today! A time of fellowship to kick off the new school year!",
       },
     ],
     prayerRequests: [

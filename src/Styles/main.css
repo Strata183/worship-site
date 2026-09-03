@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Chewy&family=Inter:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
 /* ==========================================================================
    Global foundation used by every file
@@ -315,88 +315,43 @@ nav a.active:not(.site-title) {
    ========================================================================== */
 
 /* Home page hero area. */
-.page-home {
-  padding-top: 0;
-}
-
 .home-hero {
-  align-content: center;
-  display: grid;
   isolation: isolate;
-  margin: 0 calc(50% - 50vw);
-  max-width: none;
-  min-height: calc(100vh - 72px);
-  overflow: hidden;
-  padding: clamp(2.5rem, 7vh, 5rem) 1.5rem 2.5rem;
+  margin: 0 auto;
+  max-width: 1040px;
+  overflow: visible;
+  padding: 2.5rem 1.5rem;
   position: relative;
-  width: 100vw;
-}
-
-.home-hero::before {
-  background: linear-gradient(rgba(15, 24, 18, 0.22), rgba(15, 24, 18, 0.16));
-  content: "";
-  inset: 0;
-  position: absolute;
-  z-index: -1;
 }
 
 .home-hero-image {
   display: block;
-  height: 100%;
-  inset: 0;
-  margin: 0;
-  max-width: none;
-  object-fit: cover;
-  opacity: 1;
+  height: auto;
+  max-width: 520px;
+  opacity: 0.16;
   pointer-events: none;
   position: absolute;
-  width: 100%;
-  z-index: -2;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(44vw, 520px);
+  z-index: -1;
 }
 
-.home-hero-content {
-  display: grid;
-  gap: 1rem;
-  margin: 0 auto;
-  max-width: 56rem;
+.home-hero h1,
+.home-hero-statement,
+.home-hero p {
   position: relative;
-  z-index: 1;
-}
-
-.home-hero-title {
-  color: var(--color-accent) !important;
-  font-family: "Chewy", "Arial Rounded MT Bold", sans-serif !important;
-  font-size: clamp(1.2rem, 7.6vw, 6.1rem) !important;
-  justify-self: center;
-  left: 50%;
-  letter-spacing: -0.035em;
-  line-height: 0.95;
-  margin: 0 auto 1.5rem !important;
-  max-width: max-content;
-  padding: 0;
-  position: absolute;
-  top: clamp(2.5rem, 7vh, 5rem);
-  transform: translateX(-50%);
-  -webkit-text-stroke: 0.11em white;
-  paint-order: stroke fill;
-  text-shadow: 0 0.07em 0 var(--color-accent-light);
-  text-transform: none;
-  white-space: nowrap;
-  z-index: 1;
 }
 
 .home-hero-statement {
-  background-color: rgba(255, 255, 255, 0.94);
-  border-radius: 20px;
-  box-shadow: 0 10px 24px rgba(15, 24, 18, 0.26);
   color: var(--color-accent);
   font-family: var(--font-heading);
   font-size: 1.35rem;
   font-weight: 600;
   line-height: 1.45;
-  margin: 0 auto;
-  max-width: 40rem;
-  padding: 1rem 1.25rem;
+  margin: 0.5rem auto 1.15rem;
+  max-width: 52rem;
   text-wrap: balance;
 }
 
@@ -408,18 +363,6 @@ nav a.active:not(.site-title) {
   height: 1px;
   margin: 1rem auto;
   width: min(8rem, 34vw);
-}
-
-/* The welcome copy sits in a soft card inside the framed hero panel. */
-.home-hero-intro {
-  background-color: white;
-  border: 2px solid var(--color-accent);
-  border-radius: 14px;
-  box-shadow: 0 10px 24px rgba(45, 67, 48, 0.1);
-  margin-top: 0 !important;
-  max-width: 42rem;
-  padding: 1rem 1.25rem;
-  text-wrap: balance;
 }
 
 .eyebrow {
@@ -437,12 +380,6 @@ nav a.active:not(.site-title) {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: 2.5rem;
   text-align: left;
-}
-
-.page-home .resource-grid {
-  margin-top: -5.5rem;
-  position: relative;
-  z-index: 2;
 }
 
 .resource-card {
@@ -4725,14 +4662,9 @@ nav a.active:not(.site-title) {
     font-size: 2.25rem;
   }
 
-  .home-hero-title {
-    font-size: 1.2rem !important;
-  }
-
   .home-hero {
-    min-height: calc(100svh - 72px);
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .home-hero-statement {
