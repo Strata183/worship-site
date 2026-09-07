@@ -18,7 +18,7 @@ const mastersBibleStudyWeeks = [
     notes: [
       {
         title: "Love",
-        body: "Devotion from Zef",
+        body: "Devotion by Derek",
       },
       {
         title: "Text",
