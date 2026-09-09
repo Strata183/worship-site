@@ -149,6 +149,11 @@ function MastersBibleStudy() {
     ? sortedStudyWeeks.find((week) => week.date === weekSlug)
     : newestWeek;
   const selectedSongSheet = selectedWeek ? songSheets[selectedWeek.date] : null;
+  const selectedWeekSongs = selectedWeek.songs.filter(
+    (song) =>
+      selectedWeek.date === newestWeek.date ||
+      (song.title?.trim() && song.key?.trim() && song.key !== "Key: ?")
+  );
   const visibleStudyWeeks = showAllWeeks
     ? sortedStudyWeeks
     : sortedStudyWeeks.slice(0, 4);
@@ -548,14 +553,21 @@ function MastersBibleStudy() {
               </div>
 
               <div className="masters-song-list">
-                {selectedWeek.songs.map((song) => (
-                  <article className="masters-song-card" key={song.title}>
-                    <div className="masters-song-title">
-                      <h4>{song.title}</h4>
-                      <span>{song.key}</span>
-                    </div>
-                  </article>
-                ))}
+                {selectedWeekSongs.length ? (
+                  selectedWeekSongs.map((song, index) => (
+                    <article
+                      className="masters-song-card"
+                      key={`${song.title || "draft-song"}-${index}`}
+                    >
+                      <div className="masters-song-title">
+                        <h4>{song.title}</h4>
+                        <span>{song.key}</span>
+                      </div>
+                    </article>
+                  ))
+                ) : (
+                  <p className="masters-pdf-empty">Song details are unavailable for this week.</p>
+                )}
               </div>
 
               {isAdmin && adminMode && (
