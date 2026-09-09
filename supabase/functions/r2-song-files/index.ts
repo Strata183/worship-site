@@ -112,6 +112,25 @@ function isAudioFile(file: File) {
   );
 }
 
+function getAudioContentType(file: File) {
+  if (file.type.startsWith("audio/")) {
+    return file.type;
+  }
+
+  const extension = file.name.toLowerCase().split(".").pop();
+  const contentTypes: Record<string, string> = {
+    aac: "audio/aac",
+    aiff: "audio/aiff",
+    m4a: "audio/mp4",
+    mp3: "audio/mpeg",
+    ogg: "audio/ogg",
+    wav: "audio/wav",
+    webm: "audio/webm",
+  };
+
+  return contentTypes[extension || ""] || "application/octet-stream";
+}
+
 function encodeCopySource(bucket: string, key: string) {
   return `${bucket}/${key.split("/").map(encodeURIComponent).join("/")}`;
 }
@@ -461,7 +480,7 @@ Deno.serve(async (req) => {
       const uploadContentType =
         file.type === "application/pdf"
           ? "application/pdf"
-          : file.type || "application/octet-stream";
+          : getAudioContentType(file);
 
       // Convert the browser File into bytes and upload it to R2.
       await r2.send(
@@ -596,6 +615,40 @@ Deno.serve(async (req) => {
       );
 
       return jsonResponse({ signedUrl });
+    }
+
+    if (body.action === "delete-steadfast-audio-file") {
+      const recordingId = String(body.recordingId || "");
+      const { data: isSteadfastAdmin, error: adminError } = await supabase.rpc(
+        "is_steadfast_admin",
+        { user_id: user.id },
+      );
+
+      if (adminError || !isSteadfastAdmin) {
+        return jsonResponse(
+          { error: "Only Steadfast admins can remove recordings." },
+          403,
+        );
+      }
+
+      const { data: recording, error: recordingError } = await supabase
+        .from("steadfast_audio_recordings")
+        .select("file_path")
+        .eq("id", recordingId)
+        .single();
+
+      if (recordingError || !recording) {
+        return jsonResponse({ error: "Recording not found." }, 404);
+      }
+
+      await r2.send(
+        new DeleteObjectCommand({
+          Bucket: bucket,
+          Key: recording.file_path,
+        }),
+      );
+
+      return jsonResponse({ ok: true });
     }
 
     if (body.action === "song-resource-audio-signed-url") {

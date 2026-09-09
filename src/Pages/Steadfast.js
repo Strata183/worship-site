@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { supabase } from "../supabaseClient";
@@ -48,6 +48,7 @@ async function getFunctionErrorMessage(error) {
 function SteadfastAudioPlayer({ recording }) {
   const [audioUrl, setAudioUrl] = useState("");
   const [audioError, setAudioError] = useState("");
+  const [urlAttempt, setUrlAttempt] = useState(0);
 
   useEffect(() => {
     let ignoreResponse = false;
@@ -80,7 +81,17 @@ function SteadfastAudioPlayer({ recording }) {
     return () => {
       ignoreResponse = true;
     };
-  }, [recording.id]);
+  }, [recording.id, urlAttempt]);
+
+  function refreshExpiredUrl() {
+    if (urlAttempt === 0) {
+      setAudioUrl("");
+      setUrlAttempt(1);
+      return;
+    }
+
+    setAudioError("This recording could not be played. Try uploading the audio file again.");
+  }
 
   if (audioError) {
     return <div className="steadfast-audio-placeholder">{audioError}</div>;
@@ -91,7 +102,7 @@ function SteadfastAudioPlayer({ recording }) {
   }
 
   return (
-    <audio controls src={audioUrl}>
+    <audio controls onError={refreshExpiredUrl} src={audioUrl}>
       Your browser does not support the audio element.
     </audio>
   );
@@ -120,6 +131,8 @@ function Steadfast() {
   });
   const [selectedAudioFile, setSelectedAudioFile] = useState(null);
   const [uploadingRecording, setUploadingRecording] = useState(false);
+  const [removingRecordingId, setRemovingRecordingId] = useState("");
+  const audioFileInputRef = useRef(null);
 
   const loadAccessRequests = useCallback(async () => {
     setLoadingRequests(true);
@@ -370,8 +383,49 @@ function Steadfast() {
       title: "",
     });
     setSelectedAudioFile(null);
+    if (audioFileInputRef.current) {
+      audioFileInputRef.current.value = "";
+    }
     setUploadingRecording(false);
     setAccessMessage("Audio recording uploaded.");
+    loadRecordings();
+  }
+
+  async function removeRecording(recording) {
+    if (!window.confirm(`Remove "${recording.title}" and its audio file? This cannot be undone.`)) {
+      return;
+    }
+
+    setAccessError("");
+    setAccessMessage("");
+    setRemovingRecordingId(recording.id);
+
+    const { error: fileError } = await supabase.functions.invoke("r2-song-files", {
+      body: {
+        action: "delete-steadfast-audio-file",
+        recordingId: recording.id,
+      },
+    });
+
+    if (fileError) {
+      setAccessError(await getFunctionErrorMessage(fileError));
+      setRemovingRecordingId("");
+      return;
+    }
+
+    const { error: deleteError } = await supabase
+      .from("steadfast_audio_recordings")
+      .delete()
+      .eq("id", recording.id);
+
+    if (deleteError) {
+      setAccessError(deleteError.message);
+      setRemovingRecordingId("");
+      return;
+    }
+
+    setRemovingRecordingId("");
+    setAccessMessage("Audio recording removed.");
     loadRecordings();
   }
 
@@ -540,6 +594,7 @@ function Steadfast() {
                     onChange={(event) =>
                       setSelectedAudioFile(event.target.files?.[0] || null)
                     }
+                    ref={audioFileInputRef}
                     type="file"
                   />
                 </label>
@@ -597,6 +652,16 @@ function Steadfast() {
                   </div>
 
                   <SteadfastAudioPlayer recording={recording} />
+                  {isAdmin && adminMode && (
+                    <button
+                      className="subtle-danger-button steadfast-recording-remove"
+                      disabled={removingRecordingId === recording.id}
+                      onClick={() => removeRecording(recording)}
+                      type="button"
+                    >
+                      {removingRecordingId === recording.id ? "Removing..." : "Remove recording"}
+                    </button>
+                  )}
                 </article>
               ))
             ) : (

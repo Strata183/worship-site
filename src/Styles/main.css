@@ -2289,6 +2289,11 @@ nav a.active:not(.site-title) {
   width: 100%;
 }
 
+.steadfast-recording-remove {
+  grid-column: 2;
+  justify-self: end;
+}
+
 .steadfast-audio-placeholder {
   align-items: center;
   border: 1px dashed var(--color-border);
