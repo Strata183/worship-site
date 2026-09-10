@@ -22,7 +22,7 @@ const mastersBibleStudyWeeks = [
     notes: [
       {
         title: "Love (Part 2)",
-        body: "Devotion from Derek finishing the latter half of Paul's definition of love to the Corinithinas",
+        body: "Devotion from Derek: Part 2 of Paul’s Definition of Love",
       },
       {
         title: "Text",
