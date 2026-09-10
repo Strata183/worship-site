@@ -3,22 +3,26 @@ const mastersBibleStudyWeeks = [
     date: "2026-09-10",
     songs: [
       {
-        title: "",
-        key: "Key: ?",
+        title: "10,000 Reasons",
+        key: "Key: E",
       },
       {
-        title: "",
-        key: "Key: ?",
+        title: "How deep the Father's Love for Us",
+        key: "Key: D",
       },
       {
-        title: "",
-        key: "Key: ?",
+        title: "More Love to Thee, O Christ",
+        key: "Key: G",
+      },
+      {
+        title: "Jesus, Thank You",
+        key: "Key: G",
       },
     ],
     notes: [
       {
-        title: "Love",
-        body: "Devotion by Derek",
+        title: "Love (Part 2)",
+        body: "Devotion from Derek finishing the latter half of Paul's definition of love to the Corinithinas",
       },
       {
         title: "Text",
@@ -26,7 +30,7 @@ const mastersBibleStudyWeeks = [
       },
       {
         title: "Announcements",
-        body: "?",
+        body: "Meeting at 3rd floor C-Dub lounge. Inivte friends!!",
       },
     ],
     prayerRequests: [
