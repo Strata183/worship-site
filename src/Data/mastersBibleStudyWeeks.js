@@ -1,4 +1,45 @@
 const mastersBibleStudyWeeks = [
+   {date: "2026-09-17",
+    songs: [
+      {
+        title: "",
+        key: "Key: ?",
+      },
+      {
+        title: "",
+        key: "Key: ?",
+      },
+    ],
+    notes: [
+      {
+        title: "",
+        body: "",
+      },
+      {
+        title: "",
+        body: "",
+      },
+      {
+        title: "Announcements",
+        body: "Meeting at 3rd floor C-Dub lounge. Inivte friends!!",
+      },
+    ],
+    prayerRequests: [
+      {
+        name: "Praise Reports",
+        items: [
+          "We are back at school!",
+        ],
+      },
+      {
+        name: "Prayer Requests",
+        items: [
+          "Pray for our Bible study through Ecclesiastes to be profitable and a great time of learning and fellowship",
+        "Pray for all the students coming back to school to be ready to work hard for the Lord"
+        ]
+      },
+    ],
+  },
   {
     date: "2026-09-10",
     songs: [
