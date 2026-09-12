@@ -151,8 +151,7 @@ function MastersBibleStudy() {
   const selectedSongSheet = selectedWeek ? songSheets[selectedWeek.date] : null;
   const selectedWeekSongs = selectedWeek.songs.filter(
     (song) =>
-      selectedWeek.date === newestWeek.date ||
-      (song.title?.trim() && song.key?.trim() && song.key !== "Key: ?")
+      song.title?.trim() && song.key?.trim() && song.key !== "Key: ?"
   );
   const visibleStudyWeeks = showAllWeeks
     ? sortedStudyWeeks
