@@ -2,22 +2,22 @@ const mastersBibleStudyWeeks = [
    {date: "2026-09-17",
     songs: [
       {
-        title: "",
-        key: "Key: ?",
+        title: "O Lord, My Rock and My Redeemer",
+        key: "Key: D",
       },
       {
-        title: "",
-        key: "Key: ?",
+        title: "Turn Your Eyes",
+        key: "Key: D",
       },
     ],
     notes: [
       {
-        title: "",
-        body: "",
+        title: "Main Passage",
+        body: "Ecclesiastes",
       },
       {
-        title: "",
-        body: "",
+        title: "Big Idea",
+        body: "Summary and main ideas of Ecclesiastes, Enoch",
       },
       {
         title: "Announcements",
