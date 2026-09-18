@@ -21,7 +21,7 @@ const mastersBibleStudyWeeks = [
       },
       {
         title: "Announcements",
-        body: "Meeting at 3rd floor C-Dub lounge. Inivte friends!!",
+        body: "Meeting at Dixon fire pit! Invite friends!!",
       },
     ],
     prayerRequests: [
@@ -71,7 +71,7 @@ const mastersBibleStudyWeeks = [
       },
       {
         title: "Announcements",
-        body: "Meeting at 3rd floor C-Dub lounge. Inivte friends!!",
+        body: "Meeting at 3rd floor C-Dub lounge. Invite friends!!",
       },
     ],
     prayerRequests: [
