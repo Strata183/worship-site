@@ -1,5 +1,47 @@
 const mastersBibleStudyWeeks = [
-   {date: "2026-09-17",
+ 
+  {date: "2026-09-24",
+    songs: [
+      {
+        title: "All Sufficient Merit",
+        key: "Key: G",
+      },
+      {
+        title: "He will Hold me Fast",
+        key: "Key: G",
+      },
+    ],
+    notes: [
+      {
+        title: "Main Passage",
+        body: "Ecclesiastes",
+      },
+      {
+        title: "Big Idea",
+        body: "?",
+      },
+      {
+        title: "Announcements",
+        body: "",
+      },
+    ],
+    prayerRequests: [
+      {
+        name: "Praise Reports",
+        items: [
+          "We are back at school!",
+        ],
+      },
+      {
+        name: "Prayer Requests",
+        items: [
+          "Pray for our Bible study through Ecclesiastes to be profitable and a great time of learning and fellowship",
+        "Pray for all the students coming back to school to be ready to work hard for the Lord"
+        ]
+      },
+    ],
+  },
+  {date: "2026-09-17",
     songs: [
       {
         title: "O Lord, My Rock and My Redeemer",
