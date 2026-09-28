@@ -1,0 +1,145 @@
+/* ==========================================================================
+   Pages/Home.js
+   ========================================================================== */
+
+/* Home page hero area. */
+.home-hero {
+  isolation: isolate;
+  margin: 0 auto;
+  max-width: 1040px;
+  overflow: visible;
+  padding: 2.5rem 1.5rem;
+  position: relative;
+}
+
+.home-hero-image {
+  display: block;
+  height: auto;
+  max-width: 520px;
+  opacity: 0.16;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(44vw, 520px);
+  z-index: -1;
+}
+
+.home-hero h1,
+.home-hero-statement,
+.home-hero p {
+  position: relative;
+}
+
+.home-hero-statement {
+  color: var(--color-accent);
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.45;
+  margin: 0.5rem auto 1.15rem;
+  max-width: 52rem;
+  text-wrap: balance;
+}
+
+.home-hero-statement::before,
+.home-hero-statement::after {
+  background-color: var(--color-border);
+  content: "";
+  display: block;
+  height: 1px;
+  margin: 1rem auto;
+  width: min(8rem, 34vw);
+}
+
+.eyebrow {
+  color: var(--color-accent);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+}
+
+.resource-grid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 2.5rem;
+  text-align: left;
+}
+
+.resource-card {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+  min-height: 180px;
+  padding: 1rem;
+  text-decoration: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.resource-card:hover,
+.resource-card:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 12px 28px rgba(45, 67, 48, 0.14);
+  transform: translateY(-2px);
+}
+
+.resource-card-disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.resource-card-disabled:hover,
+.resource-card-disabled:focus {
+  border-color: var(--color-border);
+  box-shadow: none;
+  transform: none;
+}
+
+.resource-card h2 {
+  font-family: var(--font-heading);
+  font-size: 1.12rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0 0 0.55rem;
+}
+
+.resource-card-image {
+  aspect-ratio: 16 / 9;
+  background-color: #050505;
+  border-radius: 6px;
+  display: block;
+  margin: 0.8rem 0 0;
+  max-width: 105px;
+  object-fit: contain;
+  object-position: center;
+  padding: 0.35rem;
+  width: 100%;
+}
+
+.resource-card-image-crop {
+  object-fit: cover;
+  padding: 0;
+}
+
+.resource-card p {
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+.resource-card span {
+  color: var(--color-accent);
+  font-weight: 800;
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.resource-card-disabled span {
+  color: var(--color-muted);
+}

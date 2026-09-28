@@ -1,0 +1,803 @@
+/* ==========================================================================
+   Pages/PspWorshipTeam.js
+   ========================================================================== */
+
+.friday-team-page {
+  max-width: 1280px;
+  text-align: left;
+}
+
+.friday-team-hero {
+  align-items: stretch;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  margin-bottom: 1.5rem;
+}
+
+.friday-team-hero > div:first-child,
+.friday-team-share-card,
+.friday-team-sidebar,
+.friday-team-main,
+.friday-chart-library {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.friday-team-hero > div:first-child {
+  padding: 1.5rem;
+}
+
+.friday-team-hero h1,
+.friday-team-hero p,
+.friday-section-heading p {
+  text-align: left;
+}
+
+.friday-team-hero h1,
+.friday-team-share-card h2,
+.friday-team-sidebar-heading h2,
+.friday-set-heading h2,
+.friday-section-heading h2,
+.friday-chart-card h3 {
+  font-family: var(--font-heading);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.friday-team-hero p,
+.friday-team-share-card p,
+.friday-team-sidebar-heading p,
+.friday-set-heading p,
+.friday-section-heading p,
+.friday-chart-card p {
+  color: var(--color-muted);
+  margin: 0.45rem 0 0;
+  max-width: none;
+}
+
+.friday-team-share-card {
+  align-content: start;
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.25rem;
+}
+
+.friday-team-share-card .secondary-button {
+  justify-self: start;
+}
+
+.friday-team-lock-hero {
+  display: block;
+  margin: 0 auto 1.5rem;
+  max-width: 680px;
+}
+
+.friday-team-shell {
+  align-items: start;
+  display: grid;
+  gap: 0;
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  margin-bottom: 1.5rem;
+}
+
+.friday-team-sidebar {
+  border-radius: 8px 0 0 8px;
+  border-right: 0;
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.friday-team-sidebar-heading {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.75rem;
+}
+
+.friday-week-list {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.friday-week-list button {
+  background-color: transparent;
+  border: 0;
+  border-radius: 7px;
+  color: var(--color-text);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 0.18rem;
+  padding: 0.7rem;
+  text-align: left;
+}
+
+.friday-week-list button:hover,
+.friday-week-list button:focus,
+.friday-week-list button.active {
+  background-color: var(--color-accent-light);
+  color: var(--color-accent);
+}
+
+.friday-week-list strong,
+.friday-week-list span {
+  display: block;
+}
+
+.friday-week-list strong {
+  font-family: var(--font-heading);
+  line-height: 1.2;
+}
+
+.friday-week-list span {
+  color: var(--color-muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.week-list-expand-button {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-accent);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 900;
+  margin-top: 0.4rem;
+  padding: 0.55rem 0.75rem;
+  width: 100%;
+}
+
+.week-list-expand-button:hover,
+.week-list-expand-button:focus {
+  background-color: var(--color-accent-light);
+  border-color: var(--color-accent);
+}
+
+.friday-team-main {
+  border-radius: 0 8px 8px 0;
+  display: grid;
+  gap: 1rem;
+  min-height: 430px;
+  padding: 1.15rem;
+}
+
+.friday-set-heading {
+  align-items: start;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding-bottom: 1rem;
+}
+
+.friday-set-heading .friday-set-lead {
+  color: var(--color-accent);
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin-top: 0.35rem;
+}
+
+.friday-set-action-panel {
+  align-items: flex-end;
+  display: grid;
+  gap: 0.65rem;
+  justify-items: end;
+}
+
+.friday-set-download-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.friday-set-download-actions .primary-button,
+.friday-set-download-actions .secondary-button {
+  font-size: 0.95rem;
+  min-height: auto;
+  padding: 0.62rem 0.9rem;
+}
+
+.friday-set-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.friday-set-actions .primary-button,
+.friday-set-actions .secondary-button,
+.friday-set-actions .subtle-danger-button {
+  font-size: 0.9rem;
+  min-height: auto;
+  padding: 0.58rem 0.85rem;
+}
+
+.friday-set-actions .subtle-danger-button {
+  background-color: transparent;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #991b1b;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+}
+
+.friday-set-actions .subtle-danger-button:hover,
+.friday-set-actions .subtle-danger-button:focus {
+  background-color: #fef2f2;
+}
+
+.friday-set-actions .subtle-danger-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.friday-set-edit-form {
+  display: grid;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.friday-set-edit-form > strong {
+  color: var(--color-accent);
+  font-family: var(--font-heading);
+  line-height: 1.2;
+}
+
+.friday-set-edit-form label {
+  color: var(--color-text);
+  display: grid;
+  font-size: 0.86rem;
+  font-weight: 800;
+  gap: 0.35rem;
+}
+
+.friday-set-edit-form input,
+.friday-set-edit-form textarea {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  font: inherit;
+  padding: 0.72rem 0.85rem;
+  width: 100%;
+}
+
+.friday-set-edit-form textarea {
+  resize: vertical;
+}
+
+.friday-set-list {
+  display: grid;
+  gap: 0.65rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.friday-set-list li {
+  align-items: start;
+  border-bottom: 1px solid var(--color-border);
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: 2rem minmax(0, 1fr) max-content;
+  padding: 0.85rem 0;
+  transition: background-color 160ms ease, opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.friday-set-list li.can-reorder {
+  cursor: grab;
+  grid-template-columns: 2rem 1.5rem minmax(0, 1fr) max-content max-content;
+}
+
+.friday-set-list li.can-reorder:active {
+  cursor: grabbing;
+}
+
+.friday-set-list li.dragging {
+  background-color: var(--color-accent-light);
+  opacity: 0.65;
+  transform: scale(0.995);
+}
+
+.friday-set-list li:last-child {
+  border-bottom: 0;
+}
+
+.friday-set-list li > span {
+  align-items: center;
+  background-color: var(--color-accent-light);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-accent);
+  display: flex;
+  font-weight: 800;
+  height: 2rem;
+  justify-content: center;
+  width: 2rem;
+}
+
+.friday-set-list strong {
+  display: block;
+  font-family: var(--font-heading);
+  line-height: 1.25;
+}
+
+.friday-set-list p {
+  color: var(--color-muted);
+  font-size: 0.94rem;
+  line-height: 1.45;
+  margin: 0.25rem 0 0;
+  max-width: none;
+  text-align: left;
+}
+
+.friday-set-list em {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-accent);
+  font-style: normal;
+  font-weight: 800;
+  min-width: 3rem;
+  padding: 0.35rem 0.7rem;
+  text-align: center;
+}
+
+.friday-set-drag-handle {
+  align-items: center;
+  cursor: grab;
+  display: grid;
+  gap: 0.16rem;
+  height: 2rem;
+  justify-content: center;
+  width: 1.5rem;
+}
+
+.friday-set-drag-handle i {
+  background-color: var(--color-muted);
+  border-radius: 999px;
+  display: block;
+  height: 0.14rem;
+  width: 1rem;
+}
+
+.friday-set-list li.can-reorder:hover .friday-set-drag-handle i,
+.friday-set-list li.dragging .friday-set-drag-handle i {
+  background-color: var(--color-accent);
+}
+
+.friday-set-song-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.friday-set-song-actions .subtle-danger-button {
+  background-color: transparent;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #991b1b;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  min-height: auto;
+  padding: 0.38rem 0.62rem;
+}
+
+.friday-set-song-actions .subtle-danger-button:hover,
+.friday-set-song-actions .subtle-danger-button:focus {
+  background-color: #fef2f2;
+}
+
+.friday-set-song-actions .subtle-danger-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.friday-chart-library {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.friday-section-heading {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.85rem;
+}
+
+.friday-library-toolbar {
+  align-items: end;
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: minmax(0, 1fr) max-content;
+}
+
+.friday-library-toolbar label,
+.friday-admin-form label {
+  color: var(--color-text);
+  display: grid;
+  font-size: 0.86rem;
+  font-weight: 800;
+  gap: 0.35rem;
+}
+
+.friday-library-toolbar input,
+.friday-admin-form input,
+.friday-admin-form select,
+.friday-admin-form textarea {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  font: inherit;
+  padding: 0.72rem 0.85rem;
+  width: 100%;
+}
+
+.friday-admin-form textarea {
+  resize: vertical;
+}
+
+.friday-library-toolbar span {
+  background-color: var(--color-accent-light);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-accent);
+  font-weight: 800;
+  padding: 0.55rem 0.85rem;
+  white-space: nowrap;
+}
+
+.friday-admin-form {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.85rem;
+}
+
+.friday-admin-drawer {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.friday-admin-drawer summary {
+  align-items: center;
+  color: var(--color-accent);
+  cursor: pointer;
+  display: flex;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  justify-content: space-between;
+  list-style: none;
+  padding: 0.8rem 0.9rem;
+}
+
+.friday-admin-drawer summary::-webkit-details-marker {
+  display: none;
+}
+
+.friday-admin-drawer summary::after {
+  color: var(--color-muted);
+  content: "+";
+  font-family: var(--font-body);
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.friday-admin-drawer[open] summary {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.friday-admin-drawer[open] summary::after {
+  content: "-";
+}
+
+.friday-admin-drawer .friday-admin-form {
+  border: 0;
+  border-radius: 0;
+}
+
+.friday-main-drawer {
+  background-color: white;
+}
+
+.friday-admin-form > strong {
+  color: var(--color-accent);
+  font-family: var(--font-heading);
+  line-height: 1.2;
+}
+
+.friday-song-form {
+  align-items: end;
+  grid-template-columns: minmax(13rem, 1.1fr) minmax(6rem, 0.4fr) minmax(11rem, 0.9fr);
+}
+
+.friday-song-form .friday-notes-field,
+.friday-song-form > strong {
+  grid-column: 1 / -1;
+}
+
+.friday-song-form button {
+  justify-self: start;
+}
+
+.friday-set-song-form,
+.friday-annotated-set-form {
+  align-items: end;
+  grid-template-columns: minmax(13rem, 1fr) minmax(14rem, 1fr) max-content;
+}
+
+.friday-set-song-form > strong,
+.friday-annotated-set-form > strong {
+  grid-column: 1 / -1;
+}
+
+.friday-annotated-set-form {
+  grid-template-columns: minmax(14rem, 1fr) max-content;
+}
+
+.friday-annotated-set-form .subtle-danger-button {
+  align-self: end;
+  background-color: transparent;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #991b1b;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+  min-height: auto;
+  padding: 0.58rem 0.85rem;
+}
+
+.friday-annotated-set-form .subtle-danger-button:hover,
+.friday-annotated-set-form .subtle-danger-button:focus {
+  background-color: #fef2f2;
+}
+
+.friday-annotated-set-form .subtle-danger-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.friday-chart-grid {
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.friday-chart-card {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  display: grid;
+  gap: 0.65rem 1rem;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  padding: 0.78rem 0.9rem;
+}
+
+.friday-chart-card .friday-chart-edit-form,
+.friday-chart-card .friday-extra-charts,
+.friday-chart-card .friday-chart-tools {
+  grid-column: 1 / -1;
+}
+
+.friday-chart-copy {
+  min-width: 0;
+}
+
+.friday-chart-note {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+
+.friday-chart-note p {
+  margin: 0;
+}
+
+.friday-chart-note button {
+  background-color: transparent;
+  border: 0;
+  color: var(--color-accent);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 900;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 0.18rem;
+}
+
+.friday-chart-note button:hover,
+.friday-chart-note button:focus {
+  color: var(--color-text);
+}
+
+.friday-chart-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  grid-column: 1;
+  min-width: 0;
+}
+
+.friday-chart-card .friday-chart-status {
+  color: #991b1b;
+  font-size: 0.83rem;
+  font-weight: 800;
+}
+
+.friday-chart-card .friday-chart-status.ready {
+  color: var(--color-accent);
+}
+
+.friday-chart-tags span {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-accent);
+  font-size: 0.74rem;
+  font-weight: 800;
+  padding: 0.28rem 0.5rem;
+}
+
+.friday-chart-card p,
+.friday-chart-card h3 {
+  overflow-wrap: anywhere;
+}
+
+.friday-chart-open-button {
+  align-self: start;
+  justify-self: end;
+  min-width: 8.5rem;
+  white-space: nowrap;
+}
+
+.friday-extra-charts {
+  border-top: 1px solid var(--color-border);
+  display: grid;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+}
+
+.friday-extra-charts p {
+  color: var(--color-accent);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.friday-extra-chart-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.friday-extra-chart-row .secondary-button,
+.friday-extra-chart-row .subtle-danger-button {
+  font-size: 0.82rem;
+  min-height: auto;
+  padding: 0.42rem 0.65rem;
+}
+
+.friday-extra-chart-row .subtle-danger-button {
+  background-color: white;
+  border: 1px solid #f3c6c6;
+  border-radius: 6px;
+  color: #991b1b;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+}
+
+.friday-extra-chart-row .subtle-danger-button:hover,
+.friday-extra-chart-row .subtle-danger-button:focus {
+  background-color: #fff5f5;
+}
+
+.friday-extra-chart-row .subtle-danger-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.friday-chart-edit-form {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.friday-chart-edit-form label {
+  color: var(--color-text);
+  display: grid;
+  font-size: 0.82rem;
+  font-weight: 800;
+  gap: 0.35rem;
+}
+
+.friday-chart-edit-form input,
+.friday-chart-edit-form textarea {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  font: inherit;
+  padding: 0.62rem 0.7rem;
+  width: 100%;
+}
+
+.friday-chart-edit-form textarea {
+  resize: vertical;
+}
+
+.friday-chart-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.friday-chart-edit-actions .primary-button,
+.friday-chart-edit-actions .secondary-button {
+  font-size: 0.9rem;
+  min-height: auto;
+  padding: 0.55rem 0.8rem;
+}
+
+.friday-chart-upload {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.85rem;
+}
+
+.friday-chart-tools {
+  background-color: var(--color-background);
+  margin-top: 0.1rem;
+}
+
+.friday-chart-tools summary {
+  font-size: 0.9rem;
+  padding: 0.62rem 0.75rem;
+}
+
+.friday-chart-upload label {
+  color: var(--color-text);
+  display: grid;
+  font-size: 0.82rem;
+  font-weight: 800;
+  gap: 0.35rem;
+}
+
+.friday-chart-upload input {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-muted);
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 0.55rem;
+}
+
+.friday-chart-upload .secondary-button {
+  font-size: 0.9rem;
+  min-height: auto;
+  padding: 0.55rem 0.75rem;
+}
+
+.friday-extra-chart-upload {
+  border-top: 1px solid var(--color-border);
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.25rem;
+  padding-top: 0.75rem;
+}

@@ -1,0 +1,437 @@
+/* ==========================================================================
+   Responsive adjustments for all files
+   ========================================================================== */
+
+/* Compact navigation and page spacing for very small screens. */
+@media (max-width: 560px) {
+  nav {
+    padding: 0.85rem 1rem;
+  }
+
+  .nav-content {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-height: auto;
+  }
+
+  nav ul {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .account-nav {
+    width: 100%;
+  }
+
+  .account-menu {
+    display: inline-block;
+  }
+
+  .account-dropdown {
+    left: 0;
+    max-width: calc(100vw - 2rem);
+    right: auto;
+    width: 12rem;
+    z-index: 1000;
+  }
+
+  .page {
+    padding-top: 3rem;
+  }
+
+  .page h1 {
+    font-size: 2.25rem;
+  }
+
+  .home-hero {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .home-hero-statement {
+    font-size: 1.08rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+  }
+
+  .home-hero-statement::before,
+  .home-hero-statement::after {
+    margin: 0.8rem auto;
+  }
+}
+
+/* Collapse wide grids before they feel cramped. */
+@media (max-width: 900px) {
+  .resource-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .resources-link-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .friday-team-hero,
+  .friday-team-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .friday-team-sidebar,
+  .friday-team-main {
+    border-radius: 8px;
+    border-right: 1px solid var(--color-border);
+  }
+
+  .friday-chart-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .friday-song-form {
+    grid-template-columns: 1fr;
+  }
+
+  .friday-set-song-form,
+  .friday-annotated-set-form {
+    grid-template-columns: 1fr;
+  }
+
+  .masters-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .masters-date-nav {
+    justify-self: stretch;
+    position: static;
+    width: 100%;
+  }
+
+  .masters-week-view {
+    grid-column: auto;
+  }
+
+  .masters-dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .masters-song-panel {
+    grid-row: auto;
+  }
+
+  .article-template-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .library-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .library-sidebar {
+    position: static;
+  }
+
+  .setlist-browser-grid,
+  .setlist-control-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .setlist-folder-panel {
+    position: static;
+  }
+
+  .prayer-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .prayer-toc {
+    justify-self: stretch;
+    position: static;
+    width: 100%;
+  }
+
+  .prayer-content {
+    grid-column: auto;
+  }
+
+  .friend-dashboard,
+  .friend-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .friend-section-primary {
+    grid-row: auto;
+  }
+
+  .steadfast-feature,
+  .steadfast-recording-card {
+    grid-template-columns: 1fr;
+  }
+
+  .steadfast-audio-upload-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Phone layout: stack cards, forms, tool panels, and score rows. */
+@media (max-width: 640px) {
+  .resource-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resources-link-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .friday-team-hero > div:first-child,
+  .friday-team-share-card,
+  .friday-team-main,
+  .friday-chart-library {
+    padding: 1rem;
+  }
+
+  .friday-set-heading {
+    align-items: stretch;
+    display: grid;
+  }
+
+  .friday-set-list li {
+    grid-template-columns: 2rem minmax(0, 1fr);
+  }
+
+  .friday-set-list li.can-reorder {
+    grid-template-columns: 2rem 1.5rem minmax(0, 1fr);
+  }
+
+  .friday-set-list em {
+    justify-self: start;
+  }
+
+  .friday-set-song-actions {
+    justify-content: flex-start;
+  }
+
+  .friday-chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .friday-chart-card {
+    grid-template-columns: 1fr;
+  }
+
+  .friday-chart-tags {
+    grid-column: 1;
+  }
+
+  .friday-chart-open-button {
+    justify-self: start;
+  }
+
+  .friday-library-toolbar {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .friday-library-toolbar span {
+    justify-self: start;
+  }
+
+  .resource-card {
+    min-height: auto;
+  }
+
+  .footer-content {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .footer-legal {
+    text-align: left;
+  }
+
+  .auth-panel,
+  .friend-summary-card,
+  .friend-section {
+    padding: 1rem;
+  }
+
+  .score-browser {
+    padding: 1rem;
+  }
+
+  .score-list li,
+  .score-edit-form {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .song-resource-card,
+  .song-resource-form {
+    grid-template-columns: 1fr;
+  }
+
+  .song-resource-drawer {
+    padding: 0.85rem;
+  }
+
+  .library-toolbar,
+  .setlist-add-grid,
+  .setlist-control-card,
+  .setlist-song-picker,
+  .upload-card-main {
+    grid-template-columns: 1fr;
+  }
+
+  .setlist-detail-heading {
+    align-items: stretch;
+    display: grid;
+  }
+
+  .setlist-item-list li {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .setlist-item-actions {
+    justify-content: flex-start;
+  }
+
+  .worthy-album-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .worthy-album-art {
+    max-width: 320px;
+  }
+
+  .friends-library-callout {
+    align-items: stretch;
+    display: grid;
+  }
+
+  .friends-library-callout a {
+    justify-content: center;
+  }
+
+  .library-count {
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 0.75rem;
+    padding-right: 0;
+  }
+
+  .score-actions {
+    justify-content: flex-start;
+  }
+
+  .score-actions button {
+    flex: 1 1 auto;
+  }
+
+  .vbs-hero {
+    grid-template-columns: 1fr;
+    padding: 1.25rem;
+  }
+
+  .vbs-hero-actions {
+    align-items: stretch;
+    min-width: 0;
+  }
+
+  .vbs-panel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .vbs-panel-heading > span {
+    text-align: left;
+  }
+
+  .vbs-chart-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .vbs-chart-actions {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .vbs-chart-actions button {
+    flex: 1;
+  }
+
+  .steadfast-hero,
+  .steadfast-section {
+    padding: 1.15rem;
+  }
+
+  .admin-mode-toggle {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .friend-list li {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .friend-person {
+    align-items: flex-start;
+  }
+
+  .row-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media print {
+  body {
+    background: white;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .setlist-print-area,
+  .setlist-print-area * {
+    visibility: visible;
+  }
+
+  .setlist-print-area {
+    background: white;
+    color: #111827;
+    display: block;
+    left: 0;
+    padding: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+  }
+
+  .setlist-print-heading {
+    margin-bottom: 1rem;
+  }
+
+  .setlist-item-list {
+    display: block;
+  }
+
+  .setlist-item-list li {
+    break-inside: avoid;
+    border: 1px solid #d1d5db;
+    display: block;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .setlist-item-actions {
+    display: none;
+  }
+
+  .setlist-item-main {
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+  }
+}

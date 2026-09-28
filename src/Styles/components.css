@@ -1,0 +1,275 @@
+/* ==========================================================================
+   Components/Navbar.js
+   ========================================================================== */
+
+/* Navigation bar at the top of the site. */
+nav {
+  background-color: var(--color-nav);
+  color: white;
+  padding: 0 1.5rem;
+}
+
+/* The nav uses a three-column grid:
+   site title, main links, account/login area. */
+.nav-content {
+  align-items: center;
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  margin: 0 auto;
+  max-width: 1360px;
+  min-height: 72px;
+}
+
+/* Main brand link on the left side of the navbar. */
+.site-title {
+  color: white;
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 800;
+  justify-self: start;
+  padding: 0.45rem 0.7rem;
+  text-decoration: none;
+}
+
+/* Horizontal list of primary nav links. */
+nav ul {
+  display: flex;
+  gap: 0.35rem;
+  justify-content: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Shared styling for links inside the nav. */
+nav a {
+  border-radius: 6px;
+  color: white;
+  display: inline-block;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+}
+
+/* Give each main nav link a steady width so the navbar feels balanced. */
+nav ul a {
+  min-width: 7rem;
+  padding-left: 1.35rem;
+  padding-right: 1.35rem;
+  text-align: center;
+}
+
+/* Hover/focus styles help mouse and keyboard users see what is active. */
+nav a:hover,
+nav a:focus {
+  background-color: var(--color-nav-hover);
+}
+
+.site-title:hover,
+.site-title:focus {
+  background-color: var(--color-nav-hover);
+  text-decoration: none;
+}
+
+/* The active class comes from NavLink when the URL matches the link. */
+nav a.active:not(.site-title) {
+  background-color: var(--color-accent);
+}
+
+/* Account area is pushed to the right column. */
+.account-nav {
+  justify-self: end;
+}
+
+/* Login link and account icon share button-like styling. */
+.login-link,
+.account-button {
+  background-color: white;
+  border: 0;
+  border-radius: 6px;
+  color: var(--color-nav);
+  cursor: pointer;
+  display: inline-block;
+  font: inherit;
+  font-weight: 800;
+  line-height: 1.4;
+  padding: 0.55rem 0.9rem;
+  text-decoration: none;
+}
+
+.account-button {
+  align-items: center;
+  display: inline-flex;
+  height: 2.5rem;
+  justify-content: center;
+  padding: 0;
+  width: 2.5rem;
+}
+
+/* The account icon is built with CSS instead of an image file. */
+.account-icon {
+  border: 2px solid currentColor;
+  border-radius: 999px;
+  display: block;
+  height: 1.3rem;
+  position: relative;
+  width: 1.3rem;
+}
+
+/* These pseudo-elements draw the head and shoulders inside the account icon. */
+.account-icon::before,
+.account-icon::after {
+  background-color: currentColor;
+  content: "";
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+}
+
+.account-icon::before {
+  border-radius: 999px;
+  height: 0.34rem;
+  top: 0.28rem;
+  width: 0.34rem;
+}
+
+.account-icon::after {
+  border-radius: 999px 999px 0 0;
+  bottom: 0.25rem;
+  height: 0.34rem;
+  width: 0.72rem;
+}
+
+.login-link:hover,
+.login-link:focus,
+.account-button:hover,
+.account-button:focus {
+  background-color: var(--color-accent-light);
+}
+
+/* Dropdown is positioned relative to the account button. */
+.account-menu {
+  position: relative;
+}
+
+/* Small invisible hover bridge so the menu does not close too easily. */
+.account-menu::after {
+  content: "";
+  height: 0.5rem;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 100%;
+}
+
+/* Hidden by default; shown when the account area is hovered or focused. */
+.account-dropdown {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.18);
+  display: none;
+  min-width: 150px;
+  padding: 0.35rem;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  z-index: 10;
+}
+
+.account-menu:hover .account-dropdown,
+.account-menu:focus-within .account-dropdown {
+  display: grid;
+}
+
+.account-dropdown a,
+.account-dropdown button {
+  background-color: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--color-text);
+  cursor: pointer;
+  display: block;
+  font: inherit;
+  font-weight: 700;
+  padding: 0.6rem 0.7rem;
+  text-align: left;
+  text-decoration: none;
+  width: 100%;
+}
+
+.account-dropdown a:hover,
+.account-dropdown a:focus,
+.account-dropdown button:hover,
+.account-dropdown button:focus {
+  background-color: var(--color-accent-light);
+}
+
+.site-title.active {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+/* ==========================================================================
+   Components/Footer.js
+   ========================================================================== */
+
+.site-footer {
+  background-color: var(--color-accent);
+  color: white;
+  margin-top: auto;
+  padding: 2rem 1.5rem;
+}
+
+.footer-content {
+  align-items: center;
+  display: flex;
+  gap: 1.5rem;
+  justify-content: space-between;
+  margin: 0 auto;
+  max-width: 1360px;
+}
+
+.site-footer h2 {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin: 0 0 0.35rem;
+}
+
+.site-footer p {
+  color: var(--color-accent-light);
+  margin: 0;
+}
+
+.footer-contact {
+  font-size: 0.95rem;
+  margin-top: 0.5rem;
+}
+
+.site-footer ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.site-footer a {
+  border-radius: 6px;
+  color: white;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.site-footer ul a {
+  padding: 0.3rem 0.45rem;
+}
+
+.site-footer a:hover,
+.site-footer a:focus {
+  background-color: rgba(255, 255, 255, 0.12);
+  text-decoration: none;
+}
