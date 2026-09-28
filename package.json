@@ -17,6 +17,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "new:masters-week": "node scripts/new-masters-bible-study-week.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
