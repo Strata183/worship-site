@@ -2,12 +2,12 @@ const mastersBibleStudyWeeks = [
   {date: "2026-10-01",
     songs: [
       {
-        title: "?",
-        key: "Key: ?",
+        title: "Rejoice",
+        key: "Key: Ab",
       },
       {
-        title: "?",
-        key: "Key: ?",
+        title: "Abide (I depend on You)",
+        key: "Key: Ab",
       },
     ],
     notes: [
@@ -21,7 +21,7 @@ const mastersBibleStudyWeeks = [
       },
       {
         title: "Announcements",
-        body: "",
+        body: "Meeting at 3rd floor C-Dub!",
       },
     ],
     prayerRequests: [
