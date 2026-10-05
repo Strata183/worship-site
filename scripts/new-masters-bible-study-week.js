@@ -39,3 +39,6 @@ fs.writeFileSync(dataPath, updatedSource);
 
 console.log(`Added a blank Master's Bible Study week for ${nextDateString}.`);
 console.log("Fill in its songs, notes, and prayer requests, then publish the site.");
+
+
+// run: npm run new:masters-week

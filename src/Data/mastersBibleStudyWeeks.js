@@ -1,253 +1,147 @@
 const mastersBibleStudyWeeks = [
-  {date: "2026-10-01",
+  {
+    date: "2026-10-08",
     songs: [
-      {
-        title: "Rejoice",
-        key: "Key: Ab",
-      },
-      {
-        title: "Abide (I depend on You)",
-        key: "Key: Ab",
-      },
+      { title: "?", key: "Key: ?" },
+      { title: "?", key: "Key: ?" },
     ],
     notes: [
-      {
-        title: "Main Passage",
-        body: "Ecclesiastes",
-      },
-      {
-        title: "Big Idea",
-        body: "?",
-      },
-      {
-        title: "Announcements",
-        body: "Meeting at 3rd floor C-Dub!",
-      },
+      { title: "Main Passage", body: "Ecclesiastes 3:1-15" },
+      { title: "Big Idea", body: "God’s Sovereignty Over Time and Season, Derek" },
+      { title: "Meeting Place", body: "3rd Floor C-Dub; 3-5pm" },
     ],
     prayerRequests: [
-      {
-        name: "Praise Reports",
-        items: [
-          "We are back at school!",
-        ],
-      },
+      { name: "Praise Reports", items: ["Zef is 20! Happy Birthday!"] },
+      { name: "Prayer Requests", items: ["To remain diligent with assignments getting harder!"] },
+    ],
+  },
+  {
+    date: "2026-10-01",
+    songs: [
+      { title: "Rejoice", key: "Key: Ab" },
+      { title: "Abide (I depend on You)", key: "Key: Ab" },
+    ],
+    notes: [
+      { title: "Main Passage", body: "Ecclesiastes 2" },
+      { title: "Big Idea", body: "?" },
+      { title: "Announcements", body: "Meeting at 3rd floor C-Dub!" },
+    ],
+    prayerRequests: [
+      { name: "Praise Reports", items: ["We are back at school!"] },
       {
         name: "Prayer Requests",
         items: [
           "Pray for our Bible study through Ecclesiastes to be profitable and a great time of learning and fellowship",
-        "Pray for all the students coming back to school to be ready to work hard for the Lord"
-        ]
+          "Pray for all the students coming back to school to be ready to work hard for the Lord",
+        ],
       },
     ],
   },
-  {date: "2026-09-24",
+  {
+    date: "2026-09-24",
     songs: [
-      {
-        title: "All Sufficient Merit",
-        key: "Key: G",
-      },
-      {
-        title: "He will Hold me Fast",
-        key: "Key: G",
-      },
+      { title: "All Sufficient Merit", key: "Key: G" },
+      { title: "He will Hold me Fast", key: "Key: G" },
     ],
     notes: [
-      {
-        title: "Main Passage",
-        body: "Ecclesiastes",
-      },
-      {
-        title: "Big Idea",
-        body: "?",
-      },
-      {
-        title: "Announcements",
-        body: "",
-      },
+      { title: "Main Passage", body: "Ecclesiastes" },
+      { title: "Big Idea", body: "?" },
+      { title: "Announcements", body: "" },
     ],
     prayerRequests: [
-      {
-        name: "Praise Reports",
-        items: [
-          "We are back at school!",
-        ],
-      },
+      { name: "Praise Reports", items: ["We are back at school!"] },
       {
         name: "Prayer Requests",
         items: [
           "Pray for our Bible study through Ecclesiastes to be profitable and a great time of learning and fellowship",
-        "Pray for all the students coming back to school to be ready to work hard for the Lord"
-        ]
+          "Pray for all the students coming back to school to be ready to work hard for the Lord",
+        ],
       },
     ],
   },
-  {date: "2026-09-17",
+  {
+    date: "2026-09-17",
     songs: [
-      {
-        title: "O Lord, My Rock and My Redeemer",
-        key: "Key: D",
-      },
-      {
-        title: "Turn Your Eyes",
-        key: "Key: D",
-      },
+      { title: "O Lord, My Rock and My Redeemer", key: "Key: D" },
+      { title: "Turn Your Eyes", key: "Key: D" },
     ],
     notes: [
-      {
-        title: "Main Passage",
-        body: "Ecclesiastes",
-      },
-      {
-        title: "Big Idea",
-        body: "Summary and main ideas of Ecclesiastes, Enoch",
-      },
-      {
-        title: "Announcements",
-        body: "Meeting at Dixon fire pit! Invite friends!!",
-      },
+      { title: "Main Passage", body: "Ecclesiastes" },
+      { title: "Big Idea", body: "Summary and main ideas of Ecclesiastes, Enoch" },
+      { title: "Announcements", body: "Meeting at Dixon fire pit! Invite friends!!" },
     ],
     prayerRequests: [
-      {
-        name: "Praise Reports",
-        items: [
-          "We are back at school!",
-        ],
-      },
+      { name: "Praise Reports", items: ["We are back at school!"] },
       {
         name: "Prayer Requests",
         items: [
           "Pray for our Bible study through Ecclesiastes to be profitable and a great time of learning and fellowship",
-        "Pray for all the students coming back to school to be ready to work hard for the Lord"
-        ]
+          "Pray for all the students coming back to school to be ready to work hard for the Lord",
+        ],
       },
     ],
   },
   {
     date: "2026-09-10",
     songs: [
-      {
-        title: "10,000 Reasons",
-        key: "Key: E",
-      },
-      {
-        title: "How deep the Father's Love for Us",
-        key: "Key: D",
-      },
-      {
-        title: "More Love to Thee, O Christ",
-        key: "Key: G",
-      },
-      {
-        title: "Jesus, Thank You",
-        key: "Key: G",
-      },
+      { title: "10,000 Reasons", key: "Key: E" },
+      { title: "How deep the Father's Love for Us", key: "Key: D" },
+      { title: "More Love to Thee, O Christ", key: "Key: G" },
+      { title: "Jesus, Thank You", key: "Key: G" },
     ],
     notes: [
-      {
-        title: "Love (Part 2)",
-        body: "Devotion from Derek: Part 2 of Paul’s Definition of Love",
-      },
-      {
-        title: "Text",
-        body: "1 Corinthians 13",
-      },
-      {
-        title: "Announcements",
-        body: "Meeting at 3rd floor C-Dub lounge. Invite friends!!",
-      },
+      { title: "Love (Part 2)", body: "Devotion from Derek: Part 2 of Paul’s Definition of Love" },
+      { title: "Text", body: "1 Corinthians 13" },
+      { title: "Announcements", body: "Meeting at 3rd floor C-Dub lounge. Invite friends!!" },
     ],
     prayerRequests: [
-      {
-        name: "Praise Reports",
-        items: [
-          "We are back at school!",
-        ],
-      },
+      { name: "Praise Reports", items: ["We are back at school!"] },
       {
         name: "Prayer Requests",
         items: [
           "Pray for our Bible study through Ecclesiastes to be profitable and a great time of learning and fellowship",
-        "Pray for all the students coming back to school to be ready to work hard for the Lord"
-        ]
+          "Pray for all the students coming back to school to be ready to work hard for the Lord",
+        ],
       },
     ],
   },
-  
   {
     date: "2026-09-03",
     songs: [
-      {
-        title: "His Mercy is More",
-        key: "Key: D",
-      },
-      {
-        title: "There is One Gospel",
-        key: "Key: C",
-      },
-      {
-        title: "Man of Sorrows",
-        key: "Key: C",
-      },
-      {
-        title: "Jesus, I my cross have taken",
-        key: "Key: E",
-      },
-      {
-        title: "All Glory be to Christ",
-        key: "Key: D",
-      },
+      { title: "His Mercy is More", key: "Key: D" },
+      { title: "There is One Gospel", key: "Key: C" },
+      { title: "Man of Sorrows", key: "Key: C" },
+      { title: "Jesus, I my cross have taken", key: "Key: E" },
+      { title: "All Glory be to Christ", key: "Key: D" },
     ],
     notes: [
-      {
-        title: "Main Passage",
-        body: "Devotion from Zef",
-      },
-      {
-        title: "Big Idea",
-        body: "Bible Study Kickoff",
-      },
+      { title: "Main Passage", body: "Devotion from Zef" },
+      { title: "Big Idea", body: "Bible Study Kickoff" },
       {
         title: "Announcements",
         body: "Meeting at Dixon fire pit today! A time of fellowship to kick off the new school year!",
       },
     ],
     prayerRequests: [
-      {
-        name: "Praise Reports",
-        items: [
-          "We are back at school!",
-        ],
-      },
+      { name: "Praise Reports", items: ["We are back at school!"] },
       {
         name: "Prayer Requests",
         items: [
           "Pray for our Bible study through Ecclesiastes to be profitable and a great time of learning and fellowship",
-        "Pray for all the students coming back to school to be ready to work hard for the Lord"
-        ]
+          "Pray for all the students coming back to school to be ready to work hard for the Lord",
+        ],
       },
     ],
   },
   {
     date: "2026-04-30",
     songs: [
-      {
-        title: "It was finished upon that cross",
-        key: "Key: E",
-      },
-      {
-        title: "I stand amazed",
-        key: "Key: E",
-      },
+      { title: "It was finished upon that cross", key: "Key: E" },
+      { title: "I stand amazed", key: "Key: E" },
     ],
     notes: [
-      {
-        title: "Main Passage",
-        body: "Romans 15-16",
-      },
-      {
-        title: "Big Idea",
-        body: "Conclusion of Romans!",
-      },
+      { title: "Main Passage", body: "Romans 15-16" },
+      { title: "Big Idea", body: "Conclusion of Romans!" },
       {
         title: "Announcements",
         body: [
@@ -256,15 +150,7 @@ const mastersBibleStudyWeeks = [
         ],
       },
     ],
-    prayerRequests: [
-      {
-        name: "Group Requests",
-        items: [
-          "",
-          "",
-        ],
-      },
-    ],
+    prayerRequests: [{ name: "Group Requests", items: ["", ""] }],
   },
 ];
 
