@@ -96,7 +96,7 @@ function Home() {
         </section>
 
         <div className="home-section-divider" aria-hidden="true">
-          <span>✝</span>
+          <span className="home-divider-cross" />
         </div>
       </div>
 

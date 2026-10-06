@@ -82,9 +82,23 @@
   height: 1px;
 }
 
-.home-section-divider span {
-  font-size: 1.45rem;
-  line-height: 1;
+.home-divider-cross {
+  background-color: currentColor;
+  display: block;
+  height: 1.35rem;
+  position: relative;
+  width: 0.26rem;
+}
+
+.home-divider-cross::before {
+  background-color: currentColor;
+  content: "";
+  height: 0.24rem;
+  left: 50%;
+  position: absolute;
+  top: 0.32rem;
+  transform: translateX(-50%);
+  width: 0.8rem;
 }
 
 .home-section-rule {

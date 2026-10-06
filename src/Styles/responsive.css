@@ -30,11 +30,15 @@
   }
 
   .account-dropdown {
-    left: 0;
-    max-width: calc(100vw - 2rem);
-    right: auto;
-    width: 12rem;
+    left: auto;
+    right: 0;
+    width: min(12rem, calc(100vw - 2rem));
     z-index: 1000;
+  }
+
+  .site-search-panel {
+    max-width: calc(100vw - 2rem);
+    right: 0;
   }
 
   .page {
