@@ -24,13 +24,17 @@ import PspWorshipTeam from "./Pages/PspWorshipTeam";
 import RoadToEmmaus from "./Pages/RoadToEmmaus/RoadToEmmaus";
 import RoadToEmmausContributors from "./Pages/RoadToEmmaus/Contributors";
 import RoadToEmmausSong from "./Pages/RoadToEmmaus/Song";
+import WorthyForSongTrackPage from "./Pages/WorthyForSong/Song";
 
 // App is the main "layout" component for the whole website.
 // It decides which page appears for each URL.
 function AppContent() {
   const pathname = useLocation().pathname;
   const isStandaloneAlbumPage =
-    pathname === "/road-to-emmaus" || pathname.startsWith("/road-to-emmaus/");
+    pathname === "/road-to-emmaus" ||
+    pathname.startsWith("/road-to-emmaus/") ||
+    pathname === "/worthy-for-song" ||
+    pathname.startsWith("/worthy-for-song/");
 
   return (
     <>
@@ -63,6 +67,7 @@ function AppContent() {
           }
         />
         <Route path="/worthy-for-song" element={<WorthyForSong />} />
+        <Route path="/worthy-for-song/:trackSlug" element={<WorthyForSongTrackPage />} />
         <Route path="/prayer" element={<Prayer />} />
         <Route
           path="/masters-bible-study"

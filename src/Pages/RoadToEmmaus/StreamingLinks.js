@@ -43,7 +43,7 @@ function StreamingPlatform({ href, icon, name }) {
   const content = (
     <>
       {icon}
-      <span className="emmaus-streaming-label">
+      <span className="album-streaming-label">
         <strong>{name}</strong>
         <small>{href ? "Listen now" : "Coming soon"}</small>
       </span>
@@ -51,12 +51,12 @@ function StreamingPlatform({ href, icon, name }) {
   );
 
   if (!href) {
-    return <span className="emmaus-streaming-platform">{content}</span>;
+    return <span className="album-streaming-platform">{content}</span>;
   }
 
   return (
     <a
-      className="emmaus-streaming-platform"
+      className="album-streaming-platform"
       href={href}
       rel="noreferrer"
       target="_blank"
@@ -72,7 +72,7 @@ function StreamingLinks({
   appleMusicUrl = "",
 }) {
   return (
-    <div className="emmaus-streaming-links" aria-label="Streaming platforms">
+    <div className="album-streaming-links" role="group" aria-label="Streaming platforms">
       <StreamingPlatform
         href={spotifyUrl}
         icon={<SpotifyIcon />}

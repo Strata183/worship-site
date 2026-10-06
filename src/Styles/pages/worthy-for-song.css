@@ -1,28 +1,62 @@
-/* ==========================================================================
-   Pages/WorthyForSong.js
-   ========================================================================== */
+/* ========================================================================
+   Pages/WorthyForSong.js and song detail pages
+   ======================================================================== */
 
-.page-worthy {
-  max-width: 1040px;
-  text-align: left;
+.page-worthy-for-song {
+  background: linear-gradient(135deg, #f4e9d4 0%, #e7d5b6 54%, #d9c4a0 100%);
+  max-width: none;
+  min-height: 100vh;
+  padding: 6rem clamp(1.5rem, 6vw, 5rem) 4rem;
+  position: relative;
+}
+
+.worthy-back-link {
+  color: #514637;
+  font-size: 0.9rem;
+  font-weight: 700;
+  left: clamp(1.5rem, 6vw, 5rem);
+  position: absolute;
+  text-decoration: none;
+  top: 1.5rem;
+}
+
+.worthy-back-link:hover,
+.worthy-back-link:focus-visible {
+  color: #8c6036;
+  text-decoration: underline;
 }
 
 .worthy-album-hero {
   align-items: center;
   display: grid;
-  gap: 1.5rem;
-  grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
-  margin: 0 auto 1.5rem;
+  gap: clamp(2rem, 6vw, 5rem);
+  grid-template-columns: minmax(250px, 0.9fr) minmax(0, 1fr);
+  margin: 0 auto;
+  max-width: 1000px;
+  text-align: left;
+}
+
+.worthy-artwork-column {
+  min-width: 0;
 }
 
 .worthy-album-art {
   aspect-ratio: 1;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  box-shadow: 0 16px 36px rgba(45, 67, 48, 0.14);
+  box-shadow: 0 24px 64px rgba(43, 35, 23, 0.24);
   display: block;
   object-fit: cover;
   width: 100%;
+}
+
+.worthy-album-copy h1 {
+  color: #29271f;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3rem, 7vw, 5.5rem);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+  margin: 0 0 1.25rem;
+  text-wrap: balance;
 }
 
 .worthy-album-copy p {
@@ -30,49 +64,231 @@
   text-align: left;
 }
 
-.worthy-track-panel {
-  background-color: white;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 1.5rem;
-}
-
-.worthy-track-heading {
-  margin-bottom: 1rem;
-}
-
-.worthy-track-heading h2 {
-  font-family: var(--font-heading);
+.worthy-album-copy .worthy-album-subtitle {
+  color: #795c35;
+  font-family: Georgia, "Times New Roman", serif;
   font-size: 1.35rem;
-  line-height: 1.2;
+  line-height: 1.4;
+  margin-bottom: 1.2rem;
+}
+
+.worthy-featured-single {
+  align-items: center;
+  background: rgba(255, 250, 240, 0.72);
+  border: 1px solid #c8b38e;
+  border-radius: 1rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin: 3rem auto 0;
+  max-width: 720px;
+  padding: 1.25rem 1.5rem;
+  text-align: left;
+}
+
+.worthy-featured-single .eyebrow {
+  color: #795c35;
+  margin-bottom: 0.2rem;
+}
+
+.worthy-featured-single h2,
+.worthy-description h2,
+.worthy-track-panel h2 {
+  color: #29271f;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 400;
+  line-height: 1.1;
+  margin: 0 0 1rem;
+}
+
+.worthy-featured-single h2 {
+  font-size: 1.7rem;
   margin: 0;
+}
+
+.worthy-featured-single > a {
+  color: #644d30;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.worthy-featured-single > a:hover,
+.worthy-featured-single > a:focus-visible {
+  color: #8c6036;
+  text-decoration: underline;
+}
+
+.worthy-description,
+.worthy-track-panel {
+  border-top: 1px solid #c8b38e;
+  margin: clamp(3.5rem, 8vw, 6rem) auto 0;
+  max-width: 720px;
+  padding-top: 2rem;
+  text-align: left;
+}
+
+.worthy-description .eyebrow,
+.worthy-track-panel .eyebrow {
+  color: #795c35;
+}
+
+.worthy-description > p:not(.eyebrow) {
+  margin-left: 0;
+  text-align: left;
+}
+
+.worthy-track-panel {
+  margin-top: 3rem;
 }
 
 .worthy-track-list {
-  display: grid;
-  gap: 0;
-  list-style: none;
+  list-style: decimal-leading-zero;
   margin: 0;
-  padding: 0;
+  padding-left: 2rem;
 }
 
 .worthy-track-list li {
+  border-bottom: 1px solid rgba(151, 121, 77, 0.4);
+  padding: 0.15rem 0.25rem;
+}
+
+.worthy-track-list li::marker {
+  color: #795c35;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.worthy-track-link {
   align-items: center;
-  border-top: 1px solid var(--color-border);
-  display: grid;
+  color: #39352a;
+  display: flex;
+  font-size: 1.08rem;
+  font-weight: 700;
   gap: 1rem;
-  grid-template-columns: 3rem minmax(0, 1fr);
-  padding: 0.9rem 0;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  text-decoration: none;
+  transition: color 160ms ease;
 }
 
-.worthy-track-number {
-  color: var(--color-accent);
-  font-size: 0.9rem;
-  font-weight: 900;
+.worthy-track-link:hover,
+.worthy-track-link:focus-visible {
+  color: #8c6036;
 }
 
-.worthy-track-title {
-  color: var(--color-text);
-  font-family: var(--font-heading);
+.worthy-track-status {
+  color: #796e5b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-left: auto;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.worthy-track-arrow {
+  color: #795c35;
+  font-size: 1.4rem;
+  font-weight: 400;
+  transition: transform 160ms ease;
+}
+
+.worthy-track-link:hover .worthy-track-arrow,
+.worthy-track-link:focus-visible .worthy-track-arrow {
+  transform: translateX(3px);
+}
+
+.worthy-song-page {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+.worthy-song-content {
+  background: rgba(255, 250, 240, 0.58);
+  border: 1px solid rgba(151, 121, 77, 0.45);
+  border-radius: 1.25rem;
+  margin: 2rem auto 0;
+  max-width: 760px;
+  padding: clamp(1.75rem, 5vw, 3.5rem);
+  text-align: center;
+  width: 100%;
+}
+
+.worthy-song-art {
+  aspect-ratio: 1;
+  box-shadow: 0 16px 36px rgba(43, 35, 23, 0.2);
+  display: block;
+  margin: 0 auto 1.5rem;
+  max-width: 220px;
+  object-fit: cover;
+  width: 100%;
+}
+
+.worthy-song-content h1 {
+  color: #29271f;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.75rem, 7vw, 5rem);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin: 0.5rem 0 1rem;
+}
+
+.worthy-release-status {
+  border: 1px solid #a88c61;
+  border-radius: 999px;
+  color: #644d30;
+  display: inline-block;
+  font-size: 0.75rem;
   font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 0.4rem 0.75rem;
+  text-transform: uppercase;
+}
+
+.worthy-release-status.is-released {
+  background: #514637;
+  border-color: #514637;
+  color: #fff8e9;
+}
+
+.worthy-song-description {
+  color: #5e5647;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin: 1.5rem auto 0;
+  max-width: 38rem;
+}
+
+.worthy-song-content .album-streaming-links {
+  margin-top: 1.75rem;
+}
+
+@media (max-width: 700px) {
+  .worthy-album-hero {
+    grid-template-columns: 1fr;
+    max-width: 520px;
+  }
+
+  .worthy-album-art {
+    margin: 0 auto;
+    max-width: 440px;
+  }
+}
+
+@media (max-width: 520px) {
+  .worthy-featured-single {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .worthy-track-link {
+    gap: 0.55rem;
+  }
+
+  .worthy-track-status {
+    font-size: 0.64rem;
+  }
 }
