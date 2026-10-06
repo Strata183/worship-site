@@ -1,8 +1,5 @@
 import { Link } from "react-router-dom";
 
-const donationUrl =
-  process.env.REACT_APP_DONATION_URL || "https://ko-fi.com/dereksmith183";
-
 // This array is the data for the cards on the home page.
 // Keeping the card information here makes the JSX below shorter.
 const homeSections = [
@@ -26,7 +23,7 @@ const homeSections = [
   },
   {
     title: "Worthy for Song",
-    description: "Worthy for Song, Lord willing, will be my first and upcoming album!",
+    description: "Worthy for Song is a solo album project with some covers and singles!",
     path: "/worthy-for-song",
     image: "/worthy_for_song.png",
     imageAlt: "Worthy for Song artwork",
@@ -64,11 +61,13 @@ const homeSections = [
   //   path: "/about",
   // },
   {
-    title: "Support Worthy for Worship",
-    description: "Give a tip through Ko-fi to help support this resource.",
-    externalUrl: donationUrl,
-    actionLabel: donationUrl ? "Donate on Ko-fi" : "Donation link coming soon",
-  }
+    title: "Road to Emmaus",
+    description: "Discover the upcoming colaborative album, its story, and its songs.",
+    path: "/road-to-emmaus",
+    image: "/road-to-emmaus-art.png",
+    imageAlt: "Sunset over a desert highway for the Road to Emmaus album",
+    imageClassName: "resource-card-image-crop",
+  },
   
 ];
 
