@@ -75,24 +75,32 @@ const homeSections = [
 function Home() {
   return (
     <main className="page page-home">
-      {/* Hero section: the main welcome area at the top of the page. */}
-      <section className="home-hero">
-        <img
-          className="home-hero-image"
-          src="/newguitar.png"
-          alt="Black acoustic guitar"
-        />
-        <h1>Welcome to Worthy for Worship</h1>
-        <h2 className="home-hero-statement">
-          Worship is that which is distinctly and only for God, and which,
-          while capturing the most profound of our emotions, does so by the
-          most profound divine truth
-        </h2>
-        <p>
-          My name is Derek Smith and this is my personal website! I hope to provide a place to find chord charts, tutorials, articles, and practical help for
-          serving the local church in worship ministry
-        </p>
-      </section>
+      <div className="home-intro-band">
+        {/* Hero section: the main welcome area at the top of the page. */}
+        <section className="home-hero">
+          <img
+            className="home-hero-image"
+            src="/newguitar.png"
+            alt="Black acoustic guitar"
+          />
+          <h1>Welcome to Worthy for Worship</h1>
+          <h2 className="home-hero-statement">
+            Worship is that which is distinctly and only for God, and which,
+            while capturing the most profound of our emotions, does so by the
+            most profound divine truth
+          </h2>
+          <p>
+            My name is Derek Smith and this is my personal website! I hope to provide a place to find chord charts, tutorials, articles, and practical help for
+            serving the local church in worship ministry
+          </p>
+        </section>
+
+        <div className="home-section-divider" aria-hidden="true">
+          <span>✝</span>
+        </div>
+      </div>
+
+      <hr className="home-section-rule" />
 
       {/* The cards are created by looping over homeSections with map(). */}
       <section className="resource-grid" aria-label="Worship resource sections">

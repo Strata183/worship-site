@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { supabase } from "../supabaseClient";
+import SiteSearch from "./SiteSearch";
 
 // Navbar appears at the top of every page.
 // It changes depending on whether the visitor is signed in.
@@ -42,6 +43,7 @@ function Navbar() {
         </ul>
 
         <div className="account-nav">
+          <SiteSearch />
           {user ? (
             // Signed-in users see the account icon and dropdown.
             <div className="account-menu">

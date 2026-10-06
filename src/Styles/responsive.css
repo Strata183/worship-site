@@ -41,6 +41,14 @@
     padding-top: 3rem;
   }
 
+  .page-home {
+    padding-top: 0;
+  }
+
+  .home-intro-band {
+    padding-top: 3rem;
+  }
+
   .page h1 {
     font-size: 2.25rem;
   }
@@ -56,10 +64,6 @@
     margin-bottom: 1rem;
   }
 
-  .home-hero-statement::before,
-  .home-hero-statement::after {
-    margin: 0.8rem auto;
-  }
 }
 
 /* Collapse wide grids before they feel cramped. */
