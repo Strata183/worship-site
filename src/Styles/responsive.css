@@ -22,7 +22,14 @@
   }
 
   .account-nav {
+    position: relative;
     width: 100%;
+  }
+
+  /* Anchor the dropdown to the full account row so it stays in the viewport
+     even when the search button sits beside the login/account controls. */
+  .site-search {
+    position: static;
   }
 
   .account-menu {
