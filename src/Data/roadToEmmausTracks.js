@@ -1,0 +1,66 @@
+// For a released song, set status to "released" and add its streaming URLs.
+// Set featured to true for the single you want highlighted on the album page.
+const roadToEmmausTracks = [
+  {
+    slug: "to-him",
+    title: "To Him",
+    description: "Placeholder: Add the song’s central message or inspiration here.",
+    status: "upcoming",
+    featured: false,
+    spotifyUrl: "",
+    youtubeMusicUrl: "",
+    appleMusicUrl: "",
+  },
+  {
+    slug: "church-pew",
+    title: "Church Pew",
+    description: "Placeholder: Share the story or idea that inspired this song.",
+    status: "upcoming",
+    featured: false,
+    spotifyUrl: "",
+    youtubeMusicUrl: "",
+    appleMusicUrl: "",
+  },
+  {
+    slug: "offering",
+    title: "Offering",
+    description: "Placeholder: Describe what this song expresses about worship and surrender.",
+    status: "upcoming",
+    featured: false,
+    spotifyUrl: "",
+    youtubeMusicUrl: "",
+    appleMusicUrl: "",
+  },
+  {
+    slug: "the-burden-fell-at-calvary",
+    title: "The Burden Fell at Calvary",
+    description: "Placeholder: Add a note about the song’s message and its focus on Jesus’ work at Calvary.",
+    status: "upcoming",
+    featured: false,
+    spotifyUrl: "",
+    youtubeMusicUrl: "",
+    appleMusicUrl: "",
+  },
+  {
+    slug: "cleopas",
+    title: "Cleopas",
+    description: "Placeholder: Share how this song connects with Cleopas and the walk to Emmaus.",
+    status: "upcoming",
+    featured: false,
+    spotifyUrl: "",
+    youtubeMusicUrl: "",
+    appleMusicUrl: "",
+  },
+  {
+    slug: "road-to-emmaus",
+    title: "Road To Emmaus",
+    description: "Placeholder: Describe what this song says about Emmaus and the album’s central theme.",
+    status: "upcoming",
+    featured: false,
+    spotifyUrl: "",
+    youtubeMusicUrl: "",
+    appleMusicUrl: "",
+  },
+];
+
+export default roadToEmmausTracks;

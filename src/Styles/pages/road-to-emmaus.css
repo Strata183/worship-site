@@ -1,0 +1,383 @@
+/* ==========================================================================
+   Pages/RoadToEmmaus.js
+   ========================================================================== */
+
+.page-road-to-emmaus {
+  background: linear-gradient(135deg, #fbf0df 0%, #f7e5d4 52%, #efd4c4 100%);
+  max-width: none;
+  min-height: 100vh;
+  padding: 6rem clamp(1.5rem, 6vw, 5rem) 4rem;
+  position: relative;
+}
+
+.emmaus-back-link {
+  color: #704638;
+  font-size: 0.9rem;
+  font-weight: 700;
+  left: clamp(1.5rem, 6vw, 5rem);
+  position: absolute;
+  text-decoration: none;
+  top: 1.5rem;
+}
+
+.emmaus-back-link:hover,
+.emmaus-back-link:focus {
+  color: #a64f3d;
+  text-decoration: underline;
+}
+
+.emmaus-hero {
+  align-items: center;
+  display: grid;
+  gap: clamp(2rem, 6vw, 5rem);
+  grid-template-columns: minmax(250px, 0.9fr) minmax(0, 1fr);
+  margin: 0 auto;
+  max-width: 1000px;
+  text-align: left;
+}
+
+.emmaus-artwork {
+  aspect-ratio: 16 / 9;
+  box-shadow: 0 24px 64px rgba(44, 36, 36, 0.2);
+  margin: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.emmaus-streaming-links {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  justify-content: center;
+  margin: 1rem auto 0;
+}
+
+.emmaus-streaming-platform {
+  align-items: center;
+  background: rgba(255, 250, 242, 0.62);
+  border: 1px solid #d3af98;
+  border-radius: 0.75rem;
+  color: #513a36;
+  display: flex;
+  gap: 0.6rem;
+  min-width: 9.5rem;
+  padding: 0.55rem 0.75rem;
+  text-decoration: none;
+  transition: border-color 180ms ease, background-color 180ms ease,
+    transform 180ms ease;
+}
+
+a.emmaus-streaming-platform:hover,
+a.emmaus-streaming-platform:focus-visible {
+  background: #fffaf2;
+  border-color: #a64f3d;
+  color: #513a36;
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.emmaus-streaming-platform svg {
+  flex: 0 0 1.8rem;
+  height: 1.8rem;
+  width: 1.8rem;
+}
+
+.emmaus-streaming-label {
+  display: grid;
+  line-height: 1.25;
+}
+
+.emmaus-streaming-label strong {
+  font-size: 0.82rem;
+}
+
+.emmaus-streaming-label small {
+  color: #876b5f;
+  font-size: 0.7rem;
+}
+
+.emmaus-artwork img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.emmaus-intro h1 {
+  color: #392b31;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3rem, 7vw, 5.5rem);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+  margin: 0 0 1.25rem;
+  text-wrap: balance;
+}
+
+.emmaus-intro p {
+  margin-left: 0;
+  text-align: left;
+}
+
+.emmaus-intro .emmaus-subtitle {
+  color: #92513f;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.35rem;
+  line-height: 1.4;
+  margin-bottom: 1.2rem;
+}
+
+.emmaus-status {
+  border: 1px solid #bd8468;
+  border-radius: 999px;
+  color: #784b3d;
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-top: 1.5rem;
+  padding: 0.5rem 0.85rem;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background-color 180ms ease, box-shadow 180ms ease,
+    color 180ms ease, transform 180ms ease;
+}
+
+.emmaus-status:hover,
+.emmaus-status:focus-visible {
+  background-color: #784b3d;
+  box-shadow: 0 6px 16px rgba(120, 75, 61, 0.25);
+  color: #fff8ef;
+  transform: translateY(-2px);
+}
+
+.emmaus-story {
+  border-top: 1px solid #d7b9a3;
+  margin: clamp(3.5rem, 8vw, 6rem) auto 0;
+  max-width: 720px;
+  padding-top: 2rem;
+  text-align: left;
+}
+
+.emmaus-story h2 {
+  color: #392b31;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 400;
+  line-height: 1.1;
+  margin: 0 0 1rem;
+}
+
+.emmaus-contributors .emmaus-story h1 {
+  color: #392b31;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin: 0 0 1rem;
+}
+
+.emmaus-story p:not(.eyebrow) {
+  margin-left: 0;
+  text-align: left;
+}
+
+.emmaus-tracks {
+  border-top: 1px solid #d7b9a3;
+  margin: 3rem auto 0;
+  max-width: 720px;
+  padding-top: 2rem;
+  text-align: left;
+}
+
+.emmaus-tracks h2 {
+  color: #392b31;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 400;
+  line-height: 1.1;
+  margin: 0 0 1rem;
+}
+
+.emmaus-tracks ol {
+  list-style: decimal-leading-zero;
+  margin: 0;
+  padding-left: 2rem;
+}
+
+.emmaus-tracks li {
+  border-bottom: 1px solid rgba(189, 132, 104, 0.45);
+  padding: 0.15rem 0.25rem;
+}
+
+.emmaus-tracks li::marker {
+  color: #a64f3d;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.emmaus-track-link {
+  align-items: center;
+  color: #513a36;
+  display: flex;
+  font-size: 1.08rem;
+  font-weight: 700;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+.emmaus-track-link:hover,
+.emmaus-track-link:focus-visible {
+  color: #a64f3d;
+}
+
+.emmaus-track-arrow {
+  color: #a64f3d;
+  font-size: 1.4rem;
+  font-weight: 400;
+  transition: transform 160ms ease;
+}
+
+.emmaus-track-link:hover .emmaus-track-arrow,
+.emmaus-track-link:focus-visible .emmaus-track-arrow {
+  transform: translateX(3px);
+}
+
+.emmaus-track-status {
+  color: #876b5f;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-left: auto;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.emmaus-featured-single {
+  align-items: center;
+  background: rgba(255, 250, 242, 0.68);
+  border: 1px solid #d3af98;
+  border-radius: 1rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin: 3rem auto 0;
+  max-width: 720px;
+  padding: 1.25rem 1.5rem;
+  text-align: left;
+}
+
+.emmaus-featured-single .eyebrow {
+  margin-bottom: 0.2rem;
+}
+
+.emmaus-featured-single h2 {
+  color: #392b31;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.7rem;
+  font-weight: 400;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.emmaus-featured-single > a {
+  color: #784b3d;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.emmaus-featured-single > a:hover,
+.emmaus-featured-single > a:focus-visible {
+  color: #a64f3d;
+  text-decoration: underline;
+}
+
+.emmaus-song-page {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+.emmaus-song-content {
+  background: rgba(255, 250, 242, 0.5);
+  border: 1px solid rgba(189, 132, 104, 0.5);
+  border-radius: 1.25rem;
+  margin: 2rem auto 0;
+  max-width: 760px;
+  padding: clamp(1.75rem, 5vw, 3.5rem);
+  text-align: center;
+  width: 100%;
+}
+
+.emmaus-song-content h1 {
+  color: #392b31;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3rem, 8vw, 5.5rem);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin: 0.5rem 0 1rem;
+}
+
+.emmaus-release-status {
+  border: 1px solid #bd8468;
+  border-radius: 999px;
+  color: #784b3d;
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 0.4rem 0.75rem;
+  text-transform: uppercase;
+}
+
+.emmaus-release-status.is-released {
+  background: #784b3d;
+  border-color: #784b3d;
+  color: #fff8ef;
+}
+
+.emmaus-song-description {
+  color: #674e46;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin: 1.5rem auto 0;
+  max-width: 38rem;
+}
+
+.emmaus-song-content .emmaus-streaming-links {
+  margin-top: 1.75rem;
+}
+
+@media (max-width: 700px) {
+  .emmaus-hero {
+    grid-template-columns: 1fr;
+    max-width: 520px;
+  }
+
+  .emmaus-artwork {
+    margin: 0 auto;
+    max-width: 440px;
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .emmaus-featured-single {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .emmaus-track-link {
+    gap: 0.55rem;
+  }
+
+  .emmaus-track-status {
+    font-size: 0.64rem;
+  }
+}

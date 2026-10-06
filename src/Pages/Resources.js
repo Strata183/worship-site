@@ -42,6 +42,11 @@ const resourceGroups = [
         path: "/worthy-for-song",
       },
       {
+        title: "Road to Emmaus",
+        description: "Album story, artwork, and release details.",
+        path: "/road-to-emmaus",
+      },
+      {
         title: "VBS 2026, Kinder Music",
         description: "Charts and practice resources for the Kinder music team.",
         path: "/vbs-2026-kinder-music",

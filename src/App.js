@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "./AuthContext";
 
 import Navbar from "./Components/Navbar";
@@ -21,104 +21,113 @@ import Prayer from "./Pages/Prayer";
 import Resources from "./Pages/Resources";
 import MastersBibleStudy from "./Pages/MastersBibleStudy";
 import PspWorshipTeam from "./Pages/PspWorshipTeam";
+import RoadToEmmaus from "./Pages/RoadToEmmaus/RoadToEmmaus";
+import RoadToEmmausContributors from "./Pages/RoadToEmmaus/Contributors";
+import RoadToEmmausSong from "./Pages/RoadToEmmaus/Song";
 
 // App is the main "layout" component for the whole website.
 // It decides which page appears for each URL.
+function AppContent() {
+  const pathname = useLocation().pathname;
+  const isStandaloneAlbumPage =
+    pathname === "/road-to-emmaus" || pathname.startsWith("/road-to-emmaus/");
+
+  return (
+    <>
+      <ScrollToTop />
+
+      {!isStandaloneAlbumPage && <Navbar />}
+
+      <Routes>
+        {/* Public route: anyone can visit the home page. */}
+        <Route path="/" element={<Home />} />
+
+        {/* Protected route: visitors must be signed in before seeing Library. */}
+        <Route
+          path="/songs"
+          element={
+            <ProtectedRoute>
+              <Library />
+            </ProtectedRoute>
+          }
+        />
+        {/* Public informational pages. */}
+        <Route path="/resources" element={<Resources />} />
+        <Route path="/tutorials" element={<Tutorials />} />
+        <Route
+          path="/steadfast"
+          element={
+            <ProtectedRoute>
+              <Steadfast />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/worthy-for-song" element={<WorthyForSong />} />
+        <Route path="/prayer" element={<Prayer />} />
+        <Route
+          path="/masters-bible-study"
+          element={
+            <ProtectedRoute>
+              <MastersBibleStudy />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/masters-bible-study/:weekSlug"
+          element={
+            <ProtectedRoute>
+              <MastersBibleStudy />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/vbs-2026-kinder-music"
+          element={
+            <ProtectedRoute>
+              <VbsKinderMusic />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/psp-worship-team"
+          element={
+            <ProtectedRoute>
+              <PspWorshipTeam />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/articles" element={<Blog />} />
+        <Route path="/articles/:articleSlug" element={<Blog />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/road-to-emmaus" element={<RoadToEmmaus />} />
+        <Route path="/road-to-emmaus/contributors" element={<RoadToEmmausContributors />} />
+        <Route path="/road-to-emmaus/:trackSlug" element={<RoadToEmmausSong />} />
+
+        {/* Login handles both sign-in and sign-up. */}
+        <Route path="/login" element={<Login />} />
+
+        {/* Friends is also protected because it uses the signed-in user's id. */}
+        <Route
+          path="/friends"
+          element={
+            <ProtectedRoute>
+              <Friends />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+
+      {!isStandaloneAlbumPage && <Footer />}
+      {!isStandaloneAlbumPage && <KoFiWidget />}
+    </>
+  );
+}
+
 function App() {
   return (
-    // AuthProvider makes login/session information available everywhere below it.
-    // Navbar, ProtectedRoute, Friends, Library, and Login can all use useAuth()
-    // because they live inside this provider.
     <AuthProvider>
-      {/* BrowserRouter turns normal-looking URLs into React pages. */}
       <BrowserRouter>
-        <ScrollToTop />
-
-        {/* Navbar appears on every route because it sits outside <Routes>. */}
-        <Navbar />
-
-        {/* Routes is the list of pages this website knows how to show. */}
-        <Routes>
-          {/* Public route: anyone can visit the home page. */}
-          <Route path="/" element={<Home />} />
-
-          {/* Protected route: visitors must be signed in before seeing Library. */}
-          <Route
-            path="/songs"
-            element={
-              <ProtectedRoute>
-                <Library />
-              </ProtectedRoute>
-            }
-          />
-          {/* Public informational pages. */}
-          <Route path="/resources" element={<Resources />} />
-          <Route path="/tutorials" element={<Tutorials />} />
-          <Route
-            path="/steadfast"
-            element={
-              <ProtectedRoute>
-                <Steadfast />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/worthy-for-song" element={<WorthyForSong />} />
-          <Route path="/prayer" element={<Prayer />} />
-          <Route
-            path="/masters-bible-study"
-            element={
-              <ProtectedRoute>
-                <MastersBibleStudy />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/masters-bible-study/:weekSlug"
-            element={
-              <ProtectedRoute>
-                <MastersBibleStudy />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/vbs-2026-kinder-music"
-            element={
-              <ProtectedRoute>
-                <VbsKinderMusic />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/psp-worship-team"
-            element={
-              <ProtectedRoute>
-                <PspWorshipTeam />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/articles" element={<Blog />} />
-          <Route path="/articles/:articleSlug" element={<Blog />} />
-          <Route path="/about" element={<About />} />
-
-          {/* Login handles both sign-in and sign-up. */}
-          <Route path="/login" element={<Login />} />
-
-          {/* Friends is also protected because it uses the signed-in user's id. */}
-          <Route
-            path="/friends"
-            element={
-              <ProtectedRoute>
-                <Friends />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-
-        {/* Footer appears on every route because it also sits outside <Routes>. */}
-        <Footer />
-
-        {/* Ko-fi donation widget floats above the app without affecting routes. */}
-        <KoFiWidget />
+        <AppContent />
       </BrowserRouter>
     </AuthProvider>
   );
