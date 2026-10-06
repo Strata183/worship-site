@@ -14,7 +14,7 @@ const worthyForSongTracks = [
   {
     slug: "sweeter-song-psalm-96",
     title: "Sweeter Song (Psalm 96)",
-    description: "Placeholder: Share the message or inspiration behind this song.",
+    description: "This song is about singing and creation new songs for the Lord! They tend to get sweeter as we see God clearer and keep writing of His immense grace towards us. This song also grabs most of its words directly from Psalm 96!  ",
     status: "released",
     featured: true,
     spotifyUrl: "https://open.spotify.com/track/0ZdXml6Zs9qUpNPKqsKlKZ?si=2781b73c658b49ec",
