@@ -75,24 +75,26 @@ const homeSections = [
 function Home() {
   return (
     <main className="page page-home">
-      <div className="home-intro-band">
+      <div className="home-intro-band home-intro-band-photo">
+        <div
+          aria-hidden="true"
+          className="home-intro-photo-background"
+          style={{ backgroundImage: 'url("/worthyforworship.png")' }}
+        />
         {/* Hero section: the main welcome area at the top of the page. */}
-        <section className="home-hero">
-          <img
-            className="home-hero-image"
-            src="/newguitar.png"
-            alt="Black acoustic guitar"
-          />
-          <h1>Welcome to Worthy for Worship</h1>
-          <h2 className="home-hero-statement">
-            Worship is that which is distinctly and only for God, and which,
-            while capturing the most profound of our emotions, does so by the
-            most profound divine truth
-          </h2>
-          <p>
-            My name is Derek Smith and this is my personal website! I hope to provide a place to find chord charts, tutorials, articles, and practical help for
-            serving the local church in worship ministry
-          </p>
+        <section className="home-hero home-hero-photo">
+          <div className="home-photo-copy">
+             {/* <p className="home-photo-kicker">Worship · Teach · Equip</p> */}
+              <h1>Worthy For Worship</h1>
+              <p>
+                Worship is that which is distinctly and only for God, and which,
+                while capturing the most profound of our emotions, does so by the
+                most profound divine truth
+              </p>
+              <Link className="home-photo-cta" to="#home-resources">
+                Explore Resources <span aria-hidden="true">→</span>
+              </Link>
+          </div>
         </section>
 
         <div className="home-section-divider" aria-hidden="true">
@@ -103,7 +105,7 @@ function Home() {
       <hr className="home-section-rule" />
 
       {/* The cards are created by looping over homeSections with map(). */}
-      <section className="resource-grid" aria-label="Worship resource sections">
+      <section className="resource-grid" id="home-resources" aria-label="Worship resource sections">
         {homeSections.map((section) => {
           const cardContent = (
             <>
