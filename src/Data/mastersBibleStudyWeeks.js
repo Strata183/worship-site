@@ -6,7 +6,7 @@ const mastersBibleStudyWeeks = [
       { title: "?", key: "Key: ?" },
     ],
     notes: [
-      { title: "Main Passage", body: "Ecclesiastes 3:1-15" },
+      { title: "Main Passage", body: "Ecclesiastes 3" },
       { title: "Big Idea", body: "God’s Sovereignty Over Time and Season, Derek" },
       { title: "Meeting Place", body: "3rd Floor C-Dub; 3-5pm" },
     ],
