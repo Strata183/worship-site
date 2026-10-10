@@ -24,29 +24,6 @@
   z-index: -1;
 }
 
-.home-intro-band-photo::before {
-  display: none;
-}
-
-.home-intro-photo-background {
-  inset: 0 auto 0 50%;
-  position: absolute;
-  transform: translateX(-50%);
-  width: 100vw;
-  z-index: -1;
-  background-position: center;
-  background-size: cover;
-}
-
-.home-intro-band-photo {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 68svh;
-  padding-bottom: 1rem;
-  padding-top: 5.5rem;
-}
-
 .home-hero {
   isolation: isolate;
   margin: 0 auto;
@@ -54,95 +31,6 @@
   overflow: visible;
   padding: 2.5rem 1.5rem;
   position: relative;
-}
-
-.home-hero-photo {
-  color: #17231b;
-  margin: 0;
-  max-width: none;
-  padding: 2rem 0;
-  text-align: left;
-}
-
-.home-hero-photo .home-hero-statement {
-  color: #17231b;
-}
-
-.home-hero-title-accent {
-  color: #173f2b;
-}
-
-.home-photo-copy {
-  margin-left: clamp(0rem, 17vw, 17rem);
-  max-width: 54rem;
-  transform: translateY(-5rem);
-}
-
-.home-photo-copy .home-photo-kicker {
-  color: #667d56;
-  font-size: 0.85rem;
-  font-weight: 800;
-  letter-spacing: 0.28em;
-  margin: 0 0 0.75rem;
-  text-transform: uppercase;
-}
-
-.home-photo-copy h1 {
-  color: #183b2b;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2.6rem, 4.2vw, 4.25rem);
-  line-height: 1.12;
-  margin-bottom: 1rem;
-  max-width: 54rem;
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.45), 0 2px 8px rgba(20, 40, 25, 0.16);
-}
-
-.home-photo-copy > p:not(.home-photo-kicker) {
-  color: #24382d;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.2rem;
-  line-height: 1.45;
-  margin: 0 0 1.25rem;
-  max-width: 38rem;
-  text-shadow: 0 1px 4px rgba(255, 255, 255, 0.5);
-}
-
-.home-photo-cta {
-  align-items: center;
-  background: #173f2b;
-  border-radius: 999px;
-  color: white;
-  display: inline-flex;
-  font-family: Georgia, "Times New Roman", serif;
-  font-weight: 700;
-  gap: 1.5rem;
-  padding: 0.8rem 1.5rem;
-  text-decoration: none;
-}
-
-.home-photo-cta:hover,
-.home-photo-cta:focus-visible {
-  background: #0f2e20;
-  color: white;
-}
-
-#root:has(.home-intro-band-photo) > nav {
-  background: transparent;
-  left: 0;
-  position: absolute;
-  right: 0;
-  top: 0;
-  z-index: 10;
-}
-
-#root:has(.home-intro-band-photo) > nav a {
-  color: #fff;
-  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.48);
-}
-
-#root:has(.home-intro-band-photo) > nav a:hover,
-#root:has(.home-intro-band-photo) > nav a:focus-visible {
-  background-color: rgba(20, 40, 29, 0.35);
 }
 
 .home-hero-image {
@@ -174,29 +62,6 @@
   margin: 0.5rem auto 1.15rem;
   max-width: 52rem;
   text-wrap: balance;
-}
-
-@media (max-width: 560px) {
-  .home-intro-photo-background {
-    background-position: 58% center;
-  }
-
-  .home-hero.home-hero-photo {
-    padding: 2rem 0;
-  }
-
-  .home-intro-band-photo {
-    min-height: 78svh;
-    padding-top: 9rem;
-  }
-
-  .home-photo-copy {
-    margin-left: 0;
-  }
-
-  .home-photo-copy h1 {
-    font-size: 2.45rem;
-  }
 }
 
 .home-section-divider {
