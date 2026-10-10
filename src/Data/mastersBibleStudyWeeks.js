@@ -2,8 +2,8 @@ const mastersBibleStudyWeeks = [
   {
     date: "2026-10-08",
     songs: [
-      { title: "?", key: "Key: ?" },
-      { title: "?", key: "Key: ?" },
+      { title: "Christ our Hope in Life in Death", key: "Key: E" },
+      { title: "In Christ Alone", key: "Key: D" },
     ],
     notes: [
       { title: "Main Passage", body: "Ecclesiastes 3" },
