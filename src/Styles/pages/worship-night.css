@@ -1,0 +1,472 @@
+.page-worship-night {
+  background: linear-gradient(145deg, #fbf4e9 0%, #f1e2cc 55%, #e8d1b1 100%);
+  color: #30231d;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  max-width: none;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 3.75rem clamp(1rem, 5vw, 4rem) 1.5rem;
+  position: relative;
+}
+
+.worship-night-back-link {
+  color: #68422e;
+  font-size: 0.9rem;
+  font-weight: 700;
+  left: clamp(1rem, 5vw, 4rem);
+  position: absolute;
+  text-decoration: none;
+  top: 1.25rem;
+}
+
+.worship-night-back-link:hover,
+.worship-night-back-link:focus-visible {
+  color: #392820;
+  text-decoration: underline;
+}
+
+.worship-night-hero {
+  align-items: center;
+  display: grid;
+  gap: clamp(1.25rem, 4vw, 3.5rem);
+  grid-template-columns: minmax(220px, 0.85fr) minmax(0, 1.15fr);
+  margin: 0 auto;
+  max-width: 1000px;
+  text-align: left;
+  width: 100%;
+}
+
+.worship-night-artwork {
+  aspect-ratio: 4 / 3;
+  background: radial-gradient(ellipse at 50% 78%, #e7a353 0, #9c5731 18%, #59372b 42%, #322822 72%);
+  border: 1px solid rgba(104, 66, 46, 0.18);
+  border-radius: 1rem;
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.worship-night-artwork img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.worship-night-intro .eyebrow,
+.worship-night-signup .eyebrow,
+.worship-night-qr .eyebrow {
+  color: #8c542f;
+  font-size: 0.76rem;
+  letter-spacing: 0.11em;
+  margin-bottom: 0.45rem;
+}
+
+.worship-night-intro h1 {
+  color: #392820;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.6rem, 6vw, 4.75rem);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+  margin: 0 0 0.85rem;
+  text-wrap: balance;
+}
+
+.worship-night-intro > p:not(.eyebrow) {
+  color: #5f5046;
+  font-size: 1.05rem;
+  margin: 0;
+  max-width: 38rem;
+  text-align: left;
+}
+
+.worship-night-details {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 1.2rem;
+  max-width: 480px;
+}
+
+.worship-night-details div {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid #d9c5aa;
+  border-radius: 0.7rem;
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.65rem 0.8rem;
+}
+
+.worship-night-details span {
+  color: #8c542f;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.worship-night-details strong {
+  color: #392820;
+  font-size: 0.95rem;
+}
+
+.worship-night-actions {
+  align-items: stretch;
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: minmax(0, 1.5fr) minmax(230px, 0.8fr);
+  margin: 1rem auto 0;
+  max-width: 1000px;
+  text-align: left;
+  width: 100%;
+}
+
+.worship-night-signup,
+.worship-night-qr {
+  background: rgba(255, 248, 237, 0.96);
+  border: 1px solid #e6c8a5;
+  border-radius: 0.9rem;
+  color: #30231d;
+  padding: 0.85rem 1rem;
+}
+
+.worship-night-signup h2,
+.worship-night-qr h2 {
+  color: #392820;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.45rem;
+  font-weight: 400;
+  margin: 0 0 0.25rem;
+}
+
+.worship-night-signup > p:not(.eyebrow),
+.worship-night-qr > p:not(.eyebrow) {
+  color: #665349;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin: 0;
+  text-align: left;
+}
+
+.worship-night-form {
+  margin-top: 0.6rem;
+}
+
+.worship-night-form label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.worship-night-input-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.worship-night-input-row input {
+  border: 1px solid #cfbda9;
+  border-radius: 7px;
+  flex: 1;
+  font: inherit;
+  min-width: 0;
+  padding: 0.65rem;
+}
+
+.worship-night-input-row button,
+.worship-night-form > button,
+.worship-night-share {
+  background: #68422e;
+  border: 0;
+  border-radius: 7px;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.65rem 0.9rem;
+}
+
+.worship-night-input-row button:disabled,
+.worship-night-form > button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.worship-night-signed-in {
+  color: #665349 !important;
+  font-size: 0.86rem !important;
+  margin: 0 0 0.55rem !important;
+  text-align: left;
+}
+
+.worship-night-message {
+  color: #68422e !important;
+  font-size: 0.85rem !important;
+  font-weight: 700;
+  min-height: 1rem;
+  text-align: left !important;
+}
+
+.worship-night-signup small {
+  color: #76645a;
+  font-size: 0.72rem;
+}
+
+.worship-night-qr {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 92px;
+  column-gap: 0.75rem;
+  align-content: center;
+}
+
+.worship-night-qr .eyebrow,
+.worship-night-qr h2,
+.worship-night-qr > p:not(.eyebrow),
+.worship-night-share {
+  grid-column: 1;
+}
+
+.worship-night-qr img {
+  background: white;
+  border: 1px solid #e1d4c5;
+  border-radius: 7px;
+  grid-column: 2;
+  grid-row: 1 / span 4;
+  height: 92px;
+  margin: auto 0;
+  padding: 0.25rem;
+  width: 92px;
+}
+
+.worship-night-share {
+  justify-self: start;
+  margin-top: 0.55rem;
+}
+
+.worship-night-archive-link-wrap {
+  margin: 0.85rem auto 0;
+  max-width: 1000px;
+  text-align: right;
+  width: 100%;
+}
+
+.worship-night-archive-link {
+  color: #68422e;
+  display: inline-block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.3rem 0;
+  text-decoration: none;
+}
+
+.worship-night-archive-link:hover,
+.worship-night-archive-link:focus-visible {
+  color: #392820;
+  text-decoration: underline;
+}
+
+.worship-night-archive-page {
+  justify-content: flex-start;
+  padding-top: 6rem;
+}
+
+.worship-night-archive-header,
+.worship-night-archive-list,
+.worship-night-archive-empty {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 900px;
+  width: 100%;
+}
+
+.worship-night-archive-header {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.worship-night-archive-header h1 {
+  color: #392820;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 400;
+  line-height: 1;
+  margin: 0 0 0.6rem;
+}
+
+.worship-night-archive-header > p:last-child {
+  color: #5f5046;
+  font-size: 1rem;
+  margin: 0;
+  text-align: left;
+}
+
+.worship-night-archive-empty {
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px dashed #c9ad8a;
+  border-radius: 0.75rem;
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  text-align: left;
+}
+
+.worship-night-archive-empty h2 {
+  color: #392820;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.8rem;
+  font-weight: 400;
+  margin: 0 0 0.45rem;
+}
+
+.worship-night-archive-empty p {
+  color: #5f5046;
+  font-size: 0.98rem;
+  margin: 0 0 1rem;
+  text-align: left;
+}
+
+.worship-night-archive-empty .worship-night-archive-link {
+  background: #f5ddc0;
+  border-radius: 7px;
+  color: #392820;
+  padding: 0.65rem 0.85rem;
+}
+
+.worship-night-archive-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.worship-night-archive-card {
+  background: rgba(255, 248, 237, 0.96);
+  border: 1px solid #e6c8a5;
+  border-radius: 0.9rem;
+  color: #30231d;
+  padding: 1rem;
+}
+
+.worship-night-archive-card-heading {
+  align-items: start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.worship-night-archive-card-heading > span {
+  color: #76645a;
+  font-size: 0.85rem;
+}
+
+.worship-night-archive-card h2 {
+  color: #392820;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin: 0 0 0.35rem;
+}
+
+.worship-night-archive-recap {
+  color: #665349;
+  font-size: 0.95rem;
+  margin: 0;
+  text-align: left;
+}
+
+.worship-night-archive-songs {
+  margin-top: 0.8rem;
+}
+
+.worship-night-archive-songs h3 {
+  color: #392820;
+  font-size: 0.9rem;
+  margin: 0 0 0.3rem;
+}
+
+.worship-night-archive-songs ul {
+  color: #665349;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1.2rem;
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.worship-night-gallery {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-top: 0.8rem;
+}
+
+.worship-night-gallery img,
+.worship-night-gallery video {
+  aspect-ratio: 16 / 10;
+  background: #241d19;
+  border-radius: 0.55rem;
+  display: block;
+  object-fit: cover;
+  width: 100%;
+}
+
+@media (max-width: 700px) {
+  .page-worship-night {
+    justify-content: flex-start;
+    min-height: 100dvh;
+    padding: 3.5rem 0.85rem 1rem;
+  }
+
+  .worship-night-hero {
+    gap: 0.9rem;
+    grid-template-columns: 1fr;
+  }
+
+  .worship-night-artwork {
+    aspect-ratio: 16 / 7;
+  }
+
+  .worship-night-intro h1 {
+    font-size: clamp(2.25rem, 10vw, 3.25rem);
+  }
+
+  .worship-night-intro > p:not(.eyebrow) {
+    font-size: 0.95rem;
+  }
+
+  .worship-night-details {
+    margin-top: 0.75rem;
+  }
+
+  .worship-night-actions {
+    gap: 0.55rem;
+    grid-template-columns: 1fr;
+    margin-top: 0.7rem;
+  }
+
+  .worship-night-signup,
+  .worship-night-qr {
+    padding: 0.7rem 0.8rem;
+  }
+
+  .worship-night-qr {
+    grid-template-columns: minmax(0, 1fr) 76px;
+  }
+
+  .worship-night-qr img {
+    height: 76px;
+    width: 76px;
+  }
+
+  .worship-night-archive-page {
+    padding-top: 4.75rem;
+  }
+
+  .worship-night-archive-link-wrap {
+    margin-top: 0.55rem;
+  }
+
+  .worship-night-archive-card-heading {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}

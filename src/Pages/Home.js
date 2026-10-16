@@ -93,6 +93,15 @@ function Home() {
             My name is Derek Smith and this is my personal website! I hope to provide a place to find chord charts, tutorials, articles, and practical help for
             serving the local church in worship ministry
           </p>
+          <Link
+            className="home-worship-night-link"
+            title="Worthy for Worship: Worship Night"
+            to="/worship-night"
+          >
+            <span>Worship Night</span>
+            <span className="home-worship-night-date">November 23 · 6 PM</span>
+            <span aria-hidden="true">→</span>
+          </Link>
         </section>
 
         <div className="home-section-divider" aria-hidden="true">

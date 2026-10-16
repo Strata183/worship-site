@@ -64,6 +64,35 @@
   text-wrap: balance;
 }
 
+.home-worship-night-link {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid #d5c4aa;
+  border-radius: 999px;
+  color: #4a3829;
+  display: inline-flex;
+  font-size: 0.8rem;
+  gap: 0.65rem;
+  margin: 0.75rem 0 0 auto;
+  padding: 0.45rem 0.75rem;
+  position: relative;
+  text-decoration: none;
+  transition: background-color 160ms ease, transform 160ms ease;
+}
+
+.home-worship-night-link:hover,
+.home-worship-night-link:focus-visible {
+  background: white;
+  color: var(--color-accent);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.home-worship-night-date {
+  color: var(--color-muted);
+  font-size: 0.72rem;
+}
+
 .home-section-divider {
   align-items: center;
   color: var(--color-accent);

@@ -25,12 +25,16 @@ import RoadToEmmaus from "./Pages/RoadToEmmaus/RoadToEmmaus";
 import RoadToEmmausContributors from "./Pages/RoadToEmmaus/Contributors";
 import RoadToEmmausSong from "./Pages/RoadToEmmaus/Song";
 import WorthyForSongTrackPage from "./Pages/WorthyForSong/Song";
+import WorshipNight from "./Pages/WorshipNight";
+import WorshipNightArchive from "./Pages/WorshipNightArchive";
 
 // App is the main "layout" component for the whole website.
 // It decides which page appears for each URL.
 function AppContent() {
   const pathname = useLocation().pathname;
   const isStandaloneAlbumPage =
+    pathname === "/worship-night" ||
+    pathname.startsWith("/worship-night/") ||
     pathname === "/road-to-emmaus" ||
     pathname.startsWith("/road-to-emmaus/") ||
     pathname === "/worthy-for-song" ||
@@ -45,6 +49,8 @@ function AppContent() {
       <Routes>
         {/* Public route: anyone can visit the home page. */}
         <Route path="/" element={<Home />} />
+        <Route path="/worship-night" element={<WorshipNight />} />
+        <Route path="/worship-night/archive" element={<WorshipNightArchive />} />
 
         {/* Protected route: visitors must be signed in before seeing Library. */}
         <Route
