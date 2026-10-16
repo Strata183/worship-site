@@ -91,11 +91,11 @@ function WorshipNight() {
             </button>
           </form>
           <p aria-live="polite" className="worship-night-message">
-            {status === "success" && "You’re on the list! Watch your inbox for updates."}
+            {status === "success" && "You’re on the list! A confirmation email is on its way."}
             {status === "already-signed-up" && "That email is already signed up. Thanks for being here!"}
             {status === "error" && "We couldn’t save your signup right now. Please try again in a moment."}
           </p>
-          <small>You’re signing up for worship night email updates. You can unsubscribe at any time.</small>
+          <small>We’ll send a confirmation and email updates about Worship Night.</small>
         </div>
 
         <aside className="worship-night-qr">
