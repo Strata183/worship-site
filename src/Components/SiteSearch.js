@@ -8,6 +8,7 @@ const sitePages = [
   { title: "Home", description: "Welcome to Worthy for Worship", path: "/" },
   { title: "Songs", description: "Chord charts, keys, and song resources", path: "/songs" },
   { title: "Resources", description: "Browse worship resources", path: "/resources" },
+  { title: "Worship Night", description: "Event details, email updates, and past Worship Nights", path: "/worship-night" },
   { title: "Tutorials", description: "Practice walkthroughs and teaching resources", path: "/tutorials" },
   { title: "Prayer Guide", description: "Guidance for prayer", path: "/prayer" },
   { title: "Master's Bible Study", description: "Weekly study songs, notes, and prayer requests", path: "/masters-bible-study" },

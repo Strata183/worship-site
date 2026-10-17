@@ -21,6 +21,11 @@ const resourceGroups = [
         path: "/prayer",
       },
       {
+        title: "Worship Night",
+        description: "Event details, email updates, and the archive of past Worship Nights.",
+        path: "/worship-night",
+      },
+      {
         title: "Master's Bible Study",
         description: "Weekly songs, prayer requests, and study notes.",
         path: "/masters-bible-study",
