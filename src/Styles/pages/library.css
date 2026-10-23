@@ -462,6 +462,22 @@
   cursor: not-allowed;
 }
 
+.score-actions .score-share-button {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  min-height: 2.55rem;
+  min-width: 2.55rem;
+  padding: 0.55rem;
+}
+
+.score-share-button svg {
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
 .shared-song-page .form-stack {
   background: linear-gradient(145deg, #ffffff, #f4f8f6);
   border: 1px solid #dbe6e1;

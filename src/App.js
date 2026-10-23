@@ -15,6 +15,7 @@ import Steadfast from "./Pages/Steadfast";
 import WorthyForSong from "./Pages/WorthyForSong";
 import VbsKinderMusic from "./Pages/VbsKinderMusic";
 import Friends from "./Pages/Friends";
+import Profile from "./Pages/Profile";
 import Library from "./Pages/Library";
 import SharedSong from "./Pages/SharedSong";
 import SharedSetlist from "./Pages/SharedSetlist";
@@ -136,6 +137,14 @@ function AppContent() {
         <Route path="/login" element={<Login />} />
 
         {/* Friends is also protected because it uses the signed-in user's id. */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/friends"
           element={

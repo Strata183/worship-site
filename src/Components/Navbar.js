@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { supabase } from "../supabaseClient";
 import SiteSearch from "./SiteSearch";
@@ -8,7 +8,6 @@ import SiteSearch from "./SiteSearch";
 function Navbar() {
   const { user } = useAuth();
 
-  // Supabase clears the saved session, which causes AuthContext to update.
   async function handleSignOut() {
     await supabase.auth.signOut();
   }
@@ -45,19 +44,18 @@ function Navbar() {
         <div className="account-nav">
           <SiteSearch />
           {user ? (
-            // Signed-in users see the account icon and dropdown.
+            // The picture opens Profile, and the existing dropdown keeps its account actions.
             <div className="account-menu">
-              <button
-                aria-label="Account menu"
+              <Link
+                aria-label="Profile"
                 className="account-button"
-                type="button"
+                to="/profile"
               >
                 <span aria-hidden="true" className="account-icon" />
-              </button>
+              </Link>
               <div className="account-dropdown">
-                {/* Friends lets users manage sharing access. */}
                 <NavLink to="/friends">Friends</NavLink>
-                <button type="button" onClick={handleSignOut}>
+                <button onClick={handleSignOut} type="button">
                   Sign out
                 </button>
               </div>

@@ -2119,8 +2119,25 @@ function Library() {
                           </button>
                           {isOwner && (
                             <>
-                              <button type="button" onClick={() => copySongShareLink(song)}>
-                                Share link
+                              <button
+                                aria-label="Copy share link"
+                                className="score-share-button"
+                                title="Copy share link"
+                                type="button"
+                                onClick={() => copySongShareLink(song)}
+                              >
+                                <svg
+                                  aria-hidden="true"
+                                  fill="none"
+                                  height="18"
+                                  viewBox="0 0 24 24"
+                                  width="18"
+                                >
+                                  <circle cx="18" cy="5" r="3" />
+                                  <circle cx="6" cy="12" r="3" />
+                                  <circle cx="18" cy="19" r="3" />
+                                  <path d="m8.7 10.7 6.6-4.4m-6.6 7 6.6 4.4" />
+                                </svg>
                               </button>
                               <button type="button" onClick={() => startEditingSong(song)}>
                                 Edit
