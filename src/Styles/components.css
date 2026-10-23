@@ -321,6 +321,10 @@ nav .site-search-results a:focus-visible {
   display: grid;
 }
 
+.account-menu.is-dismissed .account-dropdown {
+  display: none;
+}
+
 .account-dropdown a,
 .account-dropdown button {
   background-color: transparent;

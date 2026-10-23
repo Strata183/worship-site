@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { supabase } from "../supabaseClient";
@@ -7,6 +8,7 @@ import SiteSearch from "./SiteSearch";
 // It changes depending on whether the visitor is signed in.
 function Navbar() {
   const { user } = useAuth();
+  const [accountDropdownDismissed, setAccountDropdownDismissed] = useState(false);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -45,10 +47,14 @@ function Navbar() {
           <SiteSearch />
           {user ? (
             // The picture opens Profile, and the existing dropdown keeps its account actions.
-            <div className="account-menu">
+            <div
+              className={`account-menu${accountDropdownDismissed ? " is-dismissed" : ""}`}
+              onMouseLeave={() => setAccountDropdownDismissed(false)}
+            >
               <Link
                 aria-label="Profile"
                 className="account-button"
+                onClick={() => setAccountDropdownDismissed(true)}
                 to="/profile"
               >
                 <span aria-hidden="true" className="account-icon" />
