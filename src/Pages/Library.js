@@ -451,6 +451,18 @@ function Library() {
     window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   }
 
+  async function copySongShareLink(song) {
+    const shareUrl = `${window.location.origin}/songs/${song.id}`;
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setMessage("Friend-only chart link copied.");
+      setError("");
+    } catch {
+      setError("Could not copy the link. You can share this URL: " + shareUrl);
+    }
+  }
+
   async function deleteSong(song) {
     setError("");
     setMessage("");
@@ -1304,6 +1316,18 @@ function Library() {
     setCombiningSetlistId(null);
   }
 
+  async function copySetlistShareLink(setlist) {
+    const shareUrl = `${window.location.origin}/setlists/${setlist.id}`;
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setMessage("Friend-only setlist link copied.");
+      setError("");
+    } catch {
+      setError("Could not copy the link. You can share this URL: " + shareUrl);
+    }
+  }
+
   function toggleSetlistFolder(folderId) {
     setOpenSetlistFolderIds((currentFolderIds) =>
       currentFolderIds.includes(folderId)
@@ -1649,16 +1673,25 @@ function Library() {
                           <h2>{selectedSetlist.title}</h2>
                           <span>{formatSetlistDate(selectedSetlist.event_date)}</span>
                         </div>
-                        <button
-                          className="secondary-button"
-                          disabled={combiningSetlistId === selectedSetlist.id}
-                          type="button"
-                          onClick={() => downloadCombinedSetlistPdf(selectedSetlist)}
-                        >
-                          {combiningSetlistId === selectedSetlist.id
-                            ? "Building PDF..."
-                            : "Download PDF"}
-                        </button>
+                        <div className="setlist-detail-actions">
+                          <button
+                            className="secondary-button"
+                            type="button"
+                            onClick={() => copySetlistShareLink(selectedSetlist)}
+                          >
+                            Share setlist link
+                          </button>
+                          <button
+                            className="secondary-button"
+                            disabled={combiningSetlistId === selectedSetlist.id}
+                            type="button"
+                            onClick={() => downloadCombinedSetlistPdf(selectedSetlist)}
+                          >
+                            {combiningSetlistId === selectedSetlist.id
+                              ? "Building PDF..."
+                              : "Download PDF"}
+                          </button>
+                        </div>
                       </div>
 
                       {selectedSetlist.notes && (
@@ -2086,6 +2119,9 @@ function Library() {
                           </button>
                           {isOwner && (
                             <>
+                              <button type="button" onClick={() => copySongShareLink(song)}>
+                                Share link
+                              </button>
                               <button type="button" onClick={() => startEditingSong(song)}>
                                 Edit
                               </button>

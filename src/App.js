@@ -16,6 +16,8 @@ import WorthyForSong from "./Pages/WorthyForSong";
 import VbsKinderMusic from "./Pages/VbsKinderMusic";
 import Friends from "./Pages/Friends";
 import Library from "./Pages/Library";
+import SharedSong from "./Pages/SharedSong";
+import SharedSetlist from "./Pages/SharedSetlist";
 import Login from "./Pages/Login";
 import Prayer from "./Pages/Prayer";
 import Resources from "./Pages/Resources";
@@ -58,6 +60,22 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <Library />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/songs/:songId"
+          element={
+            <ProtectedRoute>
+              <SharedSong />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/setlists/:setlistId"
+          element={
+            <ProtectedRoute>
+              <SharedSetlist />
             </ProtectedRoute>
           }
         />

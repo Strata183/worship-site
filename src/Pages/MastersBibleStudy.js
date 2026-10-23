@@ -149,7 +149,7 @@ function MastersBibleStudy() {
     ? sortedStudyWeeks.find((week) => week.date === weekSlug)
     : newestWeek;
   const selectedSongSheet = selectedWeek ? songSheets[selectedWeek.date] : null;
-  const selectedWeekSongs = selectedWeek.songs.filter(
+  const selectedWeekSongs = (selectedWeek?.songs || []).filter(
     (song) =>
       song.title?.trim() && song.key?.trim() && song.key !== "Key: ?"
   );

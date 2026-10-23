@@ -1,5 +1,22 @@
 const mastersBibleStudyWeeks = [
   {
+    date: "2026-10-22",
+    songs: [
+      { title: "?", key: "Key: ?" },
+      { title: "?", key: "Key: ?" },
+    ],
+    notes: [
+      { title: "Main Passage", body: "" },
+      { title: "Big Idea", body: "" },
+      { title: "Announcements", body: "" },
+    ],
+    prayerRequests: [
+      { name: "Praise Reports", items: [""] },
+      { name: "Prayer Requests", items: [""] },
+    ],
+  },
+
+  {
     date: "2026-10-08",
     songs: [
       { title: "Christ our Hope in Life in Death", key: "Key: E" },

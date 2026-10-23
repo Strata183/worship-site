@@ -301,6 +301,19 @@
     display: grid;
   }
 
+  .setlist-detail-actions {
+    justify-content: flex-start;
+  }
+
+  .shared-setlist-items li {
+    grid-template-columns: 2.2rem minmax(0, 1fr);
+  }
+
+  .shared-setlist-items .shared-song-open-button {
+    grid-column: 2;
+    justify-self: start;
+  }
+
   .setlist-item-list li {
     align-items: stretch;
     grid-template-columns: 1fr;
