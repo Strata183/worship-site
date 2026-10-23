@@ -2,12 +2,12 @@ const mastersBibleStudyWeeks = [
   {
     date: "2026-10-22",
     songs: [
-      { title: "?", key: "Key: ?" },
-      { title: "?", key: "Key: ?" },
+      { title: "All of our tomorrows", key: "Key: C-D" },
+      { title: "What a friend we have in Jesus", key: "Key: D" },
     ],
     notes: [
-      { title: "Main Passage", body: "" },
-      { title: "Big Idea", body: "" },
+      { title: "Main Passage", body: "Matthew 6:25-34" },
+      { title: "Big Idea", body: "Do not worry-God is Sovereign-, Zef" },
       { title: "Announcements", body: "" },
     ],
     prayerRequests: [
