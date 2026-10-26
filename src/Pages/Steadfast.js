@@ -132,6 +132,9 @@ function Steadfast() {
   const [selectedAudioFile, setSelectedAudioFile] = useState(null);
   const [uploadingRecording, setUploadingRecording] = useState(false);
   const [removingRecordingId, setRemovingRecordingId] = useState("");
+  const [editingRecordingId, setEditingRecordingId] = useState("");
+  const [editingRecording, setEditingRecording] = useState(null);
+  const [savingRecordingId, setSavingRecordingId] = useState("");
   const audioFileInputRef = useRef(null);
 
   const loadAccessRequests = useCallback(async () => {
@@ -429,6 +432,58 @@ function Steadfast() {
     loadRecordings();
   }
 
+  function startEditingRecording(recording) {
+    setAccessError("");
+    setAccessMessage("");
+    setEditingRecordingId(recording.id);
+    setEditingRecording({
+      date: recording.recorded_on,
+      note: recording.note || "",
+      songs: (recording.songs || []).join("\n"),
+      title: recording.title,
+    });
+  }
+
+  function updateEditingRecording(field, value) {
+    setEditingRecording((current) => ({ ...current, [field]: value }));
+  }
+
+  async function saveRecordingEdits(event, recordingId) {
+    event.preventDefault();
+    if (!editingRecording?.date || !editingRecording.title.trim()) {
+      setAccessError("Please add a recording date and title.");
+      return;
+    }
+
+    setAccessError("");
+    setAccessMessage("");
+    setSavingRecordingId(recordingId);
+
+    const { error } = await supabase
+      .from("steadfast_audio_recordings")
+      .update({
+        recorded_on: editingRecording.date,
+        title: editingRecording.title.trim(),
+        songs: editingRecording.songs
+          .split("\n")
+          .map((song) => song.trim())
+          .filter(Boolean),
+        note: editingRecording.note.trim(),
+      })
+      .eq("id", recordingId);
+
+    setSavingRecordingId("");
+    if (error) {
+      setAccessError(error.message);
+      return;
+    }
+
+    setEditingRecordingId("");
+    setEditingRecording(null);
+    setAccessMessage("Recording details updated.");
+    loadRecordings();
+  }
+
   if (checkingAccess) {
     return (
       <main className="page page-steadfast">
@@ -638,29 +693,97 @@ function Steadfast() {
             ) : recordings.length > 0 ? (
               recordings.map((recording) => (
                 <article className="steadfast-recording-card" key={recording.id}>
-                  <div className="steadfast-recording-copy">
-                    <small>{formatRecordingDate(recording.recorded_on)}</small>
-                    <h3>{recording.title}</h3>
-                    {recording.songs.length > 0 && (
-                      <ul>
-                        {recording.songs.map((song) => (
-                          <li key={song}>{song}</li>
-                        ))}
-                      </ul>
-                    )}
-                    {recording.note && <p>{recording.note}</p>}
-                  </div>
+                  {editingRecordingId === recording.id ? (
+                    <form
+                      className="steadfast-recording-edit"
+                      onSubmit={(event) => saveRecordingEdits(event, recording.id)}
+                    >
+                      <label>
+                        Date
+                        <input
+                          onChange={(event) => updateEditingRecording("date", event.target.value)}
+                          required
+                          type="date"
+                          value={editingRecording?.date || ""}
+                        />
+                      </label>
+                      <label>
+                        Title
+                        <input
+                          onChange={(event) => updateEditingRecording("title", event.target.value)}
+                          required
+                          type="text"
+                          value={editingRecording?.title || ""}
+                        />
+                      </label>
+                      <label>
+                        Songs
+                        <textarea
+                          onChange={(event) => updateEditingRecording("songs", event.target.value)}
+                          rows="4"
+                          value={editingRecording?.songs || ""}
+                        />
+                      </label>
+                      <label>
+                        Note
+                        <textarea
+                          onChange={(event) => updateEditingRecording("note", event.target.value)}
+                          rows="3"
+                          value={editingRecording?.note || ""}
+                        />
+                      </label>
+                      <div className="steadfast-recording-edit-actions">
+                        <button className="secondary-button" disabled={savingRecordingId === recording.id} type="submit">
+                          {savingRecordingId === recording.id ? "Saving..." : "Save changes"}
+                        </button>
+                        <button
+                          className="secondary-button"
+                          onClick={() => {
+                            setEditingRecordingId("");
+                            setEditingRecording(null);
+                          }}
+                          type="button"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="steadfast-recording-copy">
+                      <small>{formatRecordingDate(recording.recorded_on)}</small>
+                      <h3>{recording.title}</h3>
+                      {(recording.songs || []).length > 0 && (
+                        <ul>
+                          {recording.songs.map((song) => (
+                            <li key={song}>{song}</li>
+                          ))}
+                        </ul>
+                      )}
+                      {recording.note && <p>{recording.note}</p>}
+                    </div>
+                  )}
 
                   <SteadfastAudioPlayer recording={recording} />
                   {isAdmin && adminMode && (
-                    <button
-                      className="subtle-danger-button steadfast-recording-remove"
-                      disabled={removingRecordingId === recording.id}
-                      onClick={() => removeRecording(recording)}
-                      type="button"
-                    >
-                      {removingRecordingId === recording.id ? "Removing..." : "Remove recording"}
-                    </button>
+                    <div className="steadfast-recording-admin-actions">
+                      {editingRecordingId !== recording.id && (
+                        <button
+                          className="secondary-button"
+                          onClick={() => startEditingRecording(recording)}
+                          type="button"
+                        >
+                          Edit details
+                        </button>
+                      )}
+                      <button
+                        className="subtle-danger-button steadfast-recording-remove"
+                        disabled={removingRecordingId === recording.id || editingRecordingId === recording.id}
+                        onClick={() => removeRecording(recording)}
+                        type="button"
+                      >
+                        {removingRecordingId === recording.id ? "Removing..." : "Remove recording"}
+                      </button>
+                    </div>
                   )}
                 </article>
               ))

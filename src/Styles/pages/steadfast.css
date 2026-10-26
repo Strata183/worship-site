@@ -231,6 +231,47 @@
   justify-self: end;
 }
 
+.steadfast-recording-edit {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.steadfast-recording-edit label {
+  color: var(--color-text);
+  display: grid;
+  font-size: 0.85rem;
+  font-weight: 800;
+  gap: 0.35rem;
+}
+
+.steadfast-recording-edit input,
+.steadfast-recording-edit textarea {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 500;
+  padding: 0.65rem 0.75rem;
+  width: 100%;
+}
+
+.steadfast-recording-edit textarea {
+  resize: vertical;
+}
+
+.steadfast-recording-edit-actions,
+.steadfast-recording-admin-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.steadfast-recording-admin-actions {
+  grid-column: 1 / -1;
+}
+
 .steadfast-audio-placeholder {
   align-items: center;
   border: 1px dashed var(--color-border);
