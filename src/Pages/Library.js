@@ -1360,12 +1360,12 @@ function Library() {
   async function addPlaceholderToSetlist(event) {
     event.preventDefault();
 
-    if (!isSelectedEventOwner) return;
-
     if (!selectedSetlist) {
       setError("Create or choose a setlist first.");
       return;
     }
+
+    if (selectedSetlist.owner_id !== user.id) return;
 
     const titleText = placeholderTitle.trim();
     const bodyText = placeholderBody.trim();
@@ -1461,7 +1461,7 @@ function Library() {
   }
 
   async function deleteSetlistItem(item) {
-    if (!isSelectedEventOwner) return;
+    if (!selectedSetlist || selectedSetlist.owner_id !== user.id) return;
     setSavingSetlistAction(true);
     setError("");
     setMessage("");
@@ -1478,6 +1478,35 @@ function Library() {
       await loadSetlistWorkspace();
     }
 
+    setSavingSetlistAction(false);
+  }
+
+  async function saveSetlistNotePage(event, item) {
+    event.preventDefault();
+    if (!selectedSetlist || selectedSetlist.owner_id !== user.id) return;
+
+    const formData = new FormData(event.currentTarget);
+    const title = String(formData.get("title") || "").trim();
+    const body = String(formData.get("body") || "").trim();
+    if (!title && !body) {
+      setError("Add a title or text to the note page.");
+      return;
+    }
+
+    setSavingSetlistAction(true);
+    setError("");
+    setMessage("");
+    const { error: updateError } = await supabase
+      .from("setlist_items")
+      .update({ title: title || "Blank page", body })
+      .eq("id", item.id);
+
+    if (updateError) {
+      setError(updateError.message);
+    } else {
+      setMessage("Note page updated.");
+      await loadSetlistWorkspace();
+    }
     setSavingSetlistAction(false);
   }
 
@@ -2122,6 +2151,16 @@ function Library() {
                                       Remove
                                     </button>
                                   </div>
+                                  {item.item_type === "placeholder" && selectedSetlist.owner_id === user.id && (
+                                    <details className="event-song-editor">
+                                      <summary>Edit note page</summary>
+                                      <form onSubmit={(event) => saveSetlistNotePage(event, item)}>
+                                        <label>Title<input defaultValue={item.title || ""} name="title" /></label>
+                                        <label>Text<textarea defaultValue={item.body || ""} name="body" rows="4" /></label>
+                                        <button className="secondary-button" disabled={savingSetlistAction} type="submit">Save note page</button>
+                                      </form>
+                                    </details>
+                                  )}
                                 </li>
                               );
                             })}
@@ -2679,6 +2718,16 @@ function Library() {
                                       Remove
                                     </button>}
                                   </div>
+                                  {item.item_type === "placeholder" && isSelectedEventOwner && (
+                                    <details className="event-song-editor">
+                                      <summary>Edit note page</summary>
+                                      <form onSubmit={(event) => saveSetlistNotePage(event, item)}>
+                                        <label>Title<input defaultValue={item.title || ""} name="title" /></label>
+                                        <label>Text<textarea defaultValue={item.body || ""} name="body" rows="4" /></label>
+                                        <button className="secondary-button" disabled={savingSetlistAction} type="submit">Save note page</button>
+                                      </form>
+                                    </details>
+                                  )}
                                   {item.item_type === "song" && isSelectedEventOwner && (
                                     <details className="event-song-editor">
                                       <summary>Plan details</summary>
