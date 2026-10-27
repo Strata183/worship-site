@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../AuthContext";
+import EventRoleChips from "../Components/EventRoleChips";
 import { supabase } from "../supabaseClient";
 
 // Turn a file name like "Amazing Grace (Key of G).pdf" into a safer storage
@@ -193,6 +194,8 @@ function SongResourceAudio({ resource }) {
 // Signed-in users can upload, open, edit, and delete their own PDF songs.
 function Library() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const requestedEventId = searchParams.get("event");
 
   // songs holds the rows loaded from the Supabase "songs" table.
   const [songs, setSongs] = useState([]);
@@ -311,6 +314,13 @@ function Library() {
       flow_notes: selectedEvent.flow_notes || "",
     });
   }, [activeShelf, eventDetails?.id, selectedSetlistId, setlists]);
+
+  useEffect(() => {
+    if (!requestedEventId || !setlists.some((setlist) => setlist.id === requestedEventId && setlist.is_event)) return;
+    setActiveShelf("events");
+    setSelectedSetlistId(requestedEventId);
+    setEventTab("overview");
+  }, [requestedEventId, setlists]);
 
   useEffect(() => {
     if (activeShelf !== "events" && activeShelf !== "setlists") return;
@@ -2319,7 +2329,7 @@ function Library() {
                                 <article className="event-team-card" key={member.id}>
                                   <div className="event-team-person">
                                     <strong>{member.display_name}</strong>
-                                    {member.roles?.length > 0 && <span>{member.roles.join(" · ")}</span>}
+                                    <EventRoleChips roles={member.roles || []} />
                                   </div>
                                   <dl>
                                     {member.instrument_part && <div><dt>Instrument / Part</dt><dd>{member.instrument_part}</dd></div>}

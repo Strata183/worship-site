@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import EventRoleChips from "../Components/EventRoleChips";
 import { supabase } from "../supabaseClient";
 
 async function getFunctionErrorMessage(error) {
@@ -17,6 +18,7 @@ async function getFunctionErrorMessage(error) {
 
 function SharedSetlist() {
   const { setlistId } = useParams();
+  const navigate = useNavigate();
   const [setlist, setSetlist] = useState(null);
   const [loading, setLoading] = useState(true);
   const [openingSongId, setOpeningSongId] = useState(null);
@@ -40,6 +42,16 @@ function SharedSetlist() {
       } else if (!data) {
         setError("This setlist is unavailable. Make sure you’re signed in with an account that is friends with its owner.");
       } else {
+        if (data.is_event) {
+          const { data: isTeamMember } = await supabase.rpc("is_event_team_member", {
+            requested_event_id: setlistId,
+          });
+          if (cancelled) return;
+          if (isTeamMember) {
+            navigate(`/songs?event=${encodeURIComponent(setlistId)}`, { replace: true });
+            return;
+          }
+        }
         setSetlist(data);
       }
 
@@ -48,7 +60,7 @@ function SharedSetlist() {
 
     loadSetlist();
     return () => { cancelled = true; };
-  }, [setlistId]);
+  }, [navigate, setlistId]);
 
   async function openSongChart(songId) {
     setOpeningSongId(songId);
@@ -157,7 +169,7 @@ function SharedSetlist() {
                 {team.map((member, index) => (
                   <article key={`${member.display_name}-${index}`}>
                     <strong>{member.display_name}</strong>
-                    {member.roles?.length > 0 && <p>{member.roles.join(" · ")}</p>}
+                    <EventRoleChips roles={member.roles || []} />
                     {member.instrument_part && <p><b>Instrument / Part:</b> {member.instrument_part}</p>}
                     {member.needs_gear && <p><b>Needs / Gear:</b> {member.needs_gear}</p>}
                     {member.contact_notes && <p><b>Contact / Notes:</b> {member.contact_notes}</p>}

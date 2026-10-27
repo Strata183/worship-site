@@ -4,15 +4,15 @@
 
 /* Protected song library layout. */
 .library-page {
-  max-width: 1400px;
+  max-width: 1760px;
 }
 
 /* Sidebar plus main score browser. */
 .library-shell {
   align-items: start;
   display: grid;
-  gap: 1.5rem;
-  grid-template-columns: minmax(230px, 280px) minmax(0, 1fr);
+  gap: 1.25rem;
+  grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
 }
 
 /* Sticky library navigation on wider screens. */
@@ -810,7 +810,7 @@
   align-items: start;
   display: grid;
   gap: 0;
-  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
 }
 
 .setlist-folder-panel {
@@ -1291,11 +1291,39 @@
   gap: 0.25rem;
 }
 
-.event-team-person span,
 .event-team-card dd {
   color: var(--color-muted);
   font-size: 0.88rem;
 }
+
+.event-role-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.event-role-chip {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.74rem;
+  font-weight: 800;
+  line-height: 1.35;
+  padding: 0.18rem 0.5rem;
+}
+
+.event-role-chip-leader { background: #f5d982; color: #654600; }
+.event-role-chip-lead-vocal { background: #f0e4f4; color: #69437a; }
+.event-role-chip-backing-vocal { background: #e9def3; color: #664a87; }
+.event-role-chip-acoustic { background: #dff0dd; color: #39723e; }
+.event-role-chip-electric { background: #dcebea; color: #286760; }
+.event-role-chip-bass { background: #e0e8f3; color: #3d587a; }
+.event-role-chip-keys { background: #e6e3f6; color: #5a4e93; }
+.event-role-chip-drums { background: #f6e1dc; color: #9a4b3b; }
+.event-role-chip-percussion { background: #faead6; color: #946328; }
+.event-role-chip-violin { background: #f5efce; color: #806b1f; }
+.event-role-chip-sound { background: #e4e5e7; color: #4e5156; }
+.event-role-chip-media { background: #d9edf3; color: #276779; }
+.event-role-chip-default { background: #e4e5e7; color: #4e5156; }
 
 .event-team-card-actions {
   align-items: end;
