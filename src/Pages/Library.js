@@ -873,6 +873,9 @@ function Library() {
   const availableEventFriends = acceptedFriends.filter(
     (friend) => !eventTeamMembers.some((member) => member.user_id === friend.id)
   );
+  const isCurrentUserOnEventTeam = eventTeamMembers.some(
+    (member) => member.user_id === user.id
+  );
 
   const friendsById = useMemo(
     () =>
@@ -2374,13 +2377,14 @@ function Library() {
                               <h3 className="event-form-wide">Add a friend to the team</h3>
                               {acceptedFriends.length === 0 && (
                                 <p className="event-form-wide">
-                                  Add friends before building your event team. <Link to="/friends">Manage friends</Link>
+                                  Add friends from <Link to="/friends">Friends</Link>, or add yourself to this event.
                                 </p>
                               )}
                               <label className="event-form-wide">
                                 Friend
                                 <select onChange={(event) => setSelectedTeamFriendId(event.target.value)} required value={selectedTeamFriendId}>
                                   <option value="">Choose an accepted friend</option>
+                                  {!isCurrentUserOnEventTeam && <option value={user.id}>Me (you)</option>}
                                   {availableEventFriends.map((friend) => <option key={friend.id} value={friend.id}>{friend.name}</option>)}
                                 </select>
                               </label>
@@ -2422,7 +2426,7 @@ function Library() {
                                 Contact / Notes
                                 <textarea onChange={(event) => setTeamMemberForm((current) => ({ ...current, contact_notes: event.target.value }))} rows="3" value={teamMemberForm.contact_notes} />
                               </label>
-                              <button className="primary-button event-form-wide" disabled={savingSetlistAction || !availableEventFriends.length} type="submit">Add to team</button>
+                              <button className="primary-button event-form-wide" disabled={savingSetlistAction || (!availableEventFriends.length && isCurrentUserOnEventTeam)} type="submit">Add to team</button>
                             </form>
                           )}
                         </section>
