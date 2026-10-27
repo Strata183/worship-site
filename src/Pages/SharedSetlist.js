@@ -70,20 +70,50 @@ function SharedSetlist() {
   }
 
   const items = setlist?.items || [];
+  const team = setlist?.team || [];
+  const formatDate = (dateValue) => {
+    if (!dateValue) return "";
+    return new Intl.DateTimeFormat("en", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(new Date(`${dateValue}T00:00:00`));
+  };
 
   return (
     <main className="page app-page shared-setlist-page">
       <section className="page-heading">
-        <p className="eyebrow">Shared setlist</p>
+        <p className="eyebrow">{setlist?.is_event ? "Shared event · View only" : "Shared setlist"}</p>
         <h1>{loading ? "Loading setlist…" : setlist?.title || "Setlist unavailable"}</h1>
-        {setlist?.event_date && <p>{setlist.event_date}</p>}
+        {setlist?.event_date && <p>{formatDate(setlist.event_date)}</p>}
       </section>
 
       {error && <p className="form-message error" role="alert">{error}</p>}
 
       {setlist && (
         <section className="shared-setlist-content" aria-label="Setlist songs">
-          {setlist.notes && <p className="shared-setlist-notes">{setlist.notes}</p>}
+          {setlist.is_event && (
+            <>
+              <section className="shared-event-section">
+                <h2>Overview</h2>
+                <dl className="shared-event-details">
+                  {setlist.start_time && <div><dt>Start</dt><dd>{setlist.start_time.slice(0, 5)}</dd></div>}
+                  {setlist.end_time && <div><dt>End</dt><dd>{setlist.end_time.slice(0, 5)}</dd></div>}
+                  {setlist.location && <div><dt>Location</dt><dd>{setlist.location}</dd></div>}
+                </dl>
+                {setlist.notes && <p className="shared-setlist-notes">{setlist.notes}</p>}
+              </section>
+              {(setlist.theme || setlist.flow_notes) && (
+                <section className="shared-event-section">
+                  <h2>Themes &amp; Flow</h2>
+                  {setlist.theme && <p><strong>Theme / Scripture</strong><br />{setlist.theme}</p>}
+                  {setlist.flow_notes && <p className="shared-event-preformatted">{setlist.flow_notes}</p>}
+                </section>
+              )}
+            </>
+          )}
+          {!setlist.is_event && setlist.notes && <p className="shared-setlist-notes">{setlist.notes}</p>}
+          <h2 className="shared-event-section-title">{setlist.is_event ? "Song Plan" : "Songs"}</h2>
           {items.length === 0 ? (
             <p className="shared-setlist-empty">There are no songs in this setlist yet.</p>
           ) : (
@@ -96,7 +126,14 @@ function SharedSetlist() {
                     {item.item_type === "placeholder" ? (
                       item.body && <p>{item.body}</p>
                     ) : (
-                      <p>Key: {item.song_key || "Not specified"}</p>
+                      <>
+                        <p>Key: {item.song_key || "Not specified"}</p>
+                        {setlist.is_event && [item.artist_version, item.tempo_feel, item.theme_scripture, item.lead_vocal, item.other_vocals, item.arrangement, item.status, item.notes_link].filter(Boolean).length > 0 && (
+                          <p className="shared-event-song-meta">
+                            {[item.artist_version, item.tempo_feel, item.theme_scripture, item.lead_vocal, item.other_vocals, item.arrangement, item.status, item.notes_link].filter(Boolean).join(" · ")}
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
                   {item.item_type === "song" && item.song_id && (
@@ -112,6 +149,22 @@ function SharedSetlist() {
                 </li>
               ))}
             </ol>
+          )}
+          {setlist.is_event && team.length > 0 && (
+            <section className="shared-event-section">
+              <h2>Team &amp; Instruments</h2>
+              <div className="shared-event-team">
+                {team.map((member, index) => (
+                  <article key={`${member.display_name}-${index}`}>
+                    <strong>{member.display_name}</strong>
+                    {member.roles?.length > 0 && <p>{member.roles.join(" · ")}</p>}
+                    {member.instrument_part && <p><b>Instrument / Part:</b> {member.instrument_part}</p>}
+                    {member.needs_gear && <p><b>Needs / Gear:</b> {member.needs_gear}</p>}
+                    {member.contact_notes && <p><b>Contact / Notes:</b> {member.contact_notes}</p>}
+                  </article>
+                ))}
+              </div>
+            </section>
           )}
           <Link className="shared-setlist-library-link" to="/songs">Go to My Library</Link>
         </section>

@@ -109,6 +109,20 @@ const songKeyOptions = [
   "B",
 ];
 const customKeyValue = "__custom_key__";
+const eventRoleOptions = [
+  "Worship Leader",
+  "Lead Vocal",
+  "Backing Vocal",
+  "Acoustic Guitar",
+  "Electric Guitar",
+  "Bass",
+  "Keys/Piano",
+  "Drums",
+  "Percussion",
+  "Violin",
+  "Sound",
+  "Slides/Media",
+];
 
 function isPresetSongKey(songKey) {
   return songKeyOptions.includes(songKey);
@@ -232,6 +246,16 @@ function Library() {
   const [openSetlistFolderIds, setOpenSetlistFolderIds] = useState([]);
   const [setlistCreateMode, setSetlistCreateMode] = useState("");
   const [draggingSetlistItemId, setDraggingSetlistItemId] = useState(null);
+  const [eventTab, setEventTab] = useState("overview");
+  const [eventDetails, setEventDetails] = useState(null);
+  const [eventTeamMembers, setEventTeamMembers] = useState([]);
+  const [selectedTeamFriendId, setSelectedTeamFriendId] = useState("");
+  const [teamMemberForm, setTeamMemberForm] = useState({
+    roles: [],
+    instrument_part: "",
+    needs_gear: "",
+    contact_notes: "",
+  });
 
   // message and error display feedback below the upload form.
   const [message, setMessage] = useState("");
@@ -243,6 +267,61 @@ function Library() {
     loadSetlistWorkspace();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!selectedSetlistId) {
+      setEventTeamMembers([]);
+      return;
+    }
+
+    let ignore = false;
+    async function loadEventTeam() {
+      const { data, error: teamError } = await supabase.rpc(
+        "get_setlist_team_members",
+        { requested_setlist_id: selectedSetlistId }
+      );
+      if (ignore) return;
+      if (teamError) {
+        setError(teamError.message);
+        setEventTeamMembers([]);
+      } else {
+        setEventTeamMembers(data || []);
+      }
+    }
+    loadEventTeam();
+    return () => { ignore = true; };
+  }, [selectedSetlistId]);
+
+  useEffect(() => {
+    const selectedEvent = activeShelf === "events" && setlists.find((setlist) => setlist.id === selectedSetlistId && setlist.is_event);
+    if (!selectedEvent) {
+      setEventDetails(null);
+      return;
+    }
+    if (eventDetails?.id === selectedEvent.id) return;
+    setEventDetails({
+      id: selectedEvent.id,
+      title: selectedEvent.title || "",
+      event_date: selectedEvent.event_date || "",
+      start_time: selectedEvent.start_time?.slice(0, 5) || "",
+      end_time: selectedEvent.end_time?.slice(0, 5) || "",
+      location: selectedEvent.location || "",
+      notes: selectedEvent.notes || "",
+      theme: selectedEvent.theme || "",
+      flow_notes: selectedEvent.flow_notes || "",
+    });
+  }, [activeShelf, eventDetails?.id, selectedSetlistId, setlists]);
+
+  useEffect(() => {
+    if (activeShelf !== "events" && activeShelf !== "setlists") return;
+    const availableSetlists = setlists.filter((setlist) =>
+      activeShelf === "events" ? setlist.is_event : !setlist.is_event
+    );
+    if (!availableSetlists.some((setlist) => setlist.id === selectedSetlistId)) {
+      setSelectedSetlistId(availableSetlists[0]?.id || null);
+      if (activeShelf === "events") setEventTab("overview");
+    }
+  }, [activeShelf, selectedSetlistId, setlists]);
 
   async function loadSongs() {
     setLoadingSongs(true);
@@ -272,10 +351,7 @@ function Library() {
 
   async function loadSetlistWorkspace() {
     const [foldersResult, setlistsResult, itemsResult] = await Promise.all([
-      supabase
-        .from("setlist_folders")
-        .select("*")
-        .order("created_at", { ascending: false }),
+      supabase.from("setlist_folders").select("*").order("created_at", { ascending: false }),
       supabase
         .from("setlists")
         .select("*")
@@ -783,6 +859,9 @@ function Library() {
         ),
     [friendships, user.id]
   );
+  const availableEventFriends = acceptedFriends.filter(
+    (friend) => !eventTeamMembers.some((member) => member.user_id === friend.id)
+  );
 
   const friendsById = useMemo(
     () =>
@@ -860,6 +939,7 @@ function Library() {
   const isMyShelf = activeShelf === "mine";
   const isFriendsShelf = activeShelf === "friends";
   const isSetlistsShelf = activeShelf === "setlists";
+  const isEventsShelf = activeShelf === "events";
   const selectedFriendSongsCount =
     friendFilter === "all"
       ? friendSongsCount
@@ -882,11 +962,9 @@ function Library() {
         ),
     [songs, user.id]
   );
-  const currentSetlistFolder = setlistFolders.find(
-    (folder) => folder.id === currentSetlistFolderId
-  );
-  const currentFolderSetlists = setlists
-    .filter((setlist) => setlist.folder_id === currentSetlistFolderId)
+  const currentSetlistFolder = setlistFolders.find((folder) => folder.id === currentSetlistFolderId);
+  const eventSetlists = setlists.filter((setlist) => setlist.is_event);
+  const currentFolderSetlists = (isEventsShelf ? eventSetlists : setlists.filter((setlist) => !setlist.is_event && setlist.folder_id === currentSetlistFolderId))
     .sort((firstSetlist, secondSetlist) => {
       if (firstSetlist.event_date && secondSetlist.event_date) {
         return new Date(secondSetlist.event_date) - new Date(firstSetlist.event_date);
@@ -903,7 +981,7 @@ function Library() {
       return (firstSetlist.title || "").localeCompare(secondSetlist.title || "");
     });
   const selectedSetlist =
-    setlists.find((setlist) => setlist.id === selectedSetlistId) ||
+    (isEventsShelf ? eventSetlists : setlists.filter((setlist) => !setlist.is_event)).find((setlist) => setlist.id === selectedSetlistId) ||
     currentFolderSetlists[0] ||
     null;
   const selectedSetlistItems = selectedSetlist
@@ -911,6 +989,7 @@ function Library() {
         .filter((item) => item.setlist_id === selectedSetlist.id)
         .sort((firstItem, secondItem) => firstItem.position - secondItem.position)
     : [];
+  const isSelectedEventOwner = isEventsShelf && selectedSetlist?.owner_id === user.id;
   const songsById = useMemo(
     () =>
       songs.reduce((songMap, song) => {
@@ -919,7 +998,8 @@ function Library() {
       }, {}),
     [songs]
   );
-  const setlistsCount = setlists.length;
+  const setlistsCount = setlists.filter((setlist) => !setlist.is_event).length;
+  const eventCount = eventSetlists.length;
 
   function formatSongDate(song) {
     // Some older rows or test data may not have created_at populated.
@@ -946,46 +1026,6 @@ function Library() {
     }).format(new Date(`${dateValue}T00:00:00`));
   }
 
-  async function createSetlistFolder(event) {
-    event.preventDefault();
-    const folderName = newSetlistFolderName.trim();
-
-    if (!folderName) {
-      setError("Name the folder first.");
-      return;
-    }
-
-    setSavingSetlistAction(true);
-    setError("");
-    setMessage("");
-
-    const { error: insertError } = await supabase
-      .from("setlist_folders")
-      .insert({
-        name: folderName,
-        owner_id: user.id,
-        parent_folder_id: currentSetlistFolderId,
-      })
-
-    if (insertError) {
-      setError(insertError.message);
-    } else {
-      setNewSetlistFolderName("");
-      setSetlistCreateMode("");
-      if (currentSetlistFolderId) {
-        setOpenSetlistFolderIds((currentFolderIds) =>
-          currentFolderIds.includes(currentSetlistFolderId)
-            ? currentFolderIds
-            : [...currentFolderIds, currentSetlistFolderId]
-        );
-      }
-      setMessage("Folder created.");
-      await loadSetlistWorkspace();
-    }
-
-    setSavingSetlistAction(false);
-  }
-
   async function createSetlist(event) {
     event.preventDefault();
     const setlistTitle = newSetlistTitle.trim();
@@ -1003,7 +1043,8 @@ function Library() {
       .from("setlists")
       .insert({
         event_date: newSetlistDate || null,
-        folder_id: currentSetlistFolderId,
+        folder_id: isEventsShelf ? null : currentSetlistFolderId,
+        is_event: isEventsShelf,
         notes: newSetlistNotes.trim(),
         owner_id: user.id,
         title: setlistTitle,
@@ -1018,23 +1059,211 @@ function Library() {
       setNewSetlistDate("");
       setNewSetlistNotes("");
       setSetlistCreateMode("");
-      if (currentSetlistFolderId) {
-        setOpenSetlistFolderIds((currentFolderIds) =>
-          currentFolderIds.includes(currentSetlistFolderId)
-            ? currentFolderIds
-            : [...currentFolderIds, currentSetlistFolderId]
-        );
+      if (!isEventsShelf && currentSetlistFolderId) {
+        setOpenSetlistFolderIds((ids) => ids.includes(currentSetlistFolderId) ? ids : [...ids, currentSetlistFolderId]);
       }
       setSelectedSetlistId(data.id);
-      setMessage("Setlist created.");
+      setEventTab("overview");
+      setMessage(isEventsShelf ? "Event created." : "Setlist created.");
       await loadSetlistWorkspace();
     }
 
     setSavingSetlistAction(false);
   }
 
+  async function deleteSetlistFolder(folder) {
+    if (!window.confirm(`Delete "${folder.name}" and everything inside it?`)) return;
+    setSavingSetlistAction(true);
+    setError("");
+    setMessage("");
+    const { error: deleteError } = await supabase.from("setlist_folders").delete().eq("id", folder.id);
+    if (deleteError) {
+      setError(deleteError.message);
+    } else {
+      if (currentSetlistFolderId === folder.id) setCurrentSetlistFolderId(folder.parent_folder_id || null);
+      setMessage("Folder deleted.");
+      await loadSetlistWorkspace();
+    }
+    setSavingSetlistAction(false);
+  }
+
+  async function createSetlistFolder(event) {
+    event.preventDefault();
+    const folderName = newSetlistFolderName.trim();
+    if (!folderName) {
+      setError("Name the folder first.");
+      return;
+    }
+    setSavingSetlistAction(true);
+    setError("");
+    setMessage("");
+    const { error: insertError } = await supabase.from("setlist_folders").insert({
+      name: folderName,
+      owner_id: user.id,
+      parent_folder_id: currentSetlistFolderId,
+    });
+    if (insertError) {
+      setError(insertError.message);
+    } else {
+      setNewSetlistFolderName("");
+      setSetlistCreateMode("");
+      setMessage("Folder created.");
+      await loadSetlistWorkspace();
+    }
+    setSavingSetlistAction(false);
+  }
+
+  async function saveEventDetails(event) {
+    event.preventDefault();
+    if (!selectedSetlist || selectedSetlist.owner_id !== user.id || !eventDetails) return;
+    if (!eventDetails.title.trim()) {
+      setError(isEventsShelf ? "Event name cannot be blank." : "Setlist name cannot be blank.");
+      return;
+    }
+
+    setSavingSetlistAction(true);
+    setError("");
+    setMessage("");
+    const { error: updateError } = await supabase
+      .from("setlists")
+      .update({
+        title: eventDetails.title.trim(),
+        event_date: eventDetails.event_date || null,
+        start_time: eventDetails.start_time || null,
+        end_time: eventDetails.end_time || null,
+        location: eventDetails.location.trim(),
+        notes: eventDetails.notes.trim(),
+        theme: eventDetails.theme.trim(),
+        flow_notes: eventDetails.flow_notes.trim(),
+      })
+      .eq("id", selectedSetlist.id);
+
+    if (updateError) {
+      setError(updateError.message);
+    } else {
+      setMessage("Event details saved.");
+      await loadSetlistWorkspace();
+    }
+    setSavingSetlistAction(false);
+  }
+
+  async function addEventTeamMember(event) {
+    event.preventDefault();
+    if (!selectedSetlist || selectedSetlist.owner_id !== user.id || !selectedTeamFriendId) {
+      return;
+    }
+
+    setSavingSetlistAction(true);
+    setError("");
+    setMessage("");
+    const { error: insertError } = await supabase
+      .from("setlist_team_members")
+      .insert({
+        setlist_id: selectedSetlist.id,
+        owner_id: user.id,
+        user_id: selectedTeamFriendId,
+        roles: teamMemberForm.roles,
+        instrument_part: teamMemberForm.instrument_part.trim(),
+        needs_gear: teamMemberForm.needs_gear.trim(),
+        contact_notes: teamMemberForm.contact_notes.trim(),
+        position: eventTeamMembers.length,
+      });
+
+    if (insertError) {
+      setError(insertError.message);
+    } else {
+      setSelectedTeamFriendId("");
+      setTeamMemberForm({ roles: [], instrument_part: "", needs_gear: "", contact_notes: "" });
+      setMessage("Team member added.");
+      const { data } = await supabase.rpc("get_setlist_team_members", {
+        requested_setlist_id: selectedSetlist.id,
+      });
+      setEventTeamMembers(data || []);
+    }
+    setSavingSetlistAction(false);
+  }
+
+  async function removeEventTeamMember(member) {
+    if (!selectedSetlist || selectedSetlist.owner_id !== user.id) return;
+    setSavingSetlistAction(true);
+    setError("");
+    const { error: deleteError } = await supabase
+      .from("setlist_team_members")
+      .delete()
+      .eq("id", member.id);
+    if (deleteError) {
+      setError(deleteError.message);
+    } else {
+      setEventTeamMembers((currentMembers) =>
+        currentMembers.filter((currentMember) => currentMember.id !== member.id)
+      );
+      setMessage(`${member.display_name} removed from the team.`);
+    }
+    setSavingSetlistAction(false);
+  }
+
+  async function saveEventTeamMember(event, member) {
+    event.preventDefault();
+    if (!isSelectedEventOwner) return;
+    const formData = new FormData(event.currentTarget);
+    setSavingSetlistAction(true);
+    setError("");
+    const { error: updateError } = await supabase
+      .from("setlist_team_members")
+      .update({
+        roles: formData.getAll("roles"),
+        instrument_part: String(formData.get("instrument_part") || "").trim(),
+        needs_gear: String(formData.get("needs_gear") || "").trim(),
+        contact_notes: String(formData.get("contact_notes") || "").trim(),
+      })
+      .eq("id", member.id);
+    if (updateError) {
+      setError(updateError.message);
+    } else {
+      const { data } = await supabase.rpc("get_setlist_team_members", {
+        requested_setlist_id: selectedSetlist.id,
+      });
+      setEventTeamMembers(data || []);
+      setMessage(`${member.display_name}'s assignment saved.`);
+    }
+    setSavingSetlistAction(false);
+  }
+
+  async function saveEventSongDetails(event, item) {
+    event.preventDefault();
+    if (!isSelectedEventOwner) return;
+    const formData = new FormData(event.currentTarget);
+    const fields = [
+      "artist_version",
+      "tempo_feel",
+      "theme_scripture",
+      "lead_vocal",
+      "other_vocals",
+      "arrangement",
+      "status",
+      "notes_link",
+    ];
+    const updates = Object.fromEntries(fields.map((field) => [field, String(formData.get(field) || "").trim()]));
+
+    setSavingSetlistAction(true);
+    setError("");
+    const { error: updateError } = await supabase
+      .from("setlist_items")
+      .update(updates)
+      .eq("id", item.id);
+    if (updateError) {
+      setError(updateError.message);
+    } else {
+      setMessage("Song plan updated.");
+      await loadSetlistWorkspace();
+    }
+    setSavingSetlistAction(false);
+  }
+
   async function addSongToSetlist(event) {
     event.preventDefault();
+
+    if (!isSelectedEventOwner) return;
 
     if (!selectedSetlist) {
       setError("Create or choose a setlist first.");
@@ -1057,6 +1286,8 @@ function Library() {
       position,
       setlist_id: selectedSetlist.id,
       song_id: setlistSongId,
+      title: songsById[setlistSongId]?.title || "",
+      song_key_snapshot: songsById[setlistSongId]?.song_key || "",
     });
 
     if (insertError) {
@@ -1072,6 +1303,8 @@ function Library() {
 
   async function addPlaceholderToSetlist(event) {
     event.preventDefault();
+
+    if (!isSelectedEventOwner) return;
 
     if (!selectedSetlist) {
       setError("Create or choose a setlist first.");
@@ -1113,7 +1346,7 @@ function Library() {
   }
 
   async function reorderSetlistItems(draggedItemId, targetItemId) {
-    if (!draggedItemId || draggedItemId === targetItemId) {
+    if (!isSelectedEventOwner || !draggedItemId || draggedItemId === targetItemId) {
       return;
     }
 
@@ -1172,6 +1405,7 @@ function Library() {
   }
 
   async function deleteSetlistItem(item) {
+    if (!isSelectedEventOwner) return;
     setSavingSetlistAction(true);
     setError("");
     setMessage("");
@@ -1185,39 +1419,6 @@ function Library() {
       setError(deleteError.message);
     } else {
       setMessage("Setlist item removed.");
-      await loadSetlistWorkspace();
-    }
-
-    setSavingSetlistAction(false);
-  }
-
-  async function deleteSetlistFolder(folder) {
-    const deleteConfirmed = window.confirm(
-      `Delete "${folder.name}" and everything inside it?`
-    );
-
-    if (!deleteConfirmed) {
-      return;
-    }
-
-    setSavingSetlistAction(true);
-    setError("");
-    setMessage("");
-
-    const { error: deleteError } = await supabase
-      .from("setlist_folders")
-      .delete()
-      .eq("id", folder.id);
-
-    if (deleteError) {
-      setError(deleteError.message);
-    } else {
-      setCurrentSetlistFolderId(folder.parent_folder_id || null);
-      setSelectedSetlistId(null);
-      setOpenSetlistFolderIds((currentFolderIds) =>
-        currentFolderIds.filter((folderId) => folderId !== folder.id)
-      );
-      setMessage("Folder deleted.");
       await loadSetlistWorkspace();
     }
 
@@ -1244,7 +1445,9 @@ function Library() {
       setError(deleteError.message);
     } else {
       if (selectedSetlistId === setlist.id) {
-        setSelectedSetlistId(null);
+        setSelectedSetlistId(
+          setlists.find((event) => event.id !== setlist.id)?.id || null
+        );
       }
       setMessage("Setlist deleted.");
       await loadSetlistWorkspace();
@@ -1353,7 +1556,7 @@ function Library() {
         firstFolder.name.localeCompare(secondFolder.name)
       );
     const nestedSetlists = setlists
-      .filter((setlist) => setlist.folder_id === parentFolderId)
+      .filter((setlist) => !setlist.is_event && setlist.folder_id === parentFolderId)
       .sort((firstSetlist, secondSetlist) => {
         if (firstSetlist.event_date && secondSetlist.event_date) {
           return new Date(secondSetlist.event_date) - new Date(firstSetlist.event_date);
@@ -1378,7 +1581,7 @@ function Library() {
             setlistFolders.filter(
               (childFolder) => childFolder.parent_folder_id === folder.id
             ).length +
-            setlists.filter((setlist) => setlist.folder_id === folder.id).length;
+            setlists.filter((setlist) => !setlist.is_event && setlist.folder_id === folder.id).length;
 
           return (
             <div className="setlist-tree-group" key={folder.id}>
@@ -1477,15 +1680,19 @@ function Library() {
           <div className="library-brand-block">
             <p className="eyebrow">PDF library</p>
             <h1>
-              {isSetlistsShelf
+              {isEventsShelf
+                ? "Events"
+                : isSetlistsShelf
                 ? "Setlists"
                 : isMyShelf
                   ? "My Library"
                   : "Friends Library"}
             </h1>
             <p>
-              {isSetlistsShelf
-                ? "Organize songs into worship sets, event folders, and printable PDFs."
+              {isEventsShelf
+                ? "Plan events with your songs and team in one place."
+                : isSetlistsShelf
+                ? "Plan services with your songs and team in one place."
                 : isMyShelf
                 ? "Open your charts, organize your scores, and sort songs by title or key."
                 : "Open charts shared by your accepted friends!"}
@@ -1517,9 +1724,13 @@ function Library() {
               <span>Setlists</span>
               <strong>{setlistsCount}</strong>
             </button>
-            <button disabled type="button" title="Coming in a later step">
-              <span>Folders</span>
-              <strong>Next</strong>
+            <button
+              className={isEventsShelf ? "active" : ""}
+              onClick={() => setActiveShelf("events")}
+              type="button"
+            >
+              <span>Events</span>
+              <strong>{eventCount}</strong>
             </button>
           </div>
         </aside>
@@ -1656,7 +1867,7 @@ function Library() {
                       <span>All setlists</span>
                       <small>Choose a folder or add something new</small>
                     </button>
-                    {setlistFolders.length === 0 && setlists.length === 0 ? (
+                    {setlistFolders.length === 0 && setlists.every((setlist) => setlist.is_event) ? (
                       <p className="song-resource-muted">No setlists yet.</p>
                     ) : (
                       renderSetlistTree()
@@ -1866,6 +2077,553 @@ function Library() {
                     <div className="library-empty-state">
                       <h3>Choose a setlist</h3>
                       <p>Select one from the left, or create a new setlist to begin.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : isEventsShelf ? (
+            <div className="setlist-workspace">
+              {message && <p className="form-message success">{message}</p>}
+              {error && <p className="form-message error">{error}</p>}
+
+              <div className="setlist-browser-grid">
+                <aside className="setlist-folder-panel">
+                  <div className="setlist-panel-heading">
+                    <strong>Events</strong>
+                    <div className="setlist-create-buttons">
+                      <button
+                        className={setlistCreateMode === "setlist" ? "active" : ""}
+                        type="button"
+                        onClick={() =>
+                          setSetlistCreateMode(
+                            setlistCreateMode === "setlist" ? "" : "setlist"
+                          )
+                        }
+                      >
+                        New Event
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="setlist-control-grid">
+                    {setlistCreateMode === "setlist" && (
+                      <form className="setlist-sidebar-form" onSubmit={createSetlist}>
+                        <label>
+                          Event name
+                          <input
+                            onChange={(event) =>
+                              setNewSetlistTitle(event.target.value)
+                            }
+                            placeholder="Sunday Service"
+                            type="text"
+                            value={newSetlistTitle}
+                          />
+                        </label>
+                        <label>
+                          Date
+                          <input
+                            onChange={(event) => setNewSetlistDate(event.target.value)}
+                            type="date"
+                            value={newSetlistDate}
+                          />
+                        </label>
+                        <label className="setlist-form-wide">
+                          Notes
+                          <textarea
+                            onChange={(event) => setNewSetlistNotes(event.target.value)}
+                            placeholder="Optional notes"
+                            rows="2"
+                            value={newSetlistNotes}
+                          />
+                        </label>
+                        <button
+                          className="primary-button"
+                          disabled={savingSetlistAction}
+                          type="submit"
+                        >
+                          Create
+                        </button>
+                      </form>
+                    )}
+                  </div>
+
+                  <div className="setlist-tree" aria-label="Setlists">
+                    {currentFolderSetlists.length === 0 ? (
+                      <p className="song-resource-muted">No setlists yet.</p>
+                    ) : currentFolderSetlists.map((event) => (
+                      <div
+                        className={`setlist-tree-row setlist-row ${selectedSetlist?.id === event.id ? "active" : ""}`}
+                        key={event.id}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedSetlistId(event.id);
+                            setEventTab("overview");
+                          }}
+                        >
+                          <span className="setlist-row-lines" aria-hidden="true"></span>
+                          <span>
+                            <strong>{event.title}</strong>
+                            <small>{formatSetlistDate(event.event_date)} · {setlistItems.filter((item) => item.setlist_id === event.id).length} plan items</small>
+                          </span>
+                        </button>
+                        {event.owner_id === user.id && (
+                          <button
+                            aria-label={`Delete ${event.title}`}
+                            className="setlist-tree-delete"
+                            disabled={savingSetlistAction}
+                            type="button"
+                            onClick={() => deleteSetlist(event)}
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </aside>
+
+                <div className="setlist-detail-panel">
+                  {selectedSetlist ? (
+                    <>
+                      <div className="setlist-detail-heading">
+                        <div>
+                          <p className="eyebrow">{isSelectedEventOwner ? "Your Event" : "You're on this team"}</p>
+                          <h2>{selectedSetlist.title}</h2>
+                          <span>
+                            {formatSetlistDate(selectedSetlist.event_date)}
+                            {selectedSetlist.start_time ? ` · ${selectedSetlist.start_time.slice(0, 5)}` : ""}
+                            {selectedSetlist.location ? ` · ${selectedSetlist.location}` : ""}
+                          </span>
+                        </div>
+                        <div className="setlist-detail-actions">
+                          <button
+                            className="secondary-button"
+                            type="button"
+                            onClick={() => copySetlistShareLink(selectedSetlist)}
+                          >
+                            Share event link
+                          </button>
+                          <button
+                            className="secondary-button"
+                            disabled={combiningSetlistId === selectedSetlist.id}
+                            type="button"
+                            onClick={() => downloadCombinedSetlistPdf(selectedSetlist)}
+                          >
+                            {combiningSetlistId === selectedSetlist.id
+                              ? "Building PDF..."
+                              : "Download PDF"}
+                          </button>
+                        </div>
+                      </div>
+
+                      <nav className="event-tabs" aria-label="Setlist sections">
+                        {[
+                          ["overview", "Overview"],
+                          ["song-plan", "Song Plan"],
+                          ["team", "Team & Instruments"],
+                          ["themes", "Themes & Flow"],
+                        ].map(([tab, label]) => (
+                          <button
+                            aria-current={eventTab === tab ? "page" : undefined}
+                            className={eventTab === tab ? "active" : ""}
+                            key={tab}
+                            onClick={() => setEventTab(tab)}
+                            type="button"
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </nav>
+
+                      {eventTab === "overview" && eventDetails && (
+                        <form className="event-overview-form" onSubmit={saveEventDetails}>
+                          <label>
+                            Event name
+                            <input
+                              disabled={!isSelectedEventOwner}
+                              onChange={(event) => setEventDetails((current) => ({ ...current, title: event.target.value }))}
+                              required
+                              value={eventDetails.title}
+                            />
+                          </label>
+                          <label>
+                            Date
+                            <input
+                              disabled={!isSelectedEventOwner}
+                              onChange={(event) => setEventDetails((current) => ({ ...current, event_date: event.target.value }))}
+                              type="date"
+                              value={eventDetails.event_date}
+                            />
+                          </label>
+                          <label>
+                            Start time
+                            <input
+                              disabled={!isSelectedEventOwner}
+                              onChange={(event) => setEventDetails((current) => ({ ...current, start_time: event.target.value }))}
+                              type="time"
+                              value={eventDetails.start_time}
+                            />
+                          </label>
+                          <label>
+                            End time
+                            <input
+                              disabled={!isSelectedEventOwner}
+                              onChange={(event) => setEventDetails((current) => ({ ...current, end_time: event.target.value }))}
+                              type="time"
+                              value={eventDetails.end_time}
+                            />
+                          </label>
+                          <label className="event-form-wide">
+                            Location
+                            <input
+                              disabled={!isSelectedEventOwner}
+                              onChange={(event) => setEventDetails((current) => ({ ...current, location: event.target.value }))}
+                              placeholder="Church / room"
+                              value={eventDetails.location}
+                            />
+                          </label>
+                          <label className="event-form-wide">
+                            Event notes
+                            <textarea
+                              disabled={!isSelectedEventOwner}
+                              onChange={(event) => setEventDetails((current) => ({ ...current, notes: event.target.value }))}
+                              rows="4"
+                              value={eventDetails.notes}
+                            />
+                          </label>
+                          {isSelectedEventOwner && (
+                            <button className="primary-button event-form-wide" disabled={savingSetlistAction} type="submit">
+                              Save overview
+                            </button>
+                          )}
+                        </form>
+                      )}
+
+                      {eventTab === "team" && (
+                        <section className="event-team-section">
+                          <div className="event-section-heading">
+                            <div>
+                              <p className="eyebrow">Team & Instruments</p>
+                              <h3>People serving this event</h3>
+                            </div>
+                            <span>{eventTeamMembers.length} {eventTeamMembers.length === 1 ? "person" : "people"}</span>
+                          </div>
+                          {eventTeamMembers.length === 0 ? (
+                            <p className="library-empty-state">No friends have been added to this event yet.</p>
+                          ) : (
+                            <div className="event-team-list">
+                              {eventTeamMembers.map((member) => (
+                                <article className="event-team-card" key={member.id}>
+                                  <div className="event-team-person">
+                                    <strong>{member.display_name}</strong>
+                                    {member.roles?.length > 0 && <span>{member.roles.join(" · ")}</span>}
+                                  </div>
+                                  <dl>
+                                    {member.instrument_part && <div><dt>Instrument / Part</dt><dd>{member.instrument_part}</dd></div>}
+                                    {member.needs_gear && <div><dt>Needs / Gear</dt><dd>{member.needs_gear}</dd></div>}
+                                    {member.contact_notes && <div><dt>Contact / Notes</dt><dd>{member.contact_notes}</dd></div>}
+                                  </dl>
+                                  {isSelectedEventOwner && (
+                                    <div className="event-team-card-actions">
+                                      <details className="event-team-edit">
+                                        <summary>Edit assignment</summary>
+                                        <form onSubmit={(event) => saveEventTeamMember(event, member)}>
+                                          <fieldset className="event-role-options">
+                                            <legend>Role</legend>
+                                            {eventRoleOptions.map((role) => (
+                                              <label key={role}>
+                                                <input defaultChecked={member.roles?.includes(role)} name="roles" type="checkbox" value={role} />
+                                                {role}
+                                              </label>
+                                            ))}
+                                          </fieldset>
+                                          <label>Instrument / Part<input defaultValue={member.instrument_part} name="instrument_part" /></label>
+                                          <label>Needs / Gear<input defaultValue={member.needs_gear} name="needs_gear" /></label>
+                                          <label className="event-form-wide">Contact / Notes<textarea defaultValue={member.contact_notes} name="contact_notes" rows="3" /></label>
+                                          <button className="secondary-button" disabled={savingSetlistAction} type="submit">Save assignment</button>
+                                        </form>
+                                      </details>
+                                      <button className="subtle-danger-button" disabled={savingSetlistAction} onClick={() => removeEventTeamMember(member)} type="button">
+                                        Remove
+                                      </button>
+                                    </div>
+                                  )}
+                                </article>
+                              ))}
+                            </div>
+                          )}
+                          {isSelectedEventOwner && (
+                            <form className="event-team-form" onSubmit={addEventTeamMember}>
+                              <h3 className="event-form-wide">Add a friend to the team</h3>
+                              {acceptedFriends.length === 0 && (
+                                <p className="event-form-wide">
+                                  Add friends before building your event team. <Link to="/friends">Manage friends</Link>
+                                </p>
+                              )}
+                              <label className="event-form-wide">
+                                Friend
+                                <select onChange={(event) => setSelectedTeamFriendId(event.target.value)} required value={selectedTeamFriendId}>
+                                  <option value="">Choose an accepted friend</option>
+                                  {availableEventFriends.map((friend) => <option key={friend.id} value={friend.id}>{friend.name}</option>)}
+                                </select>
+                              </label>
+                              <fieldset className="event-role-options event-form-wide">
+                                <legend>Role</legend>
+                                {eventRoleOptions.map((role) => (
+                                  <label key={role}>
+                                    <input
+                                      checked={teamMemberForm.roles.includes(role)}
+                                      onChange={(event) => setTeamMemberForm((current) => ({
+                                        ...current,
+                                        roles: event.target.checked
+                                          ? [...current.roles, role]
+                                          : current.roles.filter((currentRole) => currentRole !== role),
+                                      }))}
+                                      type="checkbox"
+                                    />
+                                    {role}
+                                  </label>
+                                ))}
+                              </fieldset>
+                              <label>
+                                Instrument / Part
+                                <input onChange={(event) => setTeamMemberForm((current) => ({ ...current, instrument_part: event.target.value }))} value={teamMemberForm.instrument_part} />
+                              </label>
+                              <label>
+                                Needs / Gear
+                                <input onChange={(event) => setTeamMemberForm((current) => ({ ...current, needs_gear: event.target.value }))} value={teamMemberForm.needs_gear} />
+                              </label>
+                              <label className="event-form-wide">
+                                Contact / Notes
+                                <textarea onChange={(event) => setTeamMemberForm((current) => ({ ...current, contact_notes: event.target.value }))} rows="3" value={teamMemberForm.contact_notes} />
+                              </label>
+                              <button className="primary-button event-form-wide" disabled={savingSetlistAction || !availableEventFriends.length} type="submit">Add to team</button>
+                            </form>
+                          )}
+                        </section>
+                      )}
+
+                      {eventTab === "themes" && eventDetails && (
+                        <form className="event-overview-form event-themes-form" onSubmit={saveEventDetails}>
+                          <label>
+                            Theme / Scripture
+                            <textarea disabled={!isSelectedEventOwner} onChange={(event) => setEventDetails((current) => ({ ...current, theme: event.target.value }))} rows="4" value={eventDetails.theme} />
+                          </label>
+                          <label>
+                            Themes & Flow
+                            <textarea disabled={!isSelectedEventOwner} onChange={(event) => setEventDetails((current) => ({ ...current, flow_notes: event.target.value }))} placeholder="Service flow, transitions, and themes" rows="8" value={eventDetails.flow_notes} />
+                          </label>
+                          {isSelectedEventOwner && <button className="primary-button" disabled={savingSetlistAction} type="submit">Save themes & flow</button>}
+                        </form>
+                      )}
+
+                      {eventTab === "song-plan" && (
+                        <>
+                      {selectedSetlist.notes && (
+                        <p className="setlist-detail-notes">{selectedSetlist.notes}</p>
+                      )}
+
+                      <div className="setlist-item-tools">
+                        {isSelectedEventOwner && <form className="setlist-song-picker" onSubmit={addSongToSetlist}>
+                          <label>
+                            Add a song
+                            <select
+                              onChange={(event) => setSetlistSongId(event.target.value)}
+                              value={setlistSongId}
+                            >
+                              <option value="">Choose song</option>
+                              {myLibrarySongs.map((song) => (
+                                <option key={song.id} value={song.id}>
+                                  {song.title} ({song.song_key || "No key"})
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <button
+                            className="primary-button"
+                            disabled={savingSetlistAction || myLibrarySongs.length === 0}
+                            type="submit"
+                          >
+                            Add song
+                          </button>
+                        </form>}
+
+                        {isSelectedEventOwner && <details className="setlist-add-menu">
+                          <summary>Note page</summary>
+                          <form
+                            className="setlist-add-card"
+                            onSubmit={addPlaceholderToSetlist}
+                          >
+                            <label>
+                              Title
+                              <input
+                                onChange={(event) =>
+                                  setPlaceholderTitle(event.target.value)
+                                }
+                                placeholder="Prayer"
+                                type="text"
+                                value={placeholderTitle}
+                              />
+                            </label>
+                            <label>
+                              Text
+                              <textarea
+                                onChange={(event) =>
+                                  setPlaceholderBody(event.target.value)
+                                }
+                                placeholder="Prayer, Scripture, reading, or transition note"
+                                rows="3"
+                                value={placeholderBody}
+                              />
+                            </label>
+                            <button
+                              className="primary-button"
+                              disabled={savingSetlistAction}
+                              type="submit"
+                            >
+                              Add page
+                            </button>
+                          </form>
+                        </details>}
+                      </div>
+
+                      <div className="setlist-print-area">
+                        <div className="setlist-print-heading">
+                          <h1>{selectedSetlist.title}</h1>
+                          <p>{formatSetlistDate(selectedSetlist.event_date)}</p>
+                          {selectedSetlist.notes && <p>{selectedSetlist.notes}</p>}
+                        </div>
+
+                        {selectedSetlistItems.length === 0 ? (
+                          <div className="library-empty-state">
+                            <h3>No songs yet</h3>
+                            <p>Add songs or note pages to build this setlist.</p>
+                          </div>
+                        ) : (
+                          <ol className="setlist-item-list">
+                            {selectedSetlistItems.map((item, index) => {
+                              const itemSong = item.song_id
+                                ? songsById[item.song_id]
+                                : null;
+
+                              return (
+                                <li
+                                  className={
+                                    `${item.item_type === "placeholder"
+                                      ? "placeholder-item"
+                                      : ""} ${
+                                      draggingSetlistItemId === item.id
+                                        ? "dragging"
+                                        : ""
+                                    }`
+                                  }
+                                  draggable={!savingSetlistAction && isSelectedEventOwner}
+                                  key={item.id}
+                                  onDragStart={(event) => {
+                                    setDraggingSetlistItemId(item.id);
+                                    event.dataTransfer.effectAllowed = "move";
+                                    event.dataTransfer.setData("text/plain", item.id);
+                                  }}
+                                  onDragOver={(event) => {
+                                    event.preventDefault();
+                                    event.dataTransfer.dropEffect = "move";
+                                  }}
+                                  onDrop={(event) => {
+                                    event.preventDefault();
+                                    const draggedItemId =
+                                      event.dataTransfer.getData("text/plain") ||
+                                      draggingSetlistItemId;
+
+                                    setDraggingSetlistItemId(null);
+                                    reorderSetlistItems(draggedItemId, item.id);
+                                  }}
+                                  onDragEnd={() => setDraggingSetlistItemId(null)}
+                                >
+                                  <div className="setlist-item-main">
+                                    <span>{index + 1}</span>
+                                    <span
+                                      aria-label="Drag to reorder"
+                                      className="setlist-drag-handle"
+                                      title="Drag to reorder"
+                                    >
+                                      <i></i>
+                                      <i></i>
+                                      <i></i>
+                                    </span>
+                                    <div>
+                                      <strong>
+                                        {item.item_type === "song"
+                                          ? itemSong?.title || item.title || "Missing song"
+                                          : item.title || "Blank page"}
+                                      </strong>
+                                      <p>
+                                        {item.item_type === "song"
+                                          ? `Key: ${itemSong?.song_key || item.song_key_snapshot || "No key"}${item.tempo_feel ? ` · ${item.tempo_feel}` : ""}`
+                                          : item.body || "Blank page"}
+                                      </p>
+                                      {item.item_type === "song" && (item.artist_version || item.theme_scripture || item.lead_vocal || item.other_vocals || item.arrangement || item.status) && (
+                                        <small className="event-song-meta">
+                                          {[item.artist_version, item.theme_scripture, item.lead_vocal, item.other_vocals, item.arrangement, item.status].filter(Boolean).join(" · ")}
+                                        </small>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="setlist-item-actions">
+                                    {itemSong && (
+                                      <button
+                                        type="button"
+                                        onClick={() => openPdf(itemSong)}
+                                      >
+                                        Open
+                                      </button>
+                                    )}
+                                    {isSelectedEventOwner && <button
+                                      disabled={savingSetlistAction}
+                                      type="button"
+                                      onClick={() => deleteSetlistItem(item)}
+                                    >
+                                      Remove
+                                    </button>}
+                                  </div>
+                                  {item.item_type === "song" && isSelectedEventOwner && (
+                                    <details className="event-song-editor">
+                                      <summary>Plan details</summary>
+                                      <form onSubmit={(event) => saveEventSongDetails(event, item)}>
+                                        {[
+                                          ["artist_version", "Artist / Version"],
+                                          ["tempo_feel", "Tempo / Feel"],
+                                          ["theme_scripture", "Theme / Scripture"],
+                                          ["lead_vocal", "Lead Vocal"],
+                                          ["other_vocals", "Other Vocals"],
+                                          ["arrangement", "Arrangement / Transitions"],
+                                          ["status", "Status"],
+                                          ["notes_link", "Notes / Link"],
+                                        ].map(([field, label]) => (
+                                          <label key={field}>
+                                            {label}
+                                            <input defaultValue={item[field] || (field === "status" ? "Confirmed" : "")} name={field} />
+                                          </label>
+                                        ))}
+                                        <button className="secondary-button" disabled={savingSetlistAction} type="submit">Save plan details</button>
+                                      </form>
+                                    </details>
+                                  )}
+                                </li>
+                              );
+                            })}
+                          </ol>
+                        )}
+                      </div>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <div className="library-empty-state">
+                      <h3>Choose a setlist</h3>
+                      <p>Select one from the left, or create a setlist to begin.</p>
                     </div>
                   )}
                 </div>

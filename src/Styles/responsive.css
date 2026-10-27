@@ -305,6 +305,18 @@
     justify-content: flex-start;
   }
 
+  .event-overview-form,
+  .event-team-form,
+  .event-song-editor form,
+  .event-team-card,
+  .event-team-card dl {
+    grid-template-columns: 1fr;
+  }
+
+  .event-team-card > button {
+    justify-self: start;
+  }
+
   .shared-setlist-items li {
     grid-template-columns: 2.2rem minmax(0, 1fr);
   }

@@ -1033,9 +1033,14 @@ Deno.serve(async (req) => {
         return jsonResponse({ error: "Setlist not found." }, 404);
       }
 
-      if (setlist.owner_id !== user.id) {
+      const { data: canViewSetlist, error: accessError } = await supabase.rpc(
+        "user_can_view_setlist",
+        { requested_setlist_id: setlistId },
+      );
+
+      if (accessError || !canViewSetlist) {
         return jsonResponse(
-          { error: "Only the setlist owner can combine this PDF." },
+          { error: "Only event owners and assigned team members can download this PDF." },
           403,
         );
       }
