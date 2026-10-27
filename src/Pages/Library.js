@@ -2518,10 +2518,6 @@ function Library() {
 
                       {eventTab === "song-plan" && (
                         <>
-                      {selectedSetlist.notes && (
-                        <p className="setlist-detail-notes">{selectedSetlist.notes}</p>
-                      )}
-
                       <div className="setlist-item-tools">
                         {isSelectedEventOwner && <form className="setlist-song-picker" onSubmit={addSongToSetlist}>
                           <label>
@@ -2590,7 +2586,6 @@ function Library() {
                         <div className="setlist-print-heading">
                           <h1>{selectedSetlist.title}</h1>
                           <p>{formatSetlistDate(selectedSetlist.event_date)}</p>
-                          {selectedSetlist.notes && <p>{selectedSetlist.notes}</p>}
                         </div>
 
                         {selectedSetlistItems.length === 0 ? (
