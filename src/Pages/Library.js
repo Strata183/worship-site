@@ -251,6 +251,8 @@ function Library() {
   const [draggingSetlistItemId, setDraggingSetlistItemId] = useState(null);
   const [eventTab, setEventTab] = useState("overview");
   const [eventDetails, setEventDetails] = useState(null);
+  const [editingEventTitle, setEditingEventTitle] = useState(false);
+  const [eventTitleDraft, setEventTitleDraft] = useState("");
   const [eventTeamMembers, setEventTeamMembers] = useState([]);
   const [selectedTeamFriendId, setSelectedTeamFriendId] = useState("");
   const [teamMemberForm, setTeamMemberForm] = useState({
@@ -315,6 +317,11 @@ function Library() {
       flow_notes: selectedEvent.flow_notes || "",
     });
   }, [activeShelf, eventDetails?.id, selectedSetlistId, setlists]);
+
+  useEffect(() => {
+    setEventTitleDraft(setlists.find((setlist) => setlist.id === selectedSetlistId)?.title || "");
+    setEditingEventTitle(false);
+  }, [selectedSetlistId, setlists]);
 
   useEffect(() => {
     if (!requestedEventId || !setlists.some((setlist) => setlist.id === requestedEventId && setlist.is_event)) return;
@@ -1157,6 +1164,39 @@ function Library() {
     } else {
       setMessage("Event details saved.");
       await loadSetlistWorkspace();
+    }
+    setSavingSetlistAction(false);
+  }
+
+  async function saveEventTitle(event) {
+    event.preventDefault();
+    const title = eventTitleDraft.trim();
+    if (!isSelectedEventOwner || !selectedSetlist) return;
+    if (!title) {
+      setError("Event name cannot be blank.");
+      return;
+    }
+
+    setSavingSetlistAction(true);
+    setError("");
+    setMessage("");
+    const { error: updateError } = await supabase
+      .from("setlists")
+      .update({ title })
+      .eq("id", selectedSetlist.id);
+
+    if (updateError) {
+      setError(updateError.message);
+    } else {
+      setSetlists((current) => current.map((setlist) =>
+        setlist.id === selectedSetlist.id ? { ...setlist, title } : setlist
+      ));
+      setEventDetails((current) => current?.id === selectedSetlist.id
+        ? { ...current, title }
+        : current
+      );
+      setEditingEventTitle(false);
+      setMessage("Event name updated.");
     }
     setSavingSetlistAction(false);
   }
@@ -2207,7 +2247,37 @@ function Library() {
                       <div className="setlist-detail-heading">
                         <div>
                           <p className="eyebrow">{isSelectedEventOwner ? "Your Event" : "You're on this team"}</p>
-                          <h2>{selectedSetlist.title}</h2>
+                          {editingEventTitle && isSelectedEventOwner ? (
+                            <form className="event-title-edit" onSubmit={saveEventTitle}>
+                              <input
+                                aria-label="Event name"
+                                autoFocus
+                                onChange={(event) => setEventTitleDraft(event.target.value)}
+                                value={eventTitleDraft}
+                              />
+                              <button className="primary-button" disabled={savingSetlistAction} type="submit">Save</button>
+                              <button
+                                className="text-button"
+                                disabled={savingSetlistAction}
+                                onClick={() => {
+                                  setEventTitleDraft(selectedSetlist.title);
+                                  setEditingEventTitle(false);
+                                }}
+                                type="button"
+                              >
+                                Cancel
+                              </button>
+                            </form>
+                          ) : (
+                            <div className="event-title-view">
+                              <h2>{selectedSetlist.title}</h2>
+                              {isSelectedEventOwner && (
+                                <button className="text-button" onClick={() => setEditingEventTitle(true)} type="button">
+                                  Edit name
+                                </button>
+                              )}
+                            </div>
+                          )}
                           <span>
                             {formatSetlistDate(selectedSetlist.event_date)}
                             {selectedSetlist.start_time ? ` · ${selectedSetlist.start_time.slice(0, 5)}` : ""}
