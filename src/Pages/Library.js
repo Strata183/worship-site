@@ -254,6 +254,7 @@ function Library() {
   const [eventTeamMembers, setEventTeamMembers] = useState([]);
   const [selectedTeamFriendId, setSelectedTeamFriendId] = useState("");
   const [teamMemberForm, setTeamMemberForm] = useState({
+    name_override: "",
     roles: [],
     instrument_part: "",
     needs_gear: "",
@@ -1172,6 +1173,7 @@ function Library() {
         setlist_id: selectedSetlist.id,
         owner_id: user.id,
         user_id: selectedTeamFriendId,
+        name_override: teamMemberForm.name_override.trim(),
         roles: teamMemberForm.roles,
         instrument_part: teamMemberForm.instrument_part.trim(),
         needs_gear: teamMemberForm.needs_gear.trim(),
@@ -1183,7 +1185,7 @@ function Library() {
       setError(insertError.message);
     } else {
       setSelectedTeamFriendId("");
-      setTeamMemberForm({ roles: [], instrument_part: "", needs_gear: "", contact_notes: "" });
+      setTeamMemberForm({ name_override: "", roles: [], instrument_part: "", needs_gear: "", contact_notes: "" });
       setMessage("Team member added.");
       const { data } = await supabase.rpc("get_setlist_team_members", {
         requested_setlist_id: selectedSetlist.id,
@@ -1221,6 +1223,7 @@ function Library() {
     const { error: updateError } = await supabase
       .from("setlist_team_members")
       .update({
+        name_override: String(formData.get("name_override") || "").trim(),
         roles: formData.getAll("roles"),
         instrument_part: String(formData.get("instrument_part") || "").trim(),
         needs_gear: String(formData.get("needs_gear") || "").trim(),
@@ -2341,6 +2344,7 @@ function Library() {
                                       <details className="event-team-edit">
                                         <summary>Edit assignment</summary>
                                         <form onSubmit={(event) => saveEventTeamMember(event, member)}>
+                                          <label>Name shown on this event<input defaultValue={member.name_override || ""} name="name_override" placeholder={member.display_name} /></label>
                                           <fieldset className="event-role-options">
                                             <legend>Role</legend>
                                             {eventRoleOptions.map((role) => (
@@ -2379,6 +2383,14 @@ function Library() {
                                   <option value="">Choose an accepted friend</option>
                                   {availableEventFriends.map((friend) => <option key={friend.id} value={friend.id}>{friend.name}</option>)}
                                 </select>
+                              </label>
+                              <label className="event-form-wide">
+                                Name shown on this event
+                                <input
+                                  onChange={(event) => setTeamMemberForm((current) => ({ ...current, name_override: event.target.value }))}
+                                  placeholder={acceptedFriends.find((friend) => friend.id === selectedTeamFriendId)?.name || "Use friend’s account name"}
+                                  value={teamMemberForm.name_override}
+                                />
                               </label>
                               <fieldset className="event-role-options event-form-wide">
                                 <legend>Role</legend>

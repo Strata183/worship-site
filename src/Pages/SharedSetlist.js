@@ -51,6 +51,11 @@ function SharedSetlist() {
             navigate(`/songs?event=${encodeURIComponent(setlistId)}`, { replace: true });
             return;
           }
+          const { data: eventTeam } = await supabase.rpc("get_setlist_team_members", {
+            requested_setlist_id: setlistId,
+          });
+          if (cancelled) return;
+          if (eventTeam) data.team = eventTeam;
         }
         setSetlist(data);
       }
