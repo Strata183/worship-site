@@ -3,7 +3,7 @@
    ========================================================================== */
 
 .page-articles {
-  max-width: 1120px;
+  max-width: 1480px;
   text-align: left;
 }
 
@@ -66,7 +66,7 @@
 }
 
 .article-detail-page {
-  max-width: 920px;
+  max-width: 1480px;
 }
 
 .article-back-link {
@@ -88,6 +88,8 @@
 }
 
 .article-detail-header {
+  margin: 0 auto;
+  max-width: 1040px;
   text-align: center;
 }
 
@@ -104,6 +106,7 @@
   min-height: 360px;
   padding: 2rem;
   text-align: left;
+  width: 100%;
 }
 
 .article-body p {
