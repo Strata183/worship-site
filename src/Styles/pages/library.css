@@ -1280,6 +1280,12 @@
   resize: vertical;
 }
 
+.event-overview-form .event-notes-field {
+  min-height: 8rem;
+  overflow-y: hidden;
+  resize: none;
+}
+
 .event-form-wide {
   grid-column: 1 / -1;
 }

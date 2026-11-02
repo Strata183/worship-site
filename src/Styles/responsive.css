@@ -391,13 +391,16 @@
   .event-song-editor form,
   .event-team-card,
   .event-team-card dl {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .event-overview-form,
   .event-team-form {
+    box-sizing: border-box;
+    max-width: 100%;
     min-width: 0;
     padding: 0.75rem;
+    width: 100%;
   }
 
   .event-overview-form label,
@@ -407,8 +410,11 @@
   .event-team-form input,
   .event-team-form textarea,
   .event-team-form select {
+    box-sizing: border-box;
+    display: block;
     min-width: 0;
     max-width: 100%;
+    width: 100%;
   }
 
   .event-team-card > button {

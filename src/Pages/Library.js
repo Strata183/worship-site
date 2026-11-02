@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import EventRoleChips from "../Components/EventRoleChips";
@@ -251,6 +251,7 @@ function Library() {
   const [draggingSetlistItemId, setDraggingSetlistItemId] = useState(null);
   const [eventTab, setEventTab] = useState("overview");
   const [eventDetails, setEventDetails] = useState(null);
+  const eventNotesRef = useRef(null);
   const [editingEventTitle, setEditingEventTitle] = useState(false);
   const [eventTitleDraft, setEventTitleDraft] = useState("");
   const [eventTeamMembers, setEventTeamMembers] = useState([]);
@@ -297,6 +298,20 @@ function Library() {
     loadEventTeam();
     return () => { ignore = true; };
   }, [selectedSetlistId]);
+
+  useEffect(() => {
+    const notesField = eventNotesRef.current;
+    if (!notesField) return undefined;
+
+    const resizeNotesField = () => {
+      notesField.style.height = "auto";
+      notesField.style.height = `${notesField.scrollHeight}px`;
+    };
+
+    resizeNotesField();
+    window.addEventListener("resize", resizeNotesField);
+    return () => window.removeEventListener("resize", resizeNotesField);
+  }, [eventDetails?.id, eventDetails?.notes, eventTab]);
 
   useEffect(() => {
     const selectedEvent = activeShelf === "events" && setlists.find((setlist) => setlist.id === selectedSetlistId && setlist.is_event);
@@ -2413,7 +2428,9 @@ function Library() {
                           <label className="event-form-wide">
                             Event notes
                             <textarea
+                              className="event-notes-field"
                               disabled={!isSelectedEventOwner}
+                              ref={eventNotesRef}
                               onChange={(event) => setEventDetails((current) => ({ ...current, notes: event.target.value }))}
                               rows="4"
                               value={eventDetails.notes}
