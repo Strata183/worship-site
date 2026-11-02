@@ -619,37 +619,59 @@
 }
 
 .song-resource-card .song-resource-file-link {
-  border: 1px solid var(--color-border);
+  background-color: var(--color-accent);
+  border: 0;
   border-radius: 6px;
-  padding: 0.45rem 0.65rem;
+  color: white;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin-top: 0;
+  padding: 0.65rem 0.8rem;
+}
+
+.song-resource-card .song-resource-file-link:hover,
+.song-resource-card .song-resource-file-link:focus-visible {
+  background-color: var(--color-accent-dark, var(--color-accent));
+  color: white;
+  text-decoration: none;
 }
 
 .song-resource-card audio {
   width: 100%;
 }
 
+.song-resource-actions {
+  align-items: center;
+  display: flex;
+  gap: 0.45rem;
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+}
+
 .song-resource-delete {
-  background-color: transparent;
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  color: var(--color-muted);
+  background-color: #374151;
+  border: 0;
+  border-radius: 6px;
+  color: white;
   cursor: pointer;
   flex: 0 0 auto;
-  font-size: 0.78rem;
+  font: inherit;
+  font-size: 0.9rem;
   font-weight: 800;
-  line-height: 1;
-  padding: 0.45rem 0.7rem;
+  padding: 0.65rem 0.8rem;
 }
 
 .song-resource-delete:hover,
 .song-resource-delete:focus {
-  border-color: #b91c1c;
-  color: #b91c1c;
+  background-color: #1f2937;
+  color: white;
 }
 
 .song-resource-delete:disabled {
-  cursor: wait;
-  opacity: 0.65;
+  background-color: #d1d5db;
+  color: #4b5563;
+  cursor: not-allowed;
 }
 
 .song-resource-form {

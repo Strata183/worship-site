@@ -3236,25 +3236,27 @@ function Library() {
                                     )}
                                   </div>
 
-                                  {isOwner && (
-                                    <button
-                                      className="song-resource-delete"
-                                      disabled={deletingResourceId === resource.id}
-                                      type="button"
-                                      onClick={() => deleteSongResource(resource)}
-                                    >
-                                      {deletingResourceId === resource.id
-                                        ? "Deleting..."
-                                        : "Delete"}
-                                    </button>
-                                  )}
                                 </div>
 
                                 {resource.resource_type === "audio" && (
                                   <SongResourceAudio resource={resource} />
                                 )}
-                                {resource.resource_type === "sheet" && (
-                                  <SongResourceSheet resource={resource} />
+                                {(resource.resource_type === "sheet" || isOwner) && (
+                                  <div className="song-resource-actions">
+                                    {resource.resource_type === "sheet" && (
+                                      <SongResourceSheet resource={resource} />
+                                    )}
+                                    {isOwner && (
+                                      <button
+                                        className="song-resource-delete"
+                                        disabled={deletingResourceId === resource.id}
+                                        type="button"
+                                        onClick={() => deleteSongResource(resource)}
+                                      >
+                                        {deletingResourceId === resource.id ? "Deleting..." : "Delete"}
+                                      </button>
+                                    )}
+                                  </div>
                                 )}
                               </article>
                             ))}
