@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import EventRoleChips from "../Components/EventRoleChips";
 import { supabase } from "../supabaseClient";
+import { formatTime } from "../formatTime";
 
 // Turn a file name like "Amazing Grace (Key of G).pdf" into a safer storage
 // name like "amazing-grace-key-of-g". This avoids spaces and unusual symbols.
@@ -2337,7 +2338,7 @@ function Library() {
                           )}
                           <span>
                             {formatSetlistDate(selectedSetlist.event_date)}
-                            {selectedSetlist.start_time ? ` · ${selectedSetlist.start_time.slice(0, 5)}` : ""}
+                            {selectedSetlist.start_time ? ` · ${formatTime(selectedSetlist.start_time)}` : ""}
                             {selectedSetlist.location ? ` · ${selectedSetlist.location}` : ""}
                           </span>
                         </div>
@@ -2418,7 +2419,7 @@ function Library() {
                                 value={eventDetails.start_time}
                               />
                             ) : (
-                              <output className="event-readonly-value">{eventDetails.start_time || "—"}</output>
+                              <output className="event-readonly-value">{formatTime(eventDetails.start_time) || "—"}</output>
                             )}
                           </label>
                           <label>
@@ -2430,7 +2431,7 @@ function Library() {
                                 value={eventDetails.end_time}
                               />
                             ) : (
-                              <output className="event-readonly-value">{eventDetails.end_time || "—"}</output>
+                              <output className="event-readonly-value">{formatTime(eventDetails.end_time) || "—"}</output>
                             )}
                           </label>
                           <label className="event-form-wide">

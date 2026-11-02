@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import EventRoleChips from "../Components/EventRoleChips";
 import { supabase } from "../supabaseClient";
+import { formatTime } from "../formatTime";
 
 async function getFunctionErrorMessage(error) {
   if (error?.context instanceof Response) {
@@ -114,8 +115,8 @@ function SharedSetlist() {
               <section className="shared-event-section">
                 <h2>Overview</h2>
                 <dl className="shared-event-details">
-                  {setlist.start_time && <div><dt>Start</dt><dd>{setlist.start_time.slice(0, 5)}</dd></div>}
-                  {setlist.end_time && <div><dt>End</dt><dd>{setlist.end_time.slice(0, 5)}</dd></div>}
+                  {setlist.start_time && <div><dt>Start</dt><dd>{formatTime(setlist.start_time)}</dd></div>}
+                  {setlist.end_time && <div><dt>End</dt><dd>{formatTime(setlist.end_time)}</dd></div>}
                   {setlist.location && <div><dt>Location</dt><dd>{setlist.location}</dd></div>}
                 </dl>
                 {setlist.notes && <p className="shared-setlist-notes">{setlist.notes}</p>}
