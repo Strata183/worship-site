@@ -251,6 +251,7 @@ function Library() {
   const [draggingSetlistItemId, setDraggingSetlistItemId] = useState(null);
   const [eventTab, setEventTab] = useState("overview");
   const [eventDetails, setEventDetails] = useState(null);
+  const eventLocationRef = useRef(null);
   const eventNotesRef = useRef(null);
   const [editingEventTitle, setEditingEventTitle] = useState(false);
   const [eventTitleDraft, setEventTitleDraft] = useState("");
@@ -300,18 +301,20 @@ function Library() {
   }, [selectedSetlistId]);
 
   useEffect(() => {
-    const notesField = eventNotesRef.current;
-    if (!notesField) return undefined;
+    const textareas = [eventLocationRef.current, eventNotesRef.current].filter(Boolean);
+    if (textareas.length === 0) return undefined;
 
-    const resizeNotesField = () => {
-      notesField.style.height = "auto";
-      notesField.style.height = `${notesField.scrollHeight}px`;
+    const resizeTextareas = () => {
+      textareas.forEach((textarea) => {
+        textarea.style.height = "auto";
+        textarea.style.height = `${textarea.scrollHeight}px`;
+      });
     };
 
-    resizeNotesField();
-    window.addEventListener("resize", resizeNotesField);
-    return () => window.removeEventListener("resize", resizeNotesField);
-  }, [eventDetails?.id, eventDetails?.notes, eventTab]);
+    resizeTextareas();
+    window.addEventListener("resize", resizeTextareas);
+    return () => window.removeEventListener("resize", resizeTextareas);
+  }, [eventDetails?.id, eventDetails?.location, eventDetails?.notes, eventTab]);
 
   useEffect(() => {
     const selectedEvent = activeShelf === "events" && setlists.find((setlist) => setlist.id === selectedSetlistId && setlist.is_event);
@@ -2382,59 +2385,86 @@ function Library() {
                         <form className="event-overview-form" onSubmit={saveEventDetails}>
                           <label>
                             Event name
-                            <input
-                              disabled={!isSelectedEventOwner}
-                              onChange={(event) => setEventDetails((current) => ({ ...current, title: event.target.value }))}
-                              required
-                              value={eventDetails.title}
-                            />
+                            {isSelectedEventOwner ? (
+                              <input
+                                onChange={(event) => setEventDetails((current) => ({ ...current, title: event.target.value }))}
+                                required
+                                value={eventDetails.title}
+                              />
+                            ) : (
+                              <output className="event-readonly-value">{eventDetails.title || "—"}</output>
+                            )}
                           </label>
                           <label>
                             Date
-                            <input
-                              disabled={!isSelectedEventOwner}
-                              onChange={(event) => setEventDetails((current) => ({ ...current, event_date: event.target.value }))}
-                              type="date"
-                              value={eventDetails.event_date}
-                            />
+                            {isSelectedEventOwner ? (
+                              <input
+                                onChange={(event) => setEventDetails((current) => ({ ...current, event_date: event.target.value }))}
+                                type="date"
+                                value={eventDetails.event_date}
+                              />
+                            ) : (
+                              <output className="event-readonly-value">
+                                {formatSetlistDate(eventDetails.event_date) || "—"}
+                              </output>
+                            )}
                           </label>
                           <label>
                             Start time
-                            <input
-                              disabled={!isSelectedEventOwner}
-                              onChange={(event) => setEventDetails((current) => ({ ...current, start_time: event.target.value }))}
-                              type="time"
-                              value={eventDetails.start_time}
-                            />
+                            {isSelectedEventOwner ? (
+                              <input
+                                onChange={(event) => setEventDetails((current) => ({ ...current, start_time: event.target.value }))}
+                                type="time"
+                                value={eventDetails.start_time}
+                              />
+                            ) : (
+                              <output className="event-readonly-value">{eventDetails.start_time || "—"}</output>
+                            )}
                           </label>
                           <label>
                             End time
-                            <input
-                              disabled={!isSelectedEventOwner}
-                              onChange={(event) => setEventDetails((current) => ({ ...current, end_time: event.target.value }))}
-                              type="time"
-                              value={eventDetails.end_time}
-                            />
+                            {isSelectedEventOwner ? (
+                              <input
+                                onChange={(event) => setEventDetails((current) => ({ ...current, end_time: event.target.value }))}
+                                type="time"
+                                value={eventDetails.end_time}
+                              />
+                            ) : (
+                              <output className="event-readonly-value">{eventDetails.end_time || "—"}</output>
+                            )}
                           </label>
                           <label className="event-form-wide">
                             Location
-                            <input
-                              disabled={!isSelectedEventOwner}
-                              onChange={(event) => setEventDetails((current) => ({ ...current, location: event.target.value }))}
-                              placeholder="Church / room"
-                              value={eventDetails.location}
-                            />
+                            {isSelectedEventOwner ? (
+                              <textarea
+                                className="event-location-field"
+                                ref={eventLocationRef}
+                                onChange={(event) => setEventDetails((current) => ({ ...current, location: event.target.value }))}
+                                placeholder="Church / room"
+                                rows="2"
+                                value={eventDetails.location}
+                              />
+                            ) : (
+                              <output className="event-readonly-value event-readonly-multiline">
+                                {eventDetails.location || "—"}
+                              </output>
+                            )}
                           </label>
                           <label className="event-form-wide">
                             Event notes
-                            <textarea
-                              className="event-notes-field"
-                              disabled={!isSelectedEventOwner}
-                              ref={eventNotesRef}
-                              onChange={(event) => setEventDetails((current) => ({ ...current, notes: event.target.value }))}
-                              rows="4"
-                              value={eventDetails.notes}
-                            />
+                            {isSelectedEventOwner ? (
+                              <textarea
+                                className="event-notes-field"
+                                ref={eventNotesRef}
+                                onChange={(event) => setEventDetails((current) => ({ ...current, notes: event.target.value }))}
+                                rows="4"
+                                value={eventDetails.notes}
+                              />
+                            ) : (
+                              <output className="event-readonly-value event-readonly-multiline">
+                                {eventDetails.notes || "—"}
+                              </output>
+                            )}
                           </label>
                           {isSelectedEventOwner && (
                             <button className="primary-button event-form-wide" disabled={savingSetlistAction} type="submit">

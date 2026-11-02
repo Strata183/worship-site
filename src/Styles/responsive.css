@@ -300,6 +300,29 @@
     grid-template-columns: 1fr;
   }
 
+  .score-open-button,
+  .score-title-line,
+  .score-title-button {
+    min-width: 0;
+  }
+
+  .score-title-line {
+    align-items: flex-start;
+  }
+
+  .score-title-button {
+    flex: 1 1 0%;
+    white-space: normal;
+  }
+
+  .score-main strong {
+    display: block;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
   .song-resource-card,
   .song-resource-form {
     grid-template-columns: 1fr;

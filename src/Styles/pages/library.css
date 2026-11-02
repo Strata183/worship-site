@@ -1275,9 +1275,35 @@
   -webkit-text-fill-color: #26332d;
 }
 
+.event-readonly-value {
+  background: #f1f3f1;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: #26332d;
+  display: block;
+  font-size: 1rem;
+  font-weight: 500;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  padding: 0.7rem 0.8rem;
+  width: 100%;
+}
+
+.event-readonly-multiline {
+  min-height: 4.5rem;
+  white-space: pre-wrap;
+}
+
 .event-overview-form textarea,
 .event-team-form textarea {
   resize: vertical;
+}
+
+.event-overview-form .event-location-field {
+  min-height: 4.5rem;
+  overflow-wrap: anywhere;
+  overflow-y: hidden;
+  resize: none;
 }
 
 .event-overview-form .event-notes-field {
