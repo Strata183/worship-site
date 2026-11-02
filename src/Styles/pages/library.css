@@ -618,6 +618,12 @@
   text-decoration: underline;
 }
 
+.song-resource-card .song-resource-file-link {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.45rem 0.65rem;
+}
+
 .song-resource-card audio {
   width: 100%;
 }
@@ -1510,6 +1516,11 @@
   grid-column: 1 / -1;
 }
 
+.event-song-resources {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
 .event-song-editor summary {
   color: var(--color-accent);
   cursor: pointer;
@@ -1934,4 +1945,34 @@
   background-color: #d1d5db;
   color: #4b5563;
   cursor: not-allowed;
+}
+
+.setlist-item-actions button.event-song-action-button {
+  background-color: var(--color-accent);
+  border: 0;
+  border-radius: 6px;
+  color: white;
+  font-size: 0.9rem;
+  padding: 0.65rem 0.8rem;
+}
+
+.setlist-item-actions button.event-song-action-button:hover,
+.setlist-item-actions button.event-song-action-button:focus-visible {
+  background-color: var(--color-accent-dark, var(--color-accent));
+  color: white;
+}
+
+.setlist-item-actions button.event-song-action-button:disabled {
+  background-color: #d1d5db;
+  color: #4b5563;
+  cursor: not-allowed;
+}
+
+.setlist-item-actions button.event-song-open-button {
+  background-color: #287a45;
+}
+
+.setlist-item-actions button.event-song-open-button:hover,
+.setlist-item-actions button.event-song-open-button:focus-visible {
+  background-color: #206338;
 }

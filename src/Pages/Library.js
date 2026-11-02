@@ -191,6 +191,45 @@ function SongResourceAudio({ resource }) {
   );
 }
 
+function SongResourceSheet({ resource }) {
+  const [sheetUrl, setSheetUrl] = useState("");
+  const [sheetError, setSheetError] = useState("");
+
+  useEffect(() => {
+    let ignoreResponse = false;
+
+    async function loadSheetUrl() {
+      const { data, error } = await supabase.functions.invoke("r2-song-files", {
+        body: { action: "song-resource-sheet-signed-url", resourceId: resource.id },
+      });
+
+      if (ignoreResponse) return;
+      if (error) {
+        setSheetUrl("");
+        setSheetError(await getFunctionErrorMessage(error));
+        return;
+      }
+
+      setSheetError("");
+      setSheetUrl(data.signedUrl);
+    }
+
+    loadSheetUrl();
+    return () => {
+      ignoreResponse = true;
+    };
+  }, [resource.id]);
+
+  if (sheetError) return <p className="song-resource-muted">{sheetError}</p>;
+  if (!sheetUrl) return <p className="song-resource-muted">Loading sheet...</p>;
+
+  return (
+    <a className="song-resource-file-link" href={sheetUrl} rel="noopener noreferrer" target="_blank">
+      Open PDF
+    </a>
+  );
+}
+
 // Library is the protected My Library page.
 // Signed-in users can upload, open, edit, and delete their own PDF songs.
 function Library() {
@@ -250,6 +289,7 @@ function Library() {
   const [openSetlistFolderIds, setOpenSetlistFolderIds] = useState([]);
   const [setlistCreateMode, setSetlistCreateMode] = useState("");
   const [draggingSetlistItemId, setDraggingSetlistItemId] = useState(null);
+  const [expandedEventResourceItemId, setExpandedEventResourceItemId] = useState(null);
   const [eventTab, setEventTab] = useState("overview");
   const [eventDetails, setEventDetails] = useState(null);
   const eventLocationRef = useRef(null);
@@ -665,6 +705,7 @@ function Library() {
       resourceForms[songId] || {
         audioFile: null,
         body: "",
+        sheetFile: null,
         title: "",
         type: "note",
         url: "",
@@ -684,7 +725,11 @@ function Library() {
 
   async function saveSongResource(song) {
     const resourceForm = getResourceForm(song.id);
-    const resourceTitle = resourceForm.title.trim();
+    const resourceTitle = resourceForm.title.trim() || (
+      resourceForm.type === "sheet"
+        ? resourceForm.sheetFile?.name.replace(/\.pdf$/i, "") || ""
+        : ""
+    );
     const resourceBody = resourceForm.body.trim();
     const resourceUrl = resourceForm.url.trim();
 
@@ -716,22 +761,33 @@ function Library() {
       return;
     }
 
+    if (resourceForm.type === "sheet" && !resourceForm.sheetFile) {
+      setError("Choose a PDF music sheet first.");
+      return;
+    }
+
+    if (resourceForm.type === "sheet" && !/\.pdf$/i.test(resourceForm.sheetFile.name)) {
+      setError("Please choose a PDF music sheet.");
+      return;
+    }
+
     setSavingResourceSongId(song.id);
 
     let filePath = "";
     let contentType = "";
 
-    if (resourceForm.type === "audio") {
+    if (resourceForm.type === "audio" || resourceForm.type === "sheet") {
       const resourceId = crypto.randomUUID();
-      const extension = resourceForm.audioFile.name.split(".").pop() || "audio";
-      const safeName = cleanFileName(resourceTitle || song.title || "demo") || "demo";
+      const file = resourceForm.type === "sheet" ? resourceForm.sheetFile : resourceForm.audioFile;
+      const extension = file.name.split(".").pop() || (resourceForm.type === "sheet" ? "pdf" : "audio");
+      const safeName = cleanFileName(resourceTitle || song.title || "resource") || "resource";
       filePath = `${user.id}/song-resources/${song.id}/${resourceId}-${safeName}.${extension}`;
-      contentType = resourceForm.audioFile.type;
+      contentType = resourceForm.type === "sheet" ? "application/pdf" : file.type;
 
       const formData = new FormData();
       formData.append("action", "upload");
       formData.append("filePath", filePath);
-      formData.append("file", resourceForm.audioFile);
+      formData.append("file", file);
 
       const { error: uploadError } = await supabase.functions.invoke(
         "r2-song-files",
@@ -741,7 +797,7 @@ function Library() {
       );
 
       if (uploadError) {
-        setError(`Audio upload failed: ${await getFunctionErrorMessage(uploadError)}`);
+        setError(`File upload failed: ${await getFunctionErrorMessage(uploadError)}`);
         setSavingResourceSongId(null);
         return;
       }
@@ -769,6 +825,7 @@ function Library() {
       [song.id]: {
         audioFile: null,
         body: "",
+        sheetFile: null,
         title: "",
         type: "note",
         url: "",
@@ -2737,28 +2794,38 @@ function Library() {
                                           ? itemSong?.title || item.title || "Missing song"
                                           : item.title || "Blank page"}
                                       </strong>
-                                      <p>
-                                        {item.item_type === "song"
-                                          ? `Key: ${itemSong?.song_key || item.song_key_snapshot || "No key"}${item.tempo_feel ? ` · ${item.tempo_feel}` : ""}`
-                                          : item.body || "Blank page"}
-                                      </p>
-                                      {item.item_type === "song" && (item.artist_version || item.theme_scripture || item.lead_vocal || item.other_vocals || item.arrangement || item.status) && (
-                                        <small className="event-song-meta">
-                                          {[item.artist_version, item.theme_scripture, item.lead_vocal, item.other_vocals, item.arrangement, item.status].filter(Boolean).join(" · ")}
-                                        </small>
+                                      {item.item_type === "song" ? (
+                                        <span className="score-key">
+                                          {itemSong?.song_key || item.song_key_snapshot || "No key"}
+                                        </span>
+                                      ) : (
+                                        <p>{item.body || "Blank page"}</p>
                                       )}
                                     </div>
                                   </div>
                                   <div className="setlist-item-actions">
                                     {itemSong && (
+                                      <>
                                       <button
+                                        type="button"
+                                        aria-expanded={expandedEventResourceItemId === item.id}
+                                        onClick={() => setExpandedEventResourceItemId(
+                                          expandedEventResourceItemId === item.id ? null : item.id
+                                        )}
+                                      >
+                                        Resources{(songResources[item.song_id] || []).length > 0 ? ` (${songResources[item.song_id].length})` : ""}
+                                      </button>
+                                      <button
+                                        className="event-song-action-button event-song-open-button"
                                         type="button"
                                         onClick={() => openPdf(itemSong)}
                                       >
                                         Open
                                       </button>
+                                      </>
                                     )}
                                     {isSelectedEventOwner && <button
+                                      className="event-song-action-button"
                                       disabled={savingSetlistAction}
                                       type="button"
                                       onClick={() => deleteSetlistItem(item)}
@@ -2766,6 +2833,32 @@ function Library() {
                                       Remove
                                     </button>}
                                   </div>
+                                  {itemSong && expandedEventResourceItemId === item.id && (
+                                    <div className="event-song-resources">
+                                      {(songResources[item.song_id] || []).length === 0 ? (
+                                        <p className="song-resource-muted">No resources yet.</p>
+                                      ) : (
+                                        <div className="song-resource-list">
+                                          {songResources[item.song_id].map((resource) => (
+                                            <article className="song-resource-card" key={resource.id}>
+                                              <div className="song-resource-card-copy">
+                                                <div>
+                                                  <small>{resource.resource_type === "sheet" ? "Music sheet" : resource.resource_type}</small>
+                                                  {resource.title && <h4>{resource.title}</h4>}
+                                                  {resource.body && <p>{resource.body}</p>}
+                                                  {resource.resource_type === "link" && resource.url && (
+                                                    <a href={resource.url} rel="noopener noreferrer" target="_blank">Open link</a>
+                                                  )}
+                                                </div>
+                                              </div>
+                                              {resource.resource_type === "audio" && <SongResourceAudio resource={resource} />}
+                                              {resource.resource_type === "sheet" && <SongResourceSheet resource={resource} />}
+                                            </article>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
                                   {item.item_type === "placeholder" && isSelectedEventOwner && (
                                     <details className="event-song-editor">
                                       <summary>Edit note page</summary>
@@ -3129,7 +3222,7 @@ function Library() {
                               <article className="song-resource-card" key={resource.id}>
                                 <div className="song-resource-card-copy">
                                   <div>
-                                    <small>{resource.resource_type}</small>
+                                    <small>{resource.resource_type === "sheet" ? "Music sheet" : resource.resource_type}</small>
                                     {resource.title && <h4>{resource.title}</h4>}
                                     {resource.body && <p>{resource.body}</p>}
                                     {resource.resource_type === "link" && resource.url && (
@@ -3160,6 +3253,9 @@ function Library() {
                                 {resource.resource_type === "audio" && (
                                   <SongResourceAudio resource={resource} />
                                 )}
+                                {resource.resource_type === "sheet" && (
+                                  <SongResourceSheet resource={resource} />
+                                )}
                               </article>
                             ))}
                           </div>
@@ -3184,6 +3280,7 @@ function Library() {
                                 <option value="note">Note</option>
                                 <option value="link">Link</option>
                                 <option value="audio">Audio demo</option>
+                                <option value="sheet">Music sheet PDF</option>
                               </select>
                             </label>
                             <label>
@@ -3224,6 +3321,21 @@ function Library() {
                                       event.target.files?.[0] || null
                                     )
                                   }
+                                  type="file"
+                                />
+                              </label>
+                            )}
+
+                            {resourceForm.type === "sheet" && (
+                              <label>
+                                PDF music sheet
+                                <input
+                                  accept="application/pdf,.pdf"
+                                  onChange={(event) => updateResourceForm(
+                                    song.id,
+                                    "sheetFile",
+                                    event.target.files?.[0] || null
+                                  )}
                                   type="file"
                                 />
                               </label>

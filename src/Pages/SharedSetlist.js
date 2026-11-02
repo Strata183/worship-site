@@ -146,11 +146,6 @@ function SharedSetlist() {
                     ) : (
                       <>
                         <p>Key: {item.song_key || "Not specified"}</p>
-                        {setlist.is_event && [item.artist_version, item.tempo_feel, item.theme_scripture, item.lead_vocal, item.other_vocals, item.arrangement, item.status, item.notes_link].filter(Boolean).length > 0 && (
-                          <p className="shared-event-song-meta">
-                            {[item.artist_version, item.tempo_feel, item.theme_scripture, item.lead_vocal, item.other_vocals, item.arrangement, item.status, item.notes_link].filter(Boolean).join(" · ")}
-                          </p>
-                        )}
                       </>
                     )}
                   </div>

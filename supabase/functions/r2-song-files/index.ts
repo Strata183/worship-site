@@ -112,6 +112,10 @@ function isAudioFile(file: File) {
   );
 }
 
+function isPdfFile(file: File) {
+  return file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+}
+
 function getAudioContentType(file: File) {
   if (file.type.startsWith("audio/")) {
     return file.type;
@@ -443,7 +447,7 @@ Deno.serve(async (req) => {
       }
 
       // Only allow PDFs and audio files in this storage path.
-      if (file.type !== "application/pdf" && !isAudioFile(file)) {
+      if (!isPdfFile(file) && !isAudioFile(file)) {
         return jsonResponse(
           { error: "Only PDF or audio files can be uploaded." },
           400,
@@ -473,12 +477,12 @@ Deno.serve(async (req) => {
 
       const uploadBody = new Uint8Array(await file.arrayBuffer());
 
-      if (file.type === "application/pdf") {
+      if (isPdfFile(file)) {
         assertPdfBytes(uploadBody, file.name || "Uploaded PDF");
       }
 
       const uploadContentType =
-        file.type === "application/pdf"
+        isPdfFile(file)
           ? "application/pdf"
           : getAudioContentType(file);
 
@@ -651,8 +655,12 @@ Deno.serve(async (req) => {
       return jsonResponse({ ok: true });
     }
 
-    if (body.action === "song-resource-audio-signed-url") {
+    if (
+      body.action === "song-resource-audio-signed-url" ||
+      body.action === "song-resource-sheet-signed-url"
+    ) {
       const resourceId = String(body.resourceId || "");
+      const expectedType = body.action === "song-resource-audio-signed-url" ? "audio" : "sheet";
 
       // RLS on song_resources only exposes resources attached to songs this
       // user can already see.
@@ -662,9 +670,9 @@ Deno.serve(async (req) => {
         .eq("id", resourceId)
         .single();
 
-      if (resourceError || !resource || resource.resource_type !== "audio") {
+      if (resourceError || !resource || resource.resource_type !== expectedType || !resource.file_path) {
         return jsonResponse(
-          { error: "Audio resource not found or not shared with you." },
+          { error: "Song file not found or not shared with you." },
           404,
         );
       }
@@ -1317,7 +1325,7 @@ Deno.serve(async (req) => {
         );
       }
 
-      if (resource.resource_type === "audio" && resource.file_path) {
+      if (["audio", "sheet"].includes(resource.resource_type) && resource.file_path) {
         await r2.send(
           new DeleteObjectCommand({
             Bucket: bucket,
