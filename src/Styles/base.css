@@ -146,6 +146,14 @@ body,
   font: inherit;
 }
 
+.text-button {
+  background: transparent;
+  color: var(--color-primary);
+  justify-self: start;
+  padding: 0;
+  text-decoration: underline;
+}
+
 .auth-tabs button {
   background-color: transparent;
   border-radius: 6px;

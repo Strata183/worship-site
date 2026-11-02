@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { supabase } from "../supabaseClient";
@@ -30,12 +30,22 @@ function Login() {
 
   // submitting disables the button while the request is in progress.
   const [submitting, setSubmitting] = useState(false);
+  const [recoveryMode, setRecoveryMode] = useState(false);
 
   // If the user came from ProtectedRoute, go back there after login.
   // Otherwise, default to My Library.
   const from = location.state?.from?.pathname || "/songs";
 
-  if (user) {
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") setRecoveryMode(true);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (user && !recoveryMode) {
     // Already signed in? There is no reason to show the login form.
     return <Navigate to={from} replace />;
   }
@@ -48,6 +58,19 @@ function Login() {
     setStatus("");
 
     // Choose the Supabase auth method based on the current tab.
+    if (recoveryMode) {
+      const { error: updateError } = await supabase.auth.updateUser({ password });
+      setSubmitting(false);
+      if (updateError) {
+        setError(updateError.message);
+        return;
+      }
+      setRecoveryMode(false);
+      setStatus("Your password has been updated.");
+      navigate(from, { replace: true });
+      return;
+    }
+
     const authCall =
       mode === "sign-up"
         ? supabase.auth.signUp({
@@ -85,17 +108,36 @@ function Login() {
     navigate(from, { replace: true });
   }
 
+  async function handleForgotPassword() {
+    setError("");
+    setStatus("");
+    if (!email.trim()) {
+      setError("Enter your email address first.");
+      return;
+    }
+    setSubmitting(true);
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/login`,
+    });
+    setSubmitting(false);
+    if (resetError) {
+      setError(resetError.message);
+      return;
+    }
+    setStatus("If an account exists for that email, a password reset link is on its way.");
+  }
+
   return (
     <main className="page auth-page">
       <section className="auth-panel">
         <p className="eyebrow">Private song library</p>
-        <h1>{mode === "sign-up" ? "Create your account" : "Welcome back"}</h1>
+        <h1>{recoveryMode ? "Choose a new password" : mode === "sign-up" ? "Create your account" : "Welcome back"}</h1>
         <p>
           Sign in to upload your own PDF songs and share them with accepted
           friends.
         </p>
 
-        <div className="auth-tabs" aria-label="Login mode">
+        {!recoveryMode && <div className="auth-tabs" aria-label="Login mode">
           <button
             className={mode === "sign-in" ? "active" : ""}
             type="button"
@@ -112,10 +154,10 @@ function Login() {
           >
             Sign up
           </button>
-        </div>
+        </div>}
 
         <form className="form-stack" onSubmit={handleSubmit}>
-          {mode === "sign-up" && (
+          {!recoveryMode && mode === "sign-up" && (
             <label>
               Display name
               <input
@@ -141,9 +183,9 @@ function Login() {
           </label>
 
           <label>
-            Password
+              {recoveryMode ? "New password" : "Password"}
             <input
-              autoComplete={mode === "sign-up" ? "new-password" : "current-password"}
+              autoComplete={mode === "sign-up" || recoveryMode ? "new-password" : "current-password"}
               minLength={6}
               onChange={(event) => setPassword(event.target.value)}
               required
@@ -158,10 +200,17 @@ function Login() {
           <button className="primary-button" disabled={submitting} type="submit">
             {submitting
               ? "Working..."
+              : recoveryMode
+              ? "Update password"
               : mode === "sign-up"
               ? "Create account"
               : "Sign in"}
           </button>
+          {!recoveryMode && mode === "sign-in" && (
+            <button className="text-button" disabled={submitting} onClick={handleForgotPassword} type="button">
+              Forgot password?
+            </button>
+          )}
         </form>
       </section>
     </main>
