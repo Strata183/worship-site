@@ -22,26 +22,31 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let ignore = false;
+    let authEventReceived = false;
+
+    // Subscribe before reading the saved session. Supabase can finish handling
+    // an email confirmation link while getSession() is still resolving; in
+    // that case the auth event is newer and must not be overwritten by the
+    // initial session read.
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      authEventReceived = true;
+      setSession(nextSession);
+      setLoading(false);
+    });
 
     // On page refresh, ask Supabase if the user is already signed in.
     async function loadSession() {
       const { data } = await supabase.auth.getSession();
 
-      if (!ignore) {
+      if (!ignore && !authEventReceived) {
         setSession(data.session);
         setLoading(false);
       }
     }
 
     loadSession();
-
-    // Keep React in sync when the user signs in, signs out, or confirms email.
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession);
-      setLoading(false);
-    });
 
     return () => {
       // Cleanup prevents React from updating this component after it unmounts.

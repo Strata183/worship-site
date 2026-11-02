@@ -57,8 +57,8 @@ function Login() {
               data: {
                 display_name: displayName,
               },
-              // After email confirmation, Supabase should send users back here.
-              emailRedirectTo: `${window.location.origin}/songs`,
+              // After email confirmation, return to the sign-in page.
+              emailRedirectTo: `${window.location.origin}/login`,
             },
           })
         : supabase.auth.signInWithPassword({ email, password });
