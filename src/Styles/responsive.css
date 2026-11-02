@@ -346,6 +346,7 @@
   .setlist-detail-panel {
     border: 1px solid var(--color-border);
     border-radius: 8px;
+    min-width: 0;
     padding: 0.75rem;
   }
 
@@ -391,6 +392,23 @@
   .event-team-card,
   .event-team-card dl {
     grid-template-columns: 1fr;
+  }
+
+  .event-overview-form,
+  .event-team-form {
+    min-width: 0;
+    padding: 0.75rem;
+  }
+
+  .event-overview-form label,
+  .event-team-form label,
+  .event-overview-form input,
+  .event-overview-form textarea,
+  .event-team-form input,
+  .event-team-form textarea,
+  .event-team-form select {
+    min-width: 0;
+    max-width: 100%;
   }
 
   .event-team-card > button {

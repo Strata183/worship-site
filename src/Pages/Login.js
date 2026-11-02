@@ -33,8 +33,8 @@ function Login() {
   const [recoveryMode, setRecoveryMode] = useState(false);
 
   // If the user came from ProtectedRoute, go back there after login.
-  // Otherwise, default to My Library.
-  const from = location.state?.from?.pathname || "/songs";
+  // Otherwise, return to the home page after sign-in.
+  const from = location.state?.from?.pathname || "/";
 
   useEffect(() => {
     const {
