@@ -1,5 +1,22 @@
 const mastersBibleStudyWeeks = [
   {
+    date: "2026-11-05",
+    songs: [
+      { title: "All I have is Christ", key: "Key: C" },
+      { title: "There is one Gospel", key: "Key: C" },
+    ],
+    notes: [
+      { title: "Main Passage", body: "Ecclesiastes 4" },
+      { title: "Big Idea", body: "Solomon's Laments; Derek" },
+      { title: "Announcements", body: "" },
+    ],
+    prayerRequests: [
+      { name: "Praise Reports", items: ["Derek's Sister Ana is recovering well from surgery! She is almost back to normal, just trying not to run and jump around for another week or so."] },
+      { name: "Prayer Requests", items: [""] },
+    ],
+  },
+
+  {
     date: "2026-10-22",
     songs: [
       { title: "All of our tomorrows", key: "Key: C-D" },
