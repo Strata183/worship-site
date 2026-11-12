@@ -1,5 +1,22 @@
 const mastersBibleStudyWeeks = [
   {
+    date: "2026-11-12",
+    songs: [
+      { title: "Blessed Assurance", key: "Key: B" },
+      { title: "Jesus Paid it All", key: "Key: B" },
+    ],
+    notes: [
+      { title: "Main Passage", body: "Ecclesiastes 5" },
+      { title: "Big Idea", body: "True contentment and reverence before God; Zef " },
+      { title: "Announcements", body: "Meeting Under the Oaks" },
+    ],
+    prayerRequests: [
+      { name: "Praise Reports", items: [""] },
+      { name: "Prayer Requests", items: [""] },
+    ],
+  },
+
+  {
     date: "2026-11-05",
     songs: [
       { title: "All I have is Christ", key: "Key: C" },
