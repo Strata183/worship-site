@@ -42,11 +42,11 @@ const homeSections = [
     imageAlt: "Steadfast logo",
   },
   {
-    title: "VBS 2026, Kinder Music 🔒",
-    description: "Charts and practice resources for the Kinder music team.",
-    path: "/vbs-2026-kinder-music",
-    image: "/vbs-2026-god-of-light.png",
-    imageAlt: "VBS 2026 God of Light artwork",
+    title: "Worthy for Worship: Worship Night",
+    description: "Join us for an evening of worship. Get event details and sign up for updates.",
+    path: "/worship-night",
+    image: "/worship-night-campfire.png",
+    imageAlt: "A campfire at Worship Night",
     imageClassName: "resource-card-image-crop",
   },
   // THIS IS A CARD FOR TUTORIALS THAT I WILL ADD BACK LATER. RIGHT NOW I DON'T HAVE TUTORIALS SO I DON'T NEED THIS CARD
