@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 
 import articles from "../Data/articles";
 
@@ -13,8 +13,11 @@ function Articles() {
     // If there is a slug in the URL, try to find the matching article object.
     // When there is no slug, this stays undefined and the page shows the index.
     const selectedArticle = articles.find((article) => article.slug === articleSlug);
+    const articleUnavailable = selectedArticle?.slug === "are-we-required-to-sing-at-church";
     const [articleBody, setArticleBody] = useState("");
     const [articleLoadError, setArticleLoadError] = useState(false);
+
+    if (articleUnavailable) return <Navigate to="/articles" replace />;
 
     useEffect(() => {
         let ignoreResponse = false;
@@ -118,18 +121,20 @@ function Articles() {
             <section className="article-template-grid" aria-label="Articles">
                 {/* Build the article index from the articles array above. */}
                 {articles.map((article) => (
-                    <Link
-                        className={`article-template-card${article.slug === "are-we-required-to-sing-at-church" ? " article-template-card-muted" : ""}`}
-                        key={article.slug}
-                        to={`/articles/${article.slug}`}
-                    >
+                    article.slug === "are-we-required-to-sing-at-church" ? (
+                    <div className="article-template-card article-template-card-muted" key={article.slug} aria-disabled="true">
                         <div>
                             <h2>{article.name}</h2>
                             <p>{article.description}</p>
                         </div>
-
+                        <span className="article-card-action">Coming soon</span>
+                    </div>
+                    ) : (
+                    <Link className="article-template-card" key={article.slug} to={`/articles/${article.slug}`}>
+                        <div><h2>{article.name}</h2><p>{article.description}</p></div>
                         <span className="article-card-action">Read article</span>
                     </Link>
+                    )
                 ))}
             </section>
         </main>
