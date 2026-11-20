@@ -19,6 +19,13 @@ function WorshipNight() {
   const [lyricsStatus, setLyricsStatus] = useState("");
   const [savingSong, setSavingSong] = useState(null);
   const songMenuRef = useRef(null);
+  const [darkMode, setDarkMode] = useState(() => {
+    try {
+      return window.localStorage.getItem("worship-night-theme") === "dark";
+    } catch {
+      return false;
+    }
+  });
   const pageUrl = typeof window !== "undefined" ? `${window.location.origin}/worship-night` : "";
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=12&data=${encodeURIComponent(pageUrl)}`;
 
@@ -29,6 +36,13 @@ function WorshipNight() {
   }, []);
 
   useEffect(() => { loadLyrics(); }, [loadLyrics]);
+  useEffect(() => {
+    try {
+      window.localStorage.setItem("worship-night-theme", darkMode ? "dark" : "light");
+    } catch {
+      // The theme still works for this visit if browser storage is unavailable.
+    }
+  }, [darkMode]);
   useEffect(() => {
     function closeMenuOnOutsideClick(event) {
       if (songMenuRef.current && !songMenuRef.current.contains(event.target)) {
@@ -113,10 +127,20 @@ function WorshipNight() {
   }
 
   return (
-    <main className="page page-worship-night worship-night-page">
+    <main className={`page page-worship-night worship-night-page${darkMode ? " worship-night-dark" : ""}`}>
       <Link className="worship-night-back-link" to="/">
         <span aria-hidden="true">←</span> Worthy for Worship
       </Link>
+      <button
+        aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+        aria-pressed={darkMode}
+        className="worship-night-theme-toggle"
+        onClick={() => setDarkMode((value) => !value)}
+        type="button"
+      >
+        <span aria-hidden="true">{darkMode ? "☀" : "☾"}</span>
+        {darkMode ? "Light mode" : "Dark mode"}
+      </button>
       <section className="worship-night-hero">
         <div className="worship-night-artwork">
           <img

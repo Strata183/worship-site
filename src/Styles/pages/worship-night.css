@@ -22,6 +22,25 @@
   top: 1.25rem;
 }
 
+.worship-night-theme-toggle {
+  position: absolute;
+  top: .8rem;
+  right: clamp(1rem, 5vw, 4rem);
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  border: 1px solid #d9c5aa;
+  border-radius: 999px;
+  padding: .5rem .8rem;
+  color: #68422e;
+  background: rgba(255, 255, 255, .72);
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+.worship-night-theme-toggle span { font-size: 1.15rem; line-height: 1; }
+
 .worship-night-back-link:hover,
 .worship-night-back-link:focus-visible {
   color: #392820;
@@ -321,6 +340,62 @@
   color: #392820;
   text-decoration: underline;
 }
+
+/* The public theme toggle applies to this page only and is saved per visitor. */
+.page-worship-night.worship-night-dark {
+  background: linear-gradient(145deg, #171b22 0%, #202630 55%, #292d33 100%);
+  color: #f4f1ec;
+}
+.worship-night-dark .worship-night-back-link,
+.worship-night-dark .worship-night-archive-link { color: #e7c49e; }
+.worship-night-dark .worship-night-back-link:hover,
+.worship-night-dark .worship-night-back-link:focus-visible,
+.worship-night-dark .worship-night-archive-link:hover,
+.worship-night-dark .worship-night-archive-link:focus-visible { color: #fff; }
+.worship-night-dark .worship-night-theme-toggle { border-color: #59616d; color: #f4e3ca; background: #272d36; }
+.worship-night-dark .worship-night-intro .eyebrow,
+.worship-night-dark .worship-night-signup .eyebrow,
+.worship-night-dark .worship-night-qr .eyebrow { color: #e6b981; }
+.worship-night-dark .worship-night-intro h1,
+.worship-night-dark .worship-night-details strong,
+.worship-night-dark .worship-night-signup h2,
+.worship-night-dark .worship-night-qr h2 { color: #fff4e7; }
+.worship-night-dark .worship-night-intro > p:not(.eyebrow),
+.worship-night-dark .worship-night-signup > p:not(.eyebrow),
+.worship-night-dark .worship-night-qr > p:not(.eyebrow),
+.worship-night-dark .worship-night-signup small { color: #ded8d0; }
+.worship-night-dark .worship-night-details div { border-color: #59616d; background: rgba(31, 37, 46, .88); }
+.worship-night-dark .worship-night-details span { color: #e6b981; }
+.worship-night-dark .worship-night-signup,
+.worship-night-dark .worship-night-qr { border-color: #4c535e; color: #f4f1ec; background: rgba(31, 37, 46, .96); }
+.worship-night-dark .worship-night-form label,
+.worship-night-dark .worship-night-signed-in { color: #f4f1ec !important; }
+.worship-night-dark .worship-night-input-row input { border-color: #626b78; color: #fff; background: #171b22; }
+.worship-night-dark .worship-night-message { color: #f2d1aa !important; }
+.worship-night-dark .worship-night-lyrics { border-color: #4c535e; color: #f4f1ec; background: rgba(31, 37, 46, .94); }
+.worship-night-dark .worship-night-lyrics-heading h2 { color: #fff4e7; }
+.worship-night-dark .worship-night-admin-toggle,
+.worship-night-dark .worship-night-song-admin-actions button,
+.worship-night-dark .worship-night-add-song,
+.worship-night-dark .worship-night-song-jump summary { border-color: #626b78; color: #f4f1ec; background: #272d36; }
+.worship-night-dark .worship-night-song-jump ol { border-color: #59616d; background: #202630; }
+.worship-night-dark .worship-night-song-jump li { color: #e4d8c8; }
+.worship-night-dark .worship-night-song-jump a,
+.worship-night-dark .worship-night-live-preview summary { color: #e7c49e; }
+.worship-night-dark .worship-night-song-jump a:hover,
+.worship-night-dark .worship-night-song-jump a:focus-visible { background: #363e49; }
+.worship-night-dark .worship-night-song { border-color: #59616d; background: #171b22; }
+.worship-night-dark .worship-night-song h3,
+.worship-night-dark .worship-night-lyrics-text { color: #fff; }
+.worship-night-dark .worship-night-lyrics-line { color: #e2e4e7; text-shadow: none; }
+.worship-night-dark .worship-night-lyrics-section-label { color: #f0c995; }
+.worship-night-dark .worship-night-song input,
+.worship-night-dark .worship-night-song textarea { border-color: #626b78; color: #fff; background: #202630; }
+.worship-night-dark .worship-night-preview-note { color: #ded8d0; }
+.worship-night-dark .worship-night-preview-phone { border-color: #59616d; background: #202630; }
+.worship-night-dark .worship-night-preview-card { border-color: #59616d; background: #171b22; }
+.worship-night-dark .worship-night-preview-card h3 { color: #fff; }
+.worship-night-dark .worship-night-song-admin-actions .worship-night-delete { color: #ffb7a9; }
 
 .worship-night-archive-page {
   justify-content: flex-start;
