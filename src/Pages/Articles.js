@@ -17,8 +17,6 @@ function Articles() {
     const [articleBody, setArticleBody] = useState("");
     const [articleLoadError, setArticleLoadError] = useState(false);
 
-    if (articleUnavailable) return <Navigate to="/articles" replace />;
-
     useEffect(() => {
         let ignoreResponse = false;
 
@@ -54,6 +52,8 @@ function Articles() {
             ignoreResponse = true;
         };
     }, [selectedArticle]);
+
+    if (articleUnavailable) return <Navigate to="/articles" replace />;
 
     // This branch catches typed or outdated article links.
     if (articleSlug && !selectedArticle) {

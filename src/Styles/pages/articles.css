@@ -35,8 +35,8 @@
   transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
-.article-template-card:hover,
-.article-template-card:focus {
+.article-template-card:not(.article-template-card-muted):hover,
+.article-template-card:not(.article-template-card-muted):focus {
   border-color: var(--color-accent);
   box-shadow: 0 12px 28px rgba(45, 67, 48, 0.14);
   transform: translateY(-2px);
@@ -46,6 +46,8 @@
   background-color: #f1f1ef;
   border-color: #d8d8d4;
   color: #777;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .article-template-card-muted .article-card-action {
