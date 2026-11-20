@@ -94,7 +94,9 @@ function WorshipNight() {
 
   function jumpToSong(songKey) {
     if (!songKey) return;
-    document.getElementById(`worship-song-${songKey}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const song = document.getElementById(`worship-song-${songKey}`);
+    const title = song?.querySelector(":scope > h3");
+    (title || song)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function renderLyrics(lyrics) {
