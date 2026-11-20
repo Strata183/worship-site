@@ -218,7 +218,7 @@
 .worship-night-song h3 { margin: 0 0 2.5rem; color: #080808; font-size: clamp(1.8rem, 5vw, 2.35rem); font-style: italic; font-weight: 800; line-height: 1.2; text-align: center; text-transform: uppercase; }
 .worship-night-lyrics-text { width: 100%; min-width: 0; overflow-wrap: anywhere; color: #080808; font-size: clamp(1.2rem, 2.7vw, 1.55rem); font-style: italic; font-weight: 750; line-height: 1.25; text-align: center; }
 .worship-night-lyrics-line, .worship-night-lyrics-section-label { margin: 0; }
-.worship-night-lyrics-line { width: 100%; white-space: nowrap; }
+.worship-night-lyrics-line { width: 100%; white-space: normal; overflow-wrap: normal; }
 .worship-night-lyrics-section-label { margin: 2rem 0 1.75rem; font-size: 1.18em; font-weight: 850; text-transform: uppercase; }
 .worship-night-lyrics-spacer { height: .55rem; }
 .worship-night-song label { display: grid; gap: .45rem; margin: 0 0 1rem; font-weight: 650; }

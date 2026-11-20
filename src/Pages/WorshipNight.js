@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { supabase } from "../supabaseClient";
@@ -8,35 +8,6 @@ const eventDetails = {
   date: "November 23, 2026",
   time: "6:00 PM",
 };
-
-function FittedLyricLine({ line }) {
-  const lineRef = useRef(null);
-
-  useLayoutEffect(() => {
-    const element = lineRef.current;
-    const container = element?.parentElement;
-    if (!element || !container) return undefined;
-
-    function fitLine() {
-      element.style.fontSize = "";
-      const baseSize = parseFloat(window.getComputedStyle(element).fontSize);
-      let size = baseSize;
-      const minSize = 12;
-      element.style.fontSize = `${size}px`;
-      while (element.scrollWidth > container.clientWidth && size > minSize) {
-        size = Math.max(minSize, size - 0.5);
-        element.style.fontSize = `${size}px`;
-      }
-    }
-
-    const observer = new ResizeObserver(fitLine);
-    observer.observe(container);
-    fitLine();
-    return () => observer.disconnect();
-  }, [line]);
-
-  return <p className="worship-night-lyrics-line" ref={lineRef}>{line}</p>;
-}
 
 function WorshipNight() {
   const { user } = useAuth();
@@ -119,7 +90,7 @@ function WorshipNight() {
       if (/^\[[^\]]+\]$/.test(trimmedLine)) {
         return <p className="worship-night-lyrics-section-label" key={`line-${index}`}>{trimmedLine}</p>;
       }
-      return <FittedLyricLine key={`line-${index}`} line={line} />;
+      return <p className="worship-night-lyrics-line" key={`line-${index}`}>{line}</p>;
     });
   }
 
@@ -248,7 +219,7 @@ function WorshipNight() {
               <label>Lyrics<textarea rows={14} value={song.lyrics} onChange={(event) => updateSong(index, "lyrics", event.target.value)} /></label>
               <details className="worship-night-live-preview">
                 <summary>Live mobile preview · 360 px</summary>
-                <p className="worship-night-preview-note">Previewing lyrics at a narrow phone screen width. Long lines shrink to fit.</p>
+                <p className="worship-night-preview-note">Previewing at a narrow phone width. Lines keep a consistent size and wrap when needed.</p>
                 <div className="worship-night-preview-phone">
                   <div className="worship-night-preview-card">
                     <h3>{song.title.trim() || "Song title"}</h3>
