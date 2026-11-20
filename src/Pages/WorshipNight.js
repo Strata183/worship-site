@@ -94,9 +94,14 @@ function WorshipNight() {
 
   function jumpToSong(songKey) {
     if (!songKey) return;
-    const song = document.getElementById(`worship-song-${songKey}`);
-    const title = song?.querySelector(":scope > h3");
-    (title || song)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+      const song = document.getElementById(`worship-song-${songKey}`);
+      const title = song?.querySelector(":scope > h3");
+      const target = title || song;
+      if (!target) return;
+      const top = window.scrollY + target.getBoundingClientRect().top - 8;
+      window.scrollTo({ top, behavior: "smooth" });
+    }));
   }
 
   function renderLyrics(lyrics) {
@@ -230,8 +235,8 @@ function WorshipNight() {
               const songKey = song.id || `draft-${index}`;
               return <li key={songKey}><a href={`#worship-song-${songKey}`} onClick={(event) => {
                 event.preventDefault();
-                jumpToSong(songKey);
                 event.currentTarget.closest("details").open = false;
+                jumpToSong(songKey);
               }}>{song.title.trim() || `Untitled song ${index + 1}`}</a></li>;
             })}
           </ol>
