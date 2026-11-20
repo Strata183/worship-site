@@ -247,11 +247,13 @@ function WorshipNight() {
               <label>Song title<input value={song.title} onChange={(event) => updateSong(index, "title", event.target.value)} /></label>
               <label>Lyrics<textarea rows={14} value={song.lyrics} onChange={(event) => updateSong(index, "lyrics", event.target.value)} /></label>
               <details className="worship-night-live-preview">
-                <summary>Live mobile preview</summary>
-                <p className="worship-night-preview-note">Long lines shrink to fit the available screen width.</p>
-                <div className="worship-night-preview-card">
-                  <h3>{song.title.trim() || "Song title"}</h3>
-                  <div className="worship-night-lyrics-text">{renderLyrics(song.lyrics)}</div>
+                <summary>Live mobile preview · 360 px</summary>
+                <p className="worship-night-preview-note">Previewing lyrics at a narrow phone screen width. Long lines shrink to fit.</p>
+                <div className="worship-night-preview-phone">
+                  <div className="worship-night-preview-card">
+                    <h3>{song.title.trim() || "Song title"}</h3>
+                    <div className="worship-night-lyrics-text">{renderLyrics(song.lyrics)}</div>
+                  </div>
                 </div>
               </details>
               <div className="worship-night-song-admin-actions"><button disabled={savingSong === (song.id || "new")} onClick={() => saveSong(song)} type="button">{savingSong === (song.id || "new") ? "Saving…" : "Save lyrics"}</button>{song.id && <button className="worship-night-delete" onClick={() => deleteSong(song.id)} type="button">Delete song</button>}</div>
