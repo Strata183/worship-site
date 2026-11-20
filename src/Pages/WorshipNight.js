@@ -94,12 +94,17 @@ function WorshipNight() {
 
   function jumpToSong(songKey) {
     if (!songKey) return;
+    if (songKey === "top") {
+      window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+      return;
+    }
     window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
       const song = document.getElementById(`worship-song-${songKey}`);
       const title = song?.querySelector(":scope > h3");
       const target = title || song;
       if (!target) return;
-      const top = window.scrollY + target.getBoundingClientRect().top - 8;
+      const menuHeight = songMenuRef.current?.getBoundingClientRect().height || 0;
+      const top = window.scrollY + target.getBoundingClientRect().top - menuHeight - 16;
       window.scrollTo({ top, behavior: "smooth" });
     }));
   }
@@ -134,7 +139,7 @@ function WorshipNight() {
   }
 
   return (
-    <main className={`page page-worship-night worship-night-page${darkMode ? " worship-night-dark" : ""}`}>
+    <main className={`page page-worship-night worship-night-page${darkMode ? " worship-night-dark" : ""}`} id="worship-night-top">
       <Link className="worship-night-back-link" to="/">
         <span aria-hidden="true">←</span> Worthy for Worship
       </Link>
@@ -161,7 +166,17 @@ function WorshipNight() {
           <h1>Worthy for Worship: Worship Night</h1>
           <p>
             Let’s gather, lift our voices, and worship God together.
-            Sign up for email updates and event reminders for this and future events.
+            Sign up for email updates and event reminders for this and future events.{" "}
+            <a
+              className="worship-night-lyrics-top-link"
+              href="#worship-night-lyrics"
+              onClick={(event) => {
+                event.preventDefault();
+                document.getElementById("worship-night-lyrics")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+            >
+              Jump to lyrics ↓
+            </a>
           </p>
           <div className="worship-night-details" aria-label="Event details">
             <div><span>Next date</span><strong>{eventDetails.date}</strong></div>
@@ -208,17 +223,12 @@ function WorshipNight() {
         </div>
 
         <aside className="worship-night-qr">
-          <p className="eyebrow">Help us spread the word</p>
-          <h2>Scan to sign up</h2>
-          {pageUrl && <img alt="QR code linking to the Worship Night page" height="220" src={qrUrl} width="220" />}
-          <p>Share this page or scan the code to join the email list.</p>
-          <button className="worship-night-share" onClick={() => navigator.clipboard.writeText(pageUrl)} type="button">
-            Copy page link
-          </button>
+          <h2>Share the lyrics!</h2>
+          {pageUrl && <img alt="QR code linking to the Worship Night lyrics page" height="260" src={qrUrl} width="260" />}
         </aside>
       </section>
 
-      <section className="worship-night-lyrics" aria-label="Worship Night song lyrics">
+      <section className="worship-night-lyrics" aria-label="Worship Night song lyrics" id="worship-night-lyrics">
         <div className="worship-night-lyrics-heading">
           <div><h2>Song lyrics</h2></div>
           {isAdmin && <button type="button" className="worship-night-admin-toggle" aria-pressed={adminMode} onClick={() => setAdminMode((value) => !value)}>{adminMode ? "Exit admin mode" : "Admin mode"}</button>}
@@ -228,9 +238,14 @@ function WorshipNight() {
         {songs.length > 0 && <details className="worship-night-song-jump" ref={songMenuRef}>
           <summary aria-label="Open song table of contents">
             <span aria-hidden="true" className="worship-night-menu-icon"><i /><i /><i /></span>
-            <span>Table of contents</span>
+            <span>Songs</span>
           </summary>
           <ol>
+            <li><a href="#worship-night-top" onClick={(event) => {
+              event.preventDefault();
+              event.currentTarget.closest("details").open = false;
+              jumpToSong("top");
+            }}>Top of page</a></li>
             {songs.map((song, index) => {
               const songKey = song.id || `draft-${index}`;
               return <li key={songKey}><a href={`#worship-song-${songKey}`} onClick={(event) => {
