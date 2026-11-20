@@ -119,7 +119,7 @@ function Articles() {
                 {/* Build the article index from the articles array above. */}
                 {articles.map((article) => (
                     <Link
-                        className="article-template-card"
+                        className={`article-template-card${article.slug === "are-we-required-to-sing-at-church" ? " article-template-card-muted" : ""}`}
                         key={article.slug}
                         to={`/articles/${article.slug}`}
                     >

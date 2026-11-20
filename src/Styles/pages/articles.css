@@ -42,6 +42,16 @@
   transform: translateY(-2px);
 }
 
+.article-template-card-muted {
+  background-color: #f1f1ef;
+  border-color: #d8d8d4;
+  color: #777;
+}
+
+.article-template-card-muted .article-card-action {
+  color: #777;
+}
+
 .article-template-card h2 {
   font-family: var(--font-heading);
   line-height: 1.2;
