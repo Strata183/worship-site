@@ -246,6 +246,8 @@
 .worship-night-song-jump a { border-radius: 5px; padding: .3rem; color: #68422e; font-weight: 750; text-decoration: none; }
 .worship-night-song-jump a:hover, .worship-night-song-jump a:focus-visible { background: #f3eee7; text-decoration: underline; }
 .worship-night-song-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; margin-top: 1.25rem; min-width: 0; }
+.worship-night-song-break { display: grid; min-height: 9rem; place-items: center; margin: 1rem 0; border-top: 1px solid rgba(104, 66, 46, .22); border-bottom: 1px solid rgba(104, 66, 46, .22); text-align: center; }
+.worship-night-song-break h2 { margin: 0; color: #68422e; font-family: var(--font-heading); font-size: clamp(1.5rem, 4vw, 2rem); }
 .worship-night-song { min-width: 0; scroll-margin-top: 1rem; padding: clamp(1.25rem, 4vw, 2.5rem); border: 1px solid #ececec; border-radius: 12px; background: #FFFFFFB3; }
 .worship-night-song h3 { scroll-margin-top: .5rem; margin: 0 0 2.5rem; color: #080808; font-size: clamp(1.8rem, 5vw, 2.35rem); font-style: italic; font-weight: 800; line-height: 1.2; text-align: center; text-transform: uppercase; }
 .worship-night-lyrics-text { width: 100%; min-width: 0; overflow-wrap: anywhere; color: #080808; font-size: clamp(1.2rem, 2.7vw, 1.55rem); font-style: italic; font-weight: 750; line-height: 1.25; text-align: center; }
@@ -405,6 +407,8 @@
 .worship-night-dark .worship-night-lyrics-text { color: #fff; }
 .worship-night-dark .worship-night-lyrics-line { color: #e2e4e7; text-shadow: none; }
 .worship-night-dark .worship-night-lyrics-section-label { color: #f0c995; }
+.worship-night-dark .worship-night-song-break { border-color: rgba(240, 201, 149, .25); }
+.worship-night-dark .worship-night-song-break h2 { color: #f0c995; }
 .worship-night-dark .worship-night-song input,
 .worship-night-dark .worship-night-song textarea { border-color: #626b78; color: #fff; background: #202630; }
 .worship-night-dark .worship-night-preview-note { color: #ded8d0; }

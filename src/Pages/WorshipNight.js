@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { supabase } from "../supabaseClient";
@@ -90,6 +90,26 @@ function WorshipNight() {
 
   function updateSong(index, field, value) {
     setSongs((current) => current.map((song, songIndex) => songIndex === index ? { ...song, [field]: value } : song));
+  }
+
+  async function moveSongToFirst(index) {
+    if (index === 0) return;
+    const reordered = [...songs];
+    const [song] = reordered.splice(index, 1);
+    reordered.unshift(song);
+    setSongs(reordered.map((item, position) => ({ ...item, position })));
+    setLyricsStatus("Saving song order…");
+    for (const [position, item] of reordered.entries()) {
+      if (!item.id) continue;
+      const { error } = await supabase.from("worship_night_songs").update({ position }).eq("id", item.id);
+      if (error) {
+        setLyricsStatus(`Could not save song order: ${error.message}`);
+        await loadLyrics();
+        return;
+      }
+    }
+    setLyricsStatus("Song moved to first.");
+    await loadLyrics();
   }
 
   function jumpToSong(songKey) {
@@ -259,7 +279,10 @@ function WorshipNight() {
         <div className="worship-night-song-list">
           {songs.map((song, index) => {
             const songKey = song.id || `draft-${index}`;
-            return <article className="worship-night-song" id={`worship-song-${songKey}`} key={songKey}>
+            const afterDoxology = index > 0 && /doxology/i.test(songs[index - 1].title || "");
+            return <Fragment key={songKey}>
+            {afterDoxology && <div className="worship-night-song-break"><h2>Road to Emmaus Lyrics</h2></div>}
+            <article className="worship-night-song" id={`worship-song-${songKey}`}>
             {adminMode ? <>
               <label>Song title<input value={song.title} onChange={(event) => updateSong(index, "title", event.target.value)} /></label>
               <label>Lyrics<textarea rows={14} value={song.lyrics} onChange={(event) => updateSong(index, "lyrics", event.target.value)} /></label>
@@ -273,9 +296,9 @@ function WorshipNight() {
                   </div>
                 </div>
               </details>
-              <div className="worship-night-song-admin-actions"><button disabled={savingSong === (song.id || "new")} onClick={() => saveSong(song)} type="button">{savingSong === (song.id || "new") ? "Saving…" : "Save lyrics"}</button>{song.id && <button className="worship-night-delete" onClick={() => deleteSong(song.id)} type="button">Delete song</button>}</div>
+              <div className="worship-night-song-admin-actions"><button disabled={savingSong === (song.id || "new")} onClick={() => saveSong(song)} type="button">{savingSong === (song.id || "new") ? "Saving…" : "Save lyrics"}</button>{index > 0 && <button disabled={!song.id} onClick={() => moveSongToFirst(index)} type="button">Move to first</button>}{song.id && <button className="worship-night-delete" onClick={() => deleteSong(song.id)} type="button">Delete song</button>}</div>
             </> : <><h3>{song.title}</h3><div className="worship-night-lyrics-text">{renderLyrics(song.lyrics)}</div></>}
-          </article>;
+          </article></Fragment>;
           })}
           {adminMode && <button className="worship-night-add-song" onClick={() => setSongs((current) => [...current, { title: "", lyrics: "", position: current.length }])} type="button">+ Add a song</button>}
         </div>
